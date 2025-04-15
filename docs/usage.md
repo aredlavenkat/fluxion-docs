@@ -65,4 +65,4 @@ You can nest operators like:
 
 ---
 
-For more examples, see the [Examples Gallery](examples/examples_gallery.md).
+For more examples, see the [Examples Gallery](examples/exampleSet1.md).

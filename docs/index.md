@@ -21,7 +21,7 @@ Fluxion is a MongoDB-like aggregation engine built for structured JSON documents
 - 📘 [Usage Guide](usage.md)
 - 📊 [Stages Overview](stages/)
 - 🧮 [Operators Reference](operators/)
-- 🛒 [Ecommerce Examples](examples/examples_gallery.md)
+- 🛒 [Ecommerce Examples](examples/examples/exampleSet1.md)
 - 🧠 [Glossary of Terms](glossary.md)
 - 🗺️ [Roadmap & Release Phases](roadmap.md)
 
