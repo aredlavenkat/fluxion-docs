@@ -24,4 +24,4 @@ jobs:
       - name: Deploy to GitHub Pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mkdocs gh-deploy --force --remote-name origin --remote-branch gh-pages
+        run: mkdocs gh-deploy --force --remote-name origin --remote-branch main
