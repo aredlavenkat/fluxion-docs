@@ -5,7 +5,6 @@ nav:
   - Home: index.md
   - Usage: usage.md
   - Roadmap: roadmap.md
-  - Internals: internals.md
   - Glossary: glossary.md
   - Examples Gallery:
       - Example Set 1: examples/exampleSet1.md
