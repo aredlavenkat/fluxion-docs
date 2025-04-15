@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: linux-x64
+    runs-on: linux-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
