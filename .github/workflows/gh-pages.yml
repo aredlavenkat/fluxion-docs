@@ -29,7 +29,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          mkdocs gh-deploy --force --remote-name origin --remote-branch gh-pages
+          mkdocs gh-deploy --force --remote-name origin --remote-branch main
 
 
 
