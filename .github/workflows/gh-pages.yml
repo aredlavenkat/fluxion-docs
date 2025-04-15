@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: linux
+    runs-on: linux-x64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.13.3
 
       - name: Install dependencies
         run: |
