@@ -10,6 +10,7 @@ nav:
       - $addFields: stages/addFields.md
       - $bucket: stages/bucket.md
       - $bucketAuto: stages/bucketAuto.md
+      - $densify: stages/densify.md
       - $facet: stages/facet.md
       - $group: stages/group.md
       - $limit: stages/limit.md
@@ -19,10 +20,12 @@ nav:
       - $replaceRoot: stages/replaceRoot.md
       - $replaceWith: stages/replaceWith.md
       - $set: stages/set.md
+      - $fill: stages/fill.md
       - $skip: stages/skip.md
       - $sort: stages/sort.md
       - $sortByCount: stages/sortByCount.md
       - $unwind: stages/unwind.md
+      - $setWindowFields: stages/setWindowFields.md
     - Expression Operators:
       - $abs: operators/abs.md
       - $add: operators/add.md
