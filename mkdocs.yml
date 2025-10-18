@@ -90,6 +90,21 @@ nav:
       - $trunc: operators/trunc.md
       - $unsetField: operators/unsetField.md
       - $zip: operators/zip.md
+  - Rule Engine:
+    - Overview: rules/index.md
+    - Quick Start: rules/quickstart.md
+    - Authoring Rule Sets: rules/authoring.md
+    - DSL Reference: rules/dsl-reference.md
+    - Runtime Execution: rules/runtime.md
+    - API Reference: rules/api.md
+    - Validation & Linting: rules/validation.md
+    - Extensions & SPIs: rules/extensions.md
+    - Testing & Debugging: rules/testing.md
+    - Best Practices: rules/best-practices.md
+    - Lifecycle & Governance: rules/lifecycle.md
+    - Tooling & IDE Support: rules/tooling.md
+    - Examples: rules/examples.md
+    - Integration Guide: rules/integration.md
   - Enrich:
     - Overview: enrich/index.md
     - Operators:
