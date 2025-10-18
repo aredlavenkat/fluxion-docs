@@ -25,14 +25,14 @@ The context exposes:
 
 ## Debug tracing
 
-Call `RuleEngine.evaluate(..., true)` or `RuleEngine.execute(..., true)` to enable debug mode. When enabled, each `RuleExecutionContext` records a list of `RuleDebugStageTrace` entries containing:
+Call `RuleEngine.evaluate(..., true)` or `RuleEngine.execute(..., true)` to enable debug mode. When enabled, the underlying core `PipelineExecutor` captures per-stage snapshots and each `RuleExecutionContext` exposes them as a list of `RuleDebugStageTrace` entries (`ai.fluxion.rules.debug` package) containing:
 
 - Stage index and operator name.
 - Stage specification snapshot.
 - Input and output document snapshots for that stage.
 - Any exception thrown by the stage handler.
 
-This trace is available via `context.debugTrace()` and is invaluable for building rule debugging tools. Each trace entry also exposes `filtered()` / `transformed()` booleans you can use to highlight the stage that changed execution.
+This trace is available via `context.debugTrace()` and is invaluable for building rule debugging tools. Each trace entry also exposes `filtered()` / `transformed()` booleans you can use to highlight the stage that changed execution. Because the snapshots come directly from the shared core `PipelineExecutor`, the same mechanism can power future engines (e.g. streaming) without additional work.
 
 ## Actions and hooks at runtime
 
