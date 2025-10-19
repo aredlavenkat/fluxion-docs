@@ -17,8 +17,8 @@ This page summarises the primary Java types involved in Fluxion's rule engine. I
 | Type | Purpose | Key methods |
 | --- | --- | --- |
 | `RuleEngine` | Evaluates documents against a rule set. | `evaluate(List<Document>, RuleSet)`, `evaluate(..., boolean debug)`, `execute(...)` |
-| `RuleEvaluationResult` | Outcome for a single document. | `document()`, `matches()`, `sharedAttributes()`, `ruleContexts()` |
-| `RuleMatch` | Successful rule evaluation. | `rule()`, `context()`, `actions()` |
+| `RuleEvaluationResult` | Outcome for a single document. | `document()`, `passes()`, `sharedAttributes()`, `ruleContexts()` |
+| `RulePass` | Indicates a rule whose condition pipeline passed. | `rule()`, `context()`, `actions()` |
 | `RuleExecutionContext` | Mutable per-rule context that actions and hooks can use. | `attributes()`, `putAttribute(String, Object)`, `sharedAttributes()`, `transformedDocuments()`, `debugTrace()` |
 | `RuleDebugStageTrace` (`ai.fluxion.rules.debug`) | Debug snapshot for a single stage. | `index()`, `operator()`, `inputs()`, `outputs()`, `filtered()`, `transformed()`, `error()` |
 | `RulePipelineExecutor` | Internal adapter between rules and the core `PipelineExecutor`. | `execute(RuleDefinition, RuleExecutionContext)` |

@@ -22,10 +22,10 @@ List<RuleEvaluationResult> results = engine.execute(List.of(new Document(Map.of(
     "total", 750
 ))), ruleSet);
 
-assertFalse(results.getFirst().matches().isEmpty());
+assertFalse(results.getFirst().passes().isEmpty());
 ```
 
-Use dedicated tests to verify negative cases (documents that should not match) and to assert that actions and hooks mutate context as expected.
+Use dedicated tests to verify negative cases (documents that should not pass) and to assert that actions and hooks mutate context as expected.
 
 ## Debug traces in tests
 
@@ -61,19 +61,19 @@ assertFalse(result.hasLints(), () -> "Unexpected lint: " + result.lints());
 For complex rule sets, you can maintain a golden dataset (JSON documents + expected outcomes):
 
 1. Store documents in a version-controlled directory (`rulesets/orders/examples/*.json`).
-2. Write a test harness that loads each document, runs the rule engine, and compares matches against expected values recorded in YAML/JSON.
+2. Write a test harness that loads each document, runs the rule engine, and compares passes against expected values recorded in YAML/JSON.
 3. When rules change, update the golden files as part of the review so diffs are easy to inspect.
 
 ## Optional: property-based testing
 
 Use property-based frameworks (jqwik / QuickTheories) to generate documents and assert invariants:
 
-- **Idempotence** – executing the same rule twice with the same document should produce identical matches.
-- **Boundary checks** – ensure salience boundaries behave as expected (e.g. no rule below salience X triggers when above threshold rule matches).
+- **Idempotence** – executing the same rule twice with the same document should produce identical passes.
+- **Boundary checks** – ensure salience boundaries behave as expected (e.g. no rule below salience X passes when an above-threshold rule should own the decision).
 - **Composability** – shared attributes should remain consistent regardless of rule execution order (the engine enforces salience ordering, but invariants still help).
 
 ## Optional: observability-driven QA
 
-- Export metrics for match counts per rule and watch for sudden spikes/drops after deployments.
+- Export metrics for pass counts per rule and watch for sudden spikes/drops after deployments.
 - Capture samples of `RuleExecutionContext.attributes()` for audit trails.
 - Integrate with chaos tooling: mutate documents to ensure the rule engine fails fast when faced with unexpected fields/types.

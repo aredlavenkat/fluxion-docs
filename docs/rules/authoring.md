@@ -38,11 +38,11 @@ Rules are described with a simple JSON DSL that mirrors MongoDB-style aggregatio
 
 | Field | Purpose |
 | --- | --- |
-| `id`, `name`, `description` | Human readable identifiers surfaced in traces and matches. |
+| `id`, `name`, `description` | Human readable identifiers surfaced in traces and passes. |
 | `salience` | Priority value (default `0`). Higher values execute sooner. |
 | `stages` | Required array describing the aggregation pipeline. Empty pipelines are rejected. |
 | `actions` | Optional list of action names. Actions must be registered in `RuleActionRegistry`. |
-| `metadata` | Rule-specific metadata copied into match contexts. |
+| `metadata` | Rule-specific metadata copied into pass contexts. |
 
 ## Building rule sets programmatically
 

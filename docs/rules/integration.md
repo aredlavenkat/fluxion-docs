@@ -123,7 +123,7 @@ Pass `ruleSetRef::get` into your controllers/services so they always read the mo
 
 - Enable debug mode (`evaluate(..., true)`) when diagnosing issues; inspect `context.debugTrace()` for per-stage data.
 - Export metrics via the built-in OpenTelemetry bridge (configure `OTEL_*` environment variables).
-- Log `RuleEvaluationResult.matches()` and shared attributes to trace decisions.
+- Log `RuleEvaluationResult.passes()` and shared attributes to trace decisions.
 
 ## 5. Actions and hooks
 

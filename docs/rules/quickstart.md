@@ -5,7 +5,7 @@ This walkthrough shows how to go from an empty project to a running rule engine 
 1. **Declare dependencies**
 2. **Write a rule set (DSL + Java)**
 3. **Validate and load the rule**
-4. **Evaluate documents and inspect matches**
+4. **Evaluate documents and inspect passes**
 
 ## 1. Dependencies
 
@@ -107,23 +107,23 @@ List<Document> documents = List.of(
 List<RuleEvaluationResult> results = engine.execute(documents, ruleSet, true);
 
 for (RuleEvaluationResult result : results) {
-    System.out.printf("Document %s -> matches=%d shared=%s%n",
+    System.out.printf("Document %s -> passes=%d shared=%s%n",
         result.document().toMap(),
-        result.matches().size(),
+        result.passes().size(),
         result.sharedAttributes()
     );
 
-    for (RuleMatch match : result.matches()) {
+    for (RulePass rulePass : result.passes()) {
         System.out.printf("  Rule %s actions=%s debug=%s%n",
-            match.rule().name(),
-            match.context().attributes(),
-            match.context().debugTrace()
+            rulePass.rule().name(),
+            rulePass.context().attributes(),
+            rulePass.context().debugTrace()
         );
     }
 }
 ```
 
-Debug mode (`true`) collects `RuleDebugStageTrace` entries so you can inspect how each stage impacted the document.
+`RulePass` exposes the rule, context, and queued actions for any rule whose condition pipeline passed. Debug mode (`true`) collects `RuleDebugStageTrace` entries so you can inspect how each stage impacted the document.
 
 ## Next steps
 

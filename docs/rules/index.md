@@ -1,6 +1,6 @@
 # Rule Engine Overview
 
-Fluxion's rule engine lets you layer decision logic on top of aggregation pipelines. A rule wraps an ordered list of stages, attaches metadata and salience (priority), and optionally triggers actions or hooks when the pipeline produces matches. This section documents everything you need to author, validate, extend, and run rules—whether you are building tooling, integrating the runtime, or designing new SPIs.
+Fluxion's rule engine lets you layer decision logic on top of aggregation pipelines. A rule wraps an ordered list of stages, attaches metadata and salience (priority), and optionally triggers actions or hooks when the pipeline passes. This section documents everything you need to author, validate, extend, and run rules—whether you are building tooling, integrating the runtime, or designing new SPIs.
 
 **Key capabilities**
 
@@ -15,7 +15,7 @@ Fluxion's rule engine lets you layer decision logic on top of aggregation pipeli
 ### How the rule engine fits the platform
 
 ```
-┌────────────┐    documents     ┌────────────┐    matches/actions    ┌────────────┐
+┌────────────┐    documents     ┌────────────┐    passes/actions     ┌────────────┐
 │ Connectors │ ───────────────▶ │ RuleEngine │ ────────────────────▶ │ Downstream │
 └────────────┘  (Fluxion Docs)  └─────▲──────┘    (hooks/actions)    └─────▲──────┘
                                        │                               │
@@ -27,7 +27,7 @@ Fluxion's rule engine lets you layer decision logic on top of aggregation pipeli
 
 - **Connectors** ingest data from Kafka/HTTP/etc.
 - **RuleEngine** evaluates documents against rule sets built from the DSL or Java builders.
-- **Downstream systems** receive matches, transformed documents, and action side-effects.
+- **Downstream systems** receive passes, transformed documents, and action side-effects.
 
 ### Reading guide
 

@@ -60,7 +60,7 @@ For teams writing rules in code:
 1. **Activation** – extension activates on `rules.json` files.
 2. **Schema association** – registers the JSON schema and snippets above.
 3. **Lint task** – exposes a command `fluxion.rules.lint` that invokes a local CLI.
-4. **Test command** – prompts for a sample JSON document, sends it to a locally running rule service, then shows matches and debug trace in the UI.
+4. **Test command** – prompts for a sample JSON document, sends it to a locally running rule service, then shows passes and debug trace in the UI.
 5. **Action registry sync** – optionally polls a dev server for available action names and hot reloads completion lists.
 
 A clear tooling story makes the rule engine approachable for both humans and AI assistants. Use these building blocks to craft bespoke authoring experiences for your teams.

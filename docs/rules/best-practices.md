@@ -34,7 +34,7 @@ These guidelines reflect lessons learned from running the rule engine in product
 
 1. Prototype the rule locally using the [Quick Start](quickstart.md) steps.
 2. Commit the DSL file alongside unit tests that cover positive and negative cases.
-3. During review, include lint output (`parseWithLints`) and example matches (see [Testing & Debugging](testing.md)).
+3. During review, include lint output (`parseWithLints`) and example passes (see [Testing & Debugging](testing.md)).
 4. Publish rule-set metadata describing owner, escalation path, and version.
 
 ## Actions and hooks

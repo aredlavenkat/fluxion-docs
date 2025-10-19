@@ -2,7 +2,7 @@
 
 This page collects end-to-end scenarios that demonstrate how to describe, validate, and execute rules. Each example builds on the core concepts covered in the other guides.
 
-## Example 1 — Basic match with DSL and Java
+## Example 1 — Basic pass with DSL and Java
 
 ### DSL definition
 
@@ -40,7 +40,7 @@ RuleSet ruleSet = result.ruleSet();
 RuleEngine engine = new RuleEngine();
 Document doc = new Document(Map.of("status", "active"));
 List<RuleEvaluationResult> results = engine.evaluate(List.of(doc), ruleSet);
-boolean matched = !results.getFirst().matches().isEmpty();
+boolean passed = !results.getFirst().passes().isEmpty();
 ```
 
 ---
@@ -70,7 +70,7 @@ List<RuleEvaluationResult> results = new RuleEngine().execute(
     List.of(new Document(Map.of("status", "pending", "total", 1500))),
     ruleSet
 );
-RuleExecutionContext ctx = results.getFirst().matches().getFirst().context();
+RuleExecutionContext ctx = results.getFirst().passes().getFirst().context();
 assert "flagged".equals(ctx.attributes().get("decision"));
 assert "Suspicious order".equals(results.getFirst().sharedAttributes().get("latestDecision"));
 ```
@@ -175,7 +175,7 @@ RuleSet ruleSet = RuleSet.builder()
     .build();
 ```
 
-Because salience values differ, the `escalateFraud` rule executes first. When both match, two `RuleMatch` objects are returned, in salience order.
+Because salience values differ, the `escalateFraud` rule executes first. When both pass, two `RulePass` objects are returned, in salience order.
 
 ---
 
@@ -189,7 +189,7 @@ RuleSetHook auditHook = new RuleSetHook() {
     }
 
     @Override
-    public void afterRules(Document doc, Map<String, Object> shared, List<RuleMatch> matches) {
+    public void afterRules(Document doc, Map<String, Object> shared, List<RulePass> passes) {
         Duration elapsed = Duration.between((Instant) shared.get("auditStart"), Instant.now());
         metrics.record("rules.elapsed", elapsed.toMillis());
     }
@@ -201,4 +201,4 @@ RuleSet ruleSet = RuleSet.builder()
     .build();
 ```
 
-Hook output (e.g. metrics recording) applies once per document regardless of how many rules matched.
+Hook output (e.g. metrics recording) applies once per document regardless of how many rules passed.

@@ -7,10 +7,10 @@ The rule engine executes rule sets in three phases:
    - A `RuleExecutionContext` is created with the source document, shared attributes, and metadata.
    - Optional `RuleHook.beforeEvaluation` callbacks fire.
    - The rule's pipeline is executed by `RulePipelineExecutor`, which delegates to the core `PipelineExecutor`.
-   - If the pipeline yields documents, a `RuleMatch` is produced, containing the rule, context, and associated actions.
-3. **Rule-set hooks (after)** – `RuleSetHook.afterRules` observes the aggregate matches and shared attributes for the document.
+   - If the pipeline yields documents, a `RulePass` is produced, containing the rule, context, and associated actions.
+3. **Rule-set hooks (after)** – `RuleSetHook.afterRules` observes the aggregate passes and shared attributes for the document.
 
-Finally, when `RuleEngine.execute` is used instead of `evaluate`, the engine iterates over matches and runs each action's `execute` method, followed by `RuleHook.afterActions` callbacks. `RuleEngine.evaluate` stops before actions run, making it suitable for read-only evaluation or "test this rule" flows.
+Finally, when `RuleEngine.execute` is used instead of `evaluate`, the engine iterates over passes and runs each action's `execute` method, followed by `RuleHook.afterActions` callbacks. `RuleEngine.evaluate` stops before actions run, making it suitable for read-only evaluation or "test this rule" flows.
 
 ## RuleExecutionContext
 
@@ -36,9 +36,9 @@ This trace is available via `context.debugTrace()` and is invaluable for buildin
 
 ## Actions and hooks at runtime
 
-- **Actions** run after the pipeline matches when `execute` is called. They can mutate the context (mutations are visible to downstream hooks) or trigger side effects.
+- **Actions** run after the pipeline passes when `execute` is called. They can mutate the context (mutations are visible to downstream hooks) or trigger side effects.
 - **Rule hooks** execute before and after actions, allowing you to audit or transform results.
-- **Rule set hooks** run once per document and receive the list of matches, making them ideal for shared enrichment or aggregation.
+- **Rule set hooks** run once per document and receive the list of passes, making them ideal for shared enrichment or aggregation.
 
 The runtime enforces immutability where appropriate—rule definitions, rule sets, and metadata are copied defensively—while contexts remain mutable to support orchestrating state. Avoid caching the context outside the evaluation call; treat it as request-scoped.
 

@@ -8,7 +8,7 @@ The rule engine is often used in regulated domains where auditability and change
 2. **Review** – lints must pass; peer review focuses on correctness, salience, and metadata quality.
 3. **Approval** – sign-off from domain owners. Record the approval in rule metadata (`"approvedBy"`, `"ticket"`).
 4. **Deployment** – rule sets are packaged with application releases or delivered to a rule registry.
-5. **Monitoring** – track match rates, shared attributes, and action outcomes. Compare against baselines.
+5. **Monitoring** – track pass rates, shared attributes, and action outcomes. Compare against baselines.
 6. **Retirement** – mark rules as deprecated, remove actions/hooks, and clean up metadata once retired.
 
 ## Versioning strategy
@@ -22,7 +22,7 @@ The rule engine is often used in regulated domains where auditability and change
 ## Audit trails
 
 - Persist rule JSON and metadata for each deployment (e.g. in object storage or git).
-- Log rule evaluations with rule ID, salience, match outcome, and shared attributes.
+- Log rule evaluations with rule ID, salience, pass outcome, and shared attributes.
 - Use `RuleDebugStageTrace` in incident investigations; archive traces only when necessary because they may contain PII.
 
 ## Change management metadata
