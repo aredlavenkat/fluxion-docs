@@ -89,7 +89,20 @@ Key points:
 - `registry-enabled=false` skips the in-memory `RuleSetRegistry` if you provide your own.
 - `evaluation-service-enabled=false` disables the convenience `RuleEvaluationService` bean.
 
-Refer to the [starter reference](../rules-spring-boot-starter.md) for the full property matrix, Micrometer gauges, and Actuator endpoint payloads.
+### Property reference
+
+All starter settings share the `fluxion.rules.` prefix:
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `directory` | Legacy filesystem directory scanned when `locations` is empty. Relative paths resolve against the application working directory. | `rules` |
+| `locations` | List of Spring `Resource` patterns (e.g. `classpath*:rules/*.json`, `file:/etc/fluxion/*.json`). When empty the starter falls back to `directory`. | `[]` |
+| `fail-on-error` | Fail startup if discovery fails or JSON cannot be parsed. When `false`, errors are logged and surfaced via Actuator. | `true` |
+| `require-explicit-id` | Enforce rule-set `id` values in JSON. When `false`, ids fall back to the file name. | `true` |
+| `registry-enabled` | Publish the auto-configured `RuleSetRegistry` bean. Disable when you provide your own registry implementation. | `true` |
+| `evaluation-service-enabled` | Publish the convenience `RuleEvaluationService`; requires the registry bean. | `true` |
+
+Refer to the starter configuration table whenever you need to tweak behaviour per environment.
 
 ## 4. React to rule discovery
 
@@ -101,15 +114,21 @@ class RuleBootstrapListener {
 
     @EventListener
     void onRuleSetsLoaded(RuleSetsLoadedEvent event) {
-        RuleActionRegistry.register("flag-order", ctx -> ctx.putAttribute("flagged", true));
+        // Register custom rule actions on first load
+        RuleActionRegistry.register("audit-event", ctx ->
+                log.info("Audit rule {}", ctx.rule().name()));
 
+        // Wire rule-set hooks dynamically if desired
+        RuleHookRegistry.registerRuleSetHook("capture-metrics", new MetricsCapturingHook());
+
+        // Inspect loaded descriptors for logging or auditing
         event.getLoadResult().registry().descriptors()
                 .forEach(descriptor -> log.info("Loaded rule set {} from {}", descriptor.id(), descriptor.source()));
     }
 }
 ```
 
-Hook registration can also rely on ServiceLoader SPIs; the event is convenient for dynamic wiring.
+Hook/action registration can also rely on ServiceLoader SPIs; the event is an optional integration point for dynamic wiring.
 
 ## 5. Evaluate requests via REST
 
@@ -143,13 +162,39 @@ RuleEvaluationResult evaluateManual(String ruleSetId, Map<String, Object> payloa
 }
 ```
 
-## 6. Observe health and metrics
+## 6. Observe health, metadata, and metrics
 
 With `spring-boot-starter-actuator` on the classpath:
 
-- `/actuator/health/fluxionRules` reports rule count, last load time, and non-fatal load errors.
-- `/actuator/fluxionRules` lists rule-set metadata (id, name, version, source) plus error details.
-- Micrometer gauges are auto-bound: `fluxion.rules.rule_sets`, `fluxion.rules.load_errors`, `fluxion.rules.last_loaded_epoch_millis`.
+- `/actuator/health/fluxionRules` includes `ruleSetCount`, `lastLoaded`, and a list of non-fatal discovery errors.
+- `/actuator/fluxionRules` returns rule-set descriptors (`id`, `name`, `version`, `ruleCount`, `metadata`, `source`) and the same error payload.
+- Micrometer gauges are auto-bound: 
+  - `fluxion.rules.rule_sets` – number of loaded rule sets
+  - `fluxion.rules.load_errors` – non-fatal error count (only increments when `fail-on-error=false`)
+  - `fluxion.rules.last_loaded_epoch_millis` – epoch timestamp of the last successful load
+
+Example `/actuator/fluxionRules` response:
+
+```json
+{
+  "ruleSets": [
+    {
+      "id": "orders",
+      "name": "Order Rules",
+      "version": "1.0.0",
+      "ruleCount": 4,
+      "metadata": {
+        "owner": "payments-risk"
+      },
+      "source": "classpath:rules/orders.json"
+    }
+  ],
+  "errors": [],
+  "loadedAt": "2024-10-10T18:23:11.123Z"
+}
+```
+
+Errors appear only when `fail-on-error=false` and the starter skips malformed files.
 
 Expose the endpoints via `management.endpoints.web.exposure.include`. Feed metrics into Prometheus, Datadog, etc.
 
