@@ -45,6 +45,96 @@ boolean passed = !results.getFirst().passes().isEmpty();
 
 ---
 
+## Example 8 — DSL rule with actions and hooks
+
+You can declare actions and hooks directly in the DSL as long as they are registered at runtime. The `actions` array references action names, while the optional `hooks` arrays reference rule and rule-set hooks by name (resolved from `RuleHookRegistry`).
+
+```json
+{
+  "id": "loyalty-offers",
+  "name": "Loyalty Offers",
+  "rules": [
+    {
+      "id": "gold-upgrade",
+      "name": "Upgrade loyal customers",
+      "description": "Grant gold tier when spend exceeds threshold",
+      "salience": 500,
+      "stages": [
+        { "$match": { "loyaltyTier": "silver" } },
+        { "$match": { "lifetimeSpend": { "$gte": 2500 } } }
+      ],
+      "actions": ["grant-gold-tier", "notify-upgrade"],
+      "hooks": ["audit-loyalty"]
+    }
+  ],
+  "hooks": ["audit-ruleset"]
+}
+```
+
+Minimal bootstrap code:
+
+```java
+@Configuration
+class LoyaltyRuleConfig {
+
+    @PostConstruct
+    void registerActsAndHooks() {
+        RuleActionRegistry.register("grant-gold-tier", ctx -> ctx.putSharedAttribute("upgrade", true));
+        RuleActionRegistry.register("notify-upgrade", ctx -> notificationClient.send(ctx.rule().name()));
+
+        RuleHookRegistry.registerRuleHook("audit-loyalty", new LoyaltyAuditHook());
+        RuleHookRegistry.registerRuleSetHook("audit-ruleset", new LoyaltyRuleSetHook());
+    }
+}
+```
+
+After registration, the DSL snippet above can reference those names. The parser leaves `actions` and `hooks` untouched; at runtime, the rule builder resolves them and attaches the implementations before evaluation.
+---
+
+## Example 9 — DSL with staged metadata and custom attributes
+
+Metadata travels with the rule and is exposed via `RuleExecutionContext.metadata()` and `RuleDefinition.metadata()`. This is helpful for downstream logging, tracing, or business logic.
+
+```json
+{
+  "id": "orders",
+  "version": "1.4.0",
+  "metadata": {
+    "owner": "payments-risk",
+    "runbook": "https://wiki/internal/runbooks/order-risk"
+  },
+  "rules": [
+    {
+      "id": "high-risk-order",
+      "name": "High risk order",
+      "salience": 800,
+      "metadata": {
+        "category": "fraud",
+        "severity": "high"
+      },
+      "stages": [
+        { "$match": { "status": "pending" } },
+        { "$match": { "riskScore": { "$gte": 0.9 } } }
+      ],
+      "actions": ["flag-order"],
+      "hooks": ["audit-order"]
+    }
+  ]
+}
+```
+
+When evaluating a document:
+
+```java
+RuleEvaluationResult result = engine.execute(List.of(orderDoc), ruleSet).getFirst();
+RulePass pass = result.passes().getFirst();
+Map<String, Object> metadata = pass.rule().metadata();
+log.info("Rule {} fired with severity {}", pass.rule().id(), metadata.get("severity"));
+```
+
+This keeps governance data alongside the rule definition and makes it available to actions, hooks, and observability pipelines.
+---
+
 ## Example 2 — Actions and shared attributes
 
 This scenario flags suspicious orders and records the decision in the shared context.
@@ -202,91 +292,3 @@ RuleSet ruleSet = RuleSet.builder()
 ```
 
 Hook output (e.g. metrics recording) applies once per document regardless of how many rules passed.
-
-## Example 8 — DSL rule with actions and hooks
-
-You can declare actions and hooks directly in the DSL as long as they are registered at runtime. The `actions` array references action names, while the optional `hooks` arrays reference rule and rule-set hooks by name (resolved from `RuleHookRegistry`).
-
-```json
-{
-  "id": "loyalty-offers",
-  "name": "Loyalty Offers",
-  "rules": [
-    {
-      "id": "gold-upgrade",
-      "name": "Upgrade loyal customers",
-      "description": "Grant gold tier when spend exceeds threshold",
-      "salience": 500,
-      "stages": [
-        { "$match": { "loyaltyTier": "silver" } },
-        { "$match": { "lifetimeSpend": { "$gte": 2500 } } }
-      ],
-      "actions": ["grant-gold-tier", "notify-upgrade"],
-      "hooks": ["audit-loyalty"]
-    }
-  ],
-  "hooks": ["audit-ruleset"]
-}
-```
-
-Minimal bootstrap code:
-
-```java
-@Configuration
-class LoyaltyRuleConfig {
-
-    @PostConstruct
-    void registerActsAndHooks() {
-        RuleActionRegistry.register("grant-gold-tier", ctx -> ctx.putSharedAttribute("upgrade", true));
-        RuleActionRegistry.register("notify-upgrade", ctx -> notificationClient.send(ctx.rule().name()));
-
-        RuleHookRegistry.registerRuleHook("audit-loyalty", new LoyaltyAuditHook());
-        RuleHookRegistry.registerRuleSetHook("audit-ruleset", new LoyaltyRuleSetHook());
-    }
-}
-```
-
-After registration, the DSL snippet above can reference those names. The parser leaves `actions` and `hooks` untouched; at runtime, the rule builder resolves them and attaches the implementations before evaluation.
-
-## Example 9 — DSL with staged metadata and custom attributes
-
-Metadata travels with the rule and is exposed via `RuleExecutionContext.metadata()` and `RuleDefinition.metadata()`. This is helpful for downstream logging, tracing, or business logic.
-
-```json
-{
-  "id": "orders",
-  "version": "1.4.0",
-  "metadata": {
-    "owner": "payments-risk",
-    "runbook": "https://wiki/internal/runbooks/order-risk"
-  },
-  "rules": [
-    {
-      "id": "high-risk-order",
-      "name": "High risk order",
-      "salience": 800,
-      "metadata": {
-        "category": "fraud",
-        "severity": "high"
-      },
-      "stages": [
-        { "$match": { "status": "pending" } },
-        { "$match": { "riskScore": { "$gte": 0.9 } } }
-      ],
-      "actions": ["flag-order"],
-      "hooks": ["audit-order"]
-    }
-  ]
-}
-```
-
-When evaluating a document:
-
-```java
-RuleEvaluationResult result = engine.execute(List.of(orderDoc), ruleSet).getFirst();
-RulePass pass = result.passes().getFirst();
-Map<String, Object> metadata = pass.rule().metadata();
-log.info("Rule {} fired with severity {}", pass.rule().id(), metadata.get("severity"));
-```
-
-This keeps governance data alongside the rule definition and makes it available to actions, hooks, and observability pipelines.
