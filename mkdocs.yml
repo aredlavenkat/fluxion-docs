@@ -30,7 +30,7 @@ nav:
       - $unwind: stages/unwind.md
       - $setWindowFields: stages/setWindowFields.md
       - $sampleRate: stages/sampleRate.md
-    - Expression Operators:
+    - Operators:
       - Overview: operators/index.md
       - $abs: operators/abs.md
       - $add: operators/add.md
