@@ -104,7 +104,9 @@ nav:
     - Lifecycle & Governance: rules/lifecycle.md
     - Tooling & IDE Support: rules/tooling.md
     - Examples: rules/examples.md
-    - Integration Guide: rules/integration.md
+    - Integration:
+      - Runtime Integration: rules/integration.md
+      - Spring Boot Starter Integration: rules/spring-boot-integration.md
     - Domain Glossary: rules/glossary.md
   - Enrich:
     - Overview: enrich/index.md
