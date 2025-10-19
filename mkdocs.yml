@@ -105,6 +105,7 @@ nav:
     - Tooling & IDE Support: rules/tooling.md
     - Examples: rules/examples.md
     - Integration Guide: rules/integration.md
+    - Domain Glossary: rules/glossary.md
   - Enrich:
     - Overview: enrich/index.md
     - Operators:
