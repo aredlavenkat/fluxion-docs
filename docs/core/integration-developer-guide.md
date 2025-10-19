@@ -1,16 +1,16 @@
 # Integration Developer Guide
 
-Fluxion targets engineers who need MongoDB-style analytics, enrichment, and streaming orchestration inside their own services. This guide shows how to assemble pipelines, wire the runtime, and extend Fluxion when a built-in operator or stage is missing.
+Fluxion targets engineers who need MongoDB-style analytics and enrichment inside their own services without operating a database engine. This guide shows how to assemble aggregation pipelines, execute them in-process, and extend Fluxion with custom operators or stages.
 
 ## Audience Checklist
 
 - You embed Fluxion into a JVM service (Spring Boot, Quarkus, Micronaut, etc.).
-- You want the pipeline DSL (Mongo-style stages and expressions) without running MongoDB.
+- You want the pipeline DSL (Mongo-style stages and expressions) for batch or request/response workloads.
 - You may need to add bespoke stages or operators for domain-specific logic.
 
 ## Dependencies
 
-Add the modules that match the features you plan to use. At minimum you will need `fluxion-core`. Add `fluxion-connect` for connectors (Kafka source, sinks) and `fluxion-enrich` if you rely on `$httpCall`, `$sqlQuery`, or other service-aware operators.
+Add the modules that match the features you plan to use. At minimum you will need `fluxion-core`. Add `fluxion-enrich` if you rely on `$httpCall`, `$sqlQuery`, or other service-aware operators.
 
 ```xml
 <dependencyManagement>
@@ -30,10 +30,7 @@ Add the modules that match the features you plan to use. At minimum you will nee
     <groupId>ai.fluxion</groupId>
     <artifactId>fluxion-core</artifactId>
   </dependency>
-  <dependency>
-    <groupId>ai.fluxion</groupId>
-    <artifactId>fluxion-connect</artifactId>
-  </dependency>
+  <!-- Optional enrichment operators -->
   <dependency>
     <groupId>ai.fluxion</groupId>
     <artifactId>fluxion-enrich</artifactId>
@@ -41,19 +38,16 @@ Add the modules that match the features you plan to use. At minimum you will nee
 </dependencies>
 ```
 
-> If you do not use enrichment operators or custom connectors you can omit the corresponding modules.
-
 ## Pipeline Anatomy
 
-Fluxion reuses MongoDB aggregation constructs. A streaming pipeline is composed of:
+Fluxion reuses MongoDB aggregation constructs. A pipeline is composed of:
 
-- **Source connector**: Supplies documents (Kafka topic, HTTP poller, custom source).
-- **Stage list**: Ordered MongoDB-style stages (`$match`, `$project`, `$group`, `$setWindowFields`, etc.).
-- **Expressions**: Stage payloads that use operators (`$add`, `$map`, `$dateDiff`).
-- **Sink**: Optional connector or custom sink `StreamingSink`; defaults to an in-memory collector.
-- **Runtime configuration**: Batch size, queue capacities, worker pool sizing, error policies.
+- **Stage list**: ordered MongoDB-style stages (`$match`, `$project`, `$group`, `$setWindowFields`, etc.).
+- **Expressions**: stage payloads that use operators (`$add`, `$map`, `$dateDiff`, etc.).
+- **Documents**: input data represented as `ai.fluxion.core.model.Document`.
+- **Globals**: optional immutable values available to all expressions (`$$GLOBALS`).
 
-The same stage list can be executed in batch (`PipelineExecutor`) or streaming (`StreamingPipelineExecutor` via the orchestrator).
+The same stage list can be executed repeatedly on new data, making it easy to store pipeline definitions in configuration or generate them dynamically.
 
 ## Example Pipeline JSON
 
@@ -97,54 +91,38 @@ Save the JSON to a config store, bundle it with your service, or generate it dyn
 
 ## Running the Pipeline
 
-Construct stages programmatically or parse JSON using `DocumentParser`.
+You can construct stages programmatically or parse JSON using `DocumentParser`. The snippet below shows batch execution with `PipelineExecutor`.
 
 ```java
-import ai.fluxion.core.engine.streaming.orchestrator.StreamingPipelineDefinition;
-import ai.fluxion.core.engine.streaming.orchestrator.StreamingPipelineOrchestrator;
-import ai.fluxion.core.engine.streaming.orchestrator.StreamingPipelineHandle;
-import ai.fluxion.core.engine.streaming.StreamingRuntimeConfig;
-import ai.fluxion.core.engine.streaming.StreamingErrorPolicy;
-import ai.fluxion.core.engine.connectors.SourceConnectorConfig;
+import ai.fluxion.core.engine.PipelineExecutor;
+import ai.fluxion.core.model.Document;
 import ai.fluxion.core.model.Stage;
 import ai.fluxion.core.util.DocumentParser;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
-SourceConnectorConfig source = SourceConnectorConfig.builder("kafka")
-    .topic("telemetry.events")
-    .option("bootstrapServers", "localhost:9092")
-    .option("groupId", "telemetry-pipeline")
-    .build();
+List<Document> input = DocumentParser.getDocumentsFromJsonArray(
+    Files.readString(Path.of("data/telemetry-sample.json"))
+);
 
 List<Stage> stages = DocumentParser.getStagesFromJsonArray(
     Files.readString(Path.of("pipelines/telemetry.json"))
 );
 
-StreamingRuntimeConfig runtime = StreamingRuntimeConfig.builder()
-    .stageWorkerThreads(4)
-    .sourceQueueCapacity(2048)
-    .build();
+PipelineExecutor executor = new PipelineExecutor();
+List<Document> results = executor.run(input, stages, Map.of("tenantId", "acme"));
 
-StreamingPipelineDefinition definition = StreamingPipelineDefinition.builder(source)
-    .stages(stages)
-    .runtimeConfig(runtime)
-    .errorPolicy(StreamingErrorPolicy.retrying(3))
-    .pipelineId("telemetry-health-score")
-    .build();
-
-StreamingPipelineOrchestrator orchestrator = new StreamingPipelineOrchestrator();
-StreamingPipelineHandle handle = orchestrator.run(definition);
+results.forEach(doc -> System.out.println(doc.toJson()));
 ```
 
 Key points:
 
-- `DocumentParser.getStagesFromJsonArray` loads JSON portable pipelines.
-- `StreamingPipelineDefinition` owns the source, stage list, runtime config, optional sink, and failure policy.
-- `StreamingPipelineOrchestrator` delegates to `StreamingPipelineExecutor` and returns a `StreamingPipelineHandle` for lifecycle hooks (pause, resume, metrics).
-
-To run a batch pipeline (no streaming source), call `PipelineExecutor.run(List<Document> input, List<Stage> stages, Map<String, Object> globals)`.
+- `DocumentParser` converts JSON arrays into Fluxion `Document` and `Stage` instances.
+- `PipelineExecutor#run` accepts the input documents, stage list, and optional globals.
+- Pipelines are pure functions: they return a new list of documents without mutating the input.
 
 ## Stage Syntax Cheatsheet
 
@@ -156,7 +134,7 @@ To run a batch pipeline (no streaming source), call `PipelineExecutor.run(List<D
 - Arrays of stages execute in order; stage output feeds into the next stage.
 - System variables available everywhere: `$$ROOT`, `$$CURRENT`, `$$NOW`, `$$REMOVE`, `$$PRUNE`, `$$KEEP`.
 
-See the [Stages reference](../stages/) for stage-by-stage payload details.
+See the [Stages reference](../stages/index.md) for stage-by-stage payload details.
 
 ## Expression Operators Cheatsheet
 
@@ -170,7 +148,7 @@ See the [Stages reference](../stages/) for stage-by-stage payload details.
   - **Control flow**: `$cond`, `$switch`, `$ifNull`, `$coalesce`, `$let`.
 - Operators can be nested arbitrarily: `{"$map": {"input": "$events", "as": "event", "in": {"$toUpper": "$$event.type"}}}`.
 
-See the [Operators reference](../operators/) for exhaustive syntax, edge cases, and performance notes.
+See the [Operators reference](../operators/index.md) for exhaustive syntax, edge cases, and performance notes.
 
 ## Adding a Custom Operator
 
@@ -220,9 +198,8 @@ com.acme.telemetry.ops.WeightedPercentileOperator$Contributor
 ## Adding a Custom Stage
 
 1. Implement `StageHandler` and encapsulate your transformation inside `apply`.
-2. Optionally override `process` to access `StageExecutionContext` (state store, metrics).
-3. Return the input list (possibly mutated) or allocate a new list of `Document` objects.
-4. Register the handler through `StageHandlerContributor` and `ServiceLoader`.
+2. Return the input list (possibly mutated) or allocate a new list of `Document` objects.
+3. Register the handler through `StageHandlerContributor` and `ServiceLoader`.
 
 ```java
 package com.acme.telemetry.stages;
@@ -268,21 +245,12 @@ com.acme.telemetry.stages.MaskFieldsStageHandler$Contributor
 
 Tips:
 
-- Stages receive `vars` populated with `$$ROOT`, `$$CURRENT`, and any globals supplied via `StreamingPipelineDefinition.globalVariables(...)`.
-- Use `StageExecutionContext` (override `process`) when you need metric recording or state storage.
-- For one-off experiments you can register stages at runtime: `StageRegistry.getInstance().register("$maskFields", new MaskFieldsStageHandler());`.
-
-## Operational Hooks
-
-- **Metrics**: `StageMetrics.MetricSnapshot` captures per-stage throughput, latency, queue depth. Bridge to OpenTelemetry via `StageMetricsOtelBridge`.
-- **Error handling**: `StreamingErrorPolicy.retrying(retries)` or `StreamingErrorPolicy.deadLetter(...)` controls how the runtime reacts to handler exceptions.
-- **Global variables**: Supply immutable values (feature flags, static lookups) via `StreamingPipelineDefinition.globalVariables(Map.of("tenantId", "acme"))`. They surface as `$$GLOBALS.tenantId`.
-- **State store**: Swap `StateStore` (default `InMemoryStateStore`) for a persistent implementation when stages must checkpoint progress.
+- Stages receive `vars` populated with `$$ROOT`, `$$CURRENT`, and any globals supplied when executing the pipeline.
+- Use `StageRegistry.getInstance().register(...)` during development or tests to inject stages without ServiceLoader wiring.
 
 ## Additional Resources
 
-- [Stage reference](../stages/) for payload schemas, aliases, and gotchas.
-- [Operator reference](../operators/) for complete expression coverage.
-- [Connector guides](../connect/) for Kafka and future connectors.
-- [Enrichment operators](../enrich/) for `$httpCall`, `$sqlQuery`, and service integrations.
+- [Stage reference](../stages/index.md) for payload schemas, aliases, and gotchas.
+- [Operator reference](../operators/index.md) for complete expression coverage.
+- [Enrichment operators](../enrich/index.md) for `$httpCall`, `$sqlQuery`, and service integrations.
 - Fluxion Core repository (`fluxion-core-engine-java/docs/fluxion-core-developer-guide.md`) for engine internals and SPI details.

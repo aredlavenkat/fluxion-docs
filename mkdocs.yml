@@ -8,6 +8,7 @@ nav:
     - Overview: core/index.md
     - Integration Guide: core/integration-developer-guide.md
     - Stages:
+      - Overview: stages/index.md
       - $addFields: stages/addFields.md
       - $bucket: stages/bucket.md
       - $bucketAuto: stages/bucketAuto.md
@@ -28,6 +29,7 @@ nav:
       - $unwind: stages/unwind.md
       - $setWindowFields: stages/setWindowFields.md
     - Expression Operators:
+      - Overview: operators/index.md
       - $abs: operators/abs.md
       - $add: operators/add.md
       - $allElementsTrue: operators/allElementsTrue.md

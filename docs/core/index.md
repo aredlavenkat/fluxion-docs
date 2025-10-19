@@ -28,6 +28,6 @@ Fluxion Core delivers the aggregation engine, streaming runtime, and shared serv
 Use the navigation to explore:
 
 - [Usage Guide](../usage.md) for end-to-end setup.
-- [Integration Developer Guide](integration-developer-guide.md) for hands-on pipeline assembly and extension.
+- [Integration Developer Guide](integration-developer-guide.md) for in-process pipeline assembly and extension.
 - [Stages](../stages/) for pipeline building blocks.
 - [Operators](../operators/) for expression language details.
