@@ -4,6 +4,16 @@ Adds or modifies fields in documents (alias for $addFields).
 
 ---
 
+## Syntax
+
+```json
+{ "$set": { "fieldName": <expression>, ... } }
+```
+
+`$set` accepts the same payload as `$addFields`; both names map to the same stage handler.
+
+---
+
 ## ✅ Basic Example
 
 ### 📌 Stage

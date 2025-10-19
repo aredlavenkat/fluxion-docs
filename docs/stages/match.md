@@ -4,6 +4,16 @@ Filters documents by a condition.
 
 ---
 
+## Syntax
+
+```json
+{ "$match": { <fieldOrOperator>: <valueOrExpression> } }
+```
+
+Use the same field and operator syntax as MongoDB queries (`$eq`, `$gte`, logical expressions, nested documents, etc.).
+
+---
+
 ## ✅ Basic Example
 
 ### 📌 Stage

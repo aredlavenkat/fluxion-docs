@@ -4,6 +4,16 @@ Skips over a specified number of documents.
 
 ---
 
+## Syntax
+
+```json
+{ "$skip": <nonNegativeInteger> }
+```
+
+The integer specifies how many leading documents to drop before emitting results.
+
+---
+
 ## ✅ Basic Example
 
 ### 📌 Stage

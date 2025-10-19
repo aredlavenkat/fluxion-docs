@@ -28,6 +28,7 @@ nav:
       - $sortByCount: stages/sortByCount.md
       - $unwind: stages/unwind.md
       - $setWindowFields: stages/setWindowFields.md
+      - $sampleRate: stages/sampleRate.md
     - Expression Operators:
       - Overview: operators/index.md
       - $abs: operators/abs.md
@@ -125,5 +126,4 @@ nav:
     - Example Set 1: examples/exampleSet1.md
     - Example Set 2: examples/exampleSet2.md
     - Example Set 3: examples/exampleSet3.md
-  - Roadmap: roadmap.md
   - Glossary: glossary.md

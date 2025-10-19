@@ -4,6 +4,21 @@ Removes specified fields from documents.
 
 ---
 
+## Syntax
+
+```json
+{ "$unset": "<fieldName>" }
+```
+
+```json
+{ "$unset": ["<field1>", "<field2>", ...] }
+```
+
+- Accepts either a single string or an array of field names.
+- To remove nested fields, specify the path (for example `"shipping.trackingNumber"`).
+
+---
+
 ## ✅ Basic Example
 
 ### 📌 Stage

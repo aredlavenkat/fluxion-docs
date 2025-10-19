@@ -4,6 +4,18 @@ Reshapes documents by including, excluding, or computing fields.
 
 ---
 
+## Syntax
+
+```json
+{ "$project": { "<field>": <0|1|expression>, ... } }
+```
+
+- Set a field to `1` to include it, `0` to exclude it.
+- Provide an expression to compute a new value (aliasing is allowed by assigning to a new field name).
+- `_id` is included by default; set `"_id": 0` to drop it.
+
+---
+
 ## ✅ Basic Example
 
 ### 📌 Stage

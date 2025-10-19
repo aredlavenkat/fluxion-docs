@@ -4,6 +4,16 @@ Limits the number of documents passed to the next stage.
 
 ---
 
+## Syntax
+
+```json
+{ "$limit": <positiveInteger> }
+```
+
+The integer caps how many documents are emitted downstream.
+
+---
+
 ## ✅ Basic Example
 
 ### 📌 Stage

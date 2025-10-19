@@ -32,5 +32,6 @@ Fluxion implements a large subset of MongoDB aggregation stages. Use this index 
 ## Advanced / Specialized
 
 - [$merge](merge.md), [$out](out.md), [$search](search.md), [$vectorSearch](vectorSearch.md): environment-specific stages with additional deployment prerequisites.
+- [$sampleRate](sampleRate.md): probabilistic sampling using per-document Bernoulli draws.
 
 Use the sidebar for the full alphabetical list. Each stage page covers payload syntax, options, and representative examples you can drop into your pipelines.
