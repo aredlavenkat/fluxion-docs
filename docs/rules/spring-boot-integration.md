@@ -218,8 +218,111 @@ For behavioural tests, call `RuleEvaluationService` with sample documents and as
 
 A runnable Spring Boot sample demonstrating YAML config, REST endpoints, and Actuator exposure lives in the `samples/fluxion-rules-starter-sample/` directory of the core repository. A dedicated samples repository will be linked here once published.
 
-## 9. Next steps
+## 9. Extend rules with custom actions/hooks via the SPIs (see Extensions & SPIs)
 
-- Extend rules with custom actions/hooks via the SPIs (see [Extensions & SPIs](extensions.md)).
-- Automate rule validation in your CI pipeline (linting, evaluation tests, JSON schema checks).
-- Combine this starter with Fluxion connectors to build full ingestion + decision services.
+The starter honours the rule-engine Service Provider Interfaces (SPIs), so any custom actions or hooks you publish are discovered automatically at startup. This keeps behaviour reusable and infrastructure code minimal.
+
+### When to use the SPIs
+
+- Share a library of actions/hooks across multiple services.
+- Encapsulate side-effects (notifications, persistence, metrics) in actions rather than controllers.
+- Attach instrumentation or safety guards (timeouts, auditing) through hooks.
+
+### Implementation steps
+
+1. **Create a contributor class.**
+   - Actions: implement `ai.fluxion.rules.spi.RuleActionContributor` and return a `Map<String, RuleAction>`.
+   - Hooks: implement `ai.fluxion.rules.spi.RuleHookContributor` and return maps for `RuleHook` and/or `RuleSetHook`.
+2. **Register with ServiceLoader.** Add a descriptor file under `META-INF/services/` containing the fully-qualified class name.
+3. **Package on the classpath.** Include the contributor jar in your application; the starter’s registries load it via `ServiceLoader`.
+4. **Reference by name in DSL/Java.** Use the action/hook names in rule JSON or builder APIs (`builder.addHookByName("audit-before")`).
+
+### Example: Action contributor
+
+```java
+package com.example.rules.actions;
+
+import ai.fluxion.rules.domain.RuleAction;
+import ai.fluxion.rules.spi.RuleActionContributor;
+
+import java.util.Map;
+
+public final class NotificationActionContributor implements RuleActionContributor {
+
+    @Override
+    public Map<String, RuleAction> ruleActions() {
+        return Map.of(
+                "notify-upgrade", context -> notificationClient().sendUpgrade(context.document()),
+                "flag-order", context -> context.putAttribute("flagged", true)
+        );
+    }
+
+    private NotificationClient notificationClient() {
+        return NotificationClientHolder.INSTANCE;
+    }
+}
+```
+
+`META-INF/services/ai.fluxion.rules.spi.RuleActionContributor`:
+
+```
+com.example.rules.actions.NotificationActionContributor
+```
+
+### Example: Hook contributor
+
+```java
+package com.example.rules.hooks;
+
+import ai.fluxion.rules.engine.RuleHook;
+import ai.fluxion.rules.engine.RuleSetHook;
+import ai.fluxion.rules.spi.RuleHookContributor;
+
+import java.util.Map;
+
+public final class AuditingHookContributor implements RuleHookContributor {
+
+    @Override
+    public Map<String, RuleHook> ruleHooks() {
+        return Map.of("audit-before", context -> auditService().logStart(context));
+    }
+
+    @Override
+    public Map<String, RuleSetHook> ruleSetHooks() {
+        return Map.of("capture-metrics", new MetricsCapturingHook());
+    }
+}
+```
+
+`META-INF/services/ai.fluxion.rules.spi.RuleHookContributor`:
+
+```
+com.example.rules.hooks.AuditingHookContributor
+```
+
+### Testing contributors
+
+```java
+@Test
+void actionContributorRegistersNames() {
+    NotificationActionContributor contributor = new NotificationActionContributor();
+    assertThat(contributor.ruleActions()).containsKey("notify-upgrade");
+}
+```
+
+You can also bootstrap a Spring context (with the starter on the classpath) and assert that `RuleActionRegistry.resolve("notify-upgrade")` returns the expected implementation.
+
+### Dynamic overrides via events
+
+For experiments or environment-specific tweaks, register actions/hooks imperatively inside a `RuleSetsLoadedEvent` listener:
+
+```java
+@EventListener
+void onRulesLoaded(RuleSetsLoadedEvent event) {
+    RuleActionRegistry.register("debug-action", ctx -> log.debug("rule {} fired", ctx.rule().name()));
+}
+```
+
+These manual registrations live alongside ServiceLoader contributions and are handy for toggling behaviour based on feature flags or configuration services.
+
+> Tip: keep action/hook names lowercase-with-dashes to avoid collisions and keep DSL payloads readable.
