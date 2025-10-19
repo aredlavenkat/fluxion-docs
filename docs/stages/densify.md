@@ -44,6 +44,25 @@
 
 If only 2023-01-01 and 2023-01-03 exist for a SKU, `$densify` inserts a synthetic document for 2023-01-02 with the partition fields present and other fields unset.
 
+### 📥 Input
+
+```json
+[
+  { "sku": "A", "eventDate": { "$date": "2024-01-01" }, "quantity": 5 },
+  { "sku": "A", "eventDate": { "$date": "2024-01-03" }, "quantity": 7 }
+]
+```
+
+### 📤 Output
+
+```json
+[
+  { "sku": "A", "eventDate": { "$date": "2024-01-01" }, "quantity": 5 },
+  { "sku": "A", "eventDate": { "$date": "2024-01-02" } },
+  { "sku": "A", "eventDate": { "$date": "2024-01-03" }, "quantity": 7 }
+]
+```
+
 ---
 
 ## 💡 Tips

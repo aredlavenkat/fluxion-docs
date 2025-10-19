@@ -124,6 +124,33 @@ Key points:
 - `PipelineExecutor#run` accepts the input documents, stage list, and optional globals.
 - Pipelines are pure functions: they return a new list of documents without mutating the input.
 
+## Managing Pipeline Definitions
+
+- **Storage options**: keep pipeline JSON in source control, a config server (Spring Cloud Config, Consul), or a database table keyed by tenant. The executor is agnostic as long as you can load the JSON string.
+- **Cache parsed stages**: parsing on every request is wasteful. Cache the `List<Stage>` per pipeline identifier and invalidate the cache when your configuration changes.
+
+  ```java
+  record PipelineHandle(List<Stage> stages, Instant lastModified) {}
+
+  class PipelineRepository {
+      private final ConcurrentMap<String, PipelineHandle> cache = new ConcurrentHashMap<>();
+
+      PipelineHandle resolve(String name) {
+          return cache.compute(name, (key, existing) -> {
+              LoadedPipeline loaded = configService.fetch(name);
+              if (existing != null && !loaded.changedSince(existing.lastModified())) {
+                  return existing;
+              }
+              List<Stage> stages = DocumentParser.getStagesFromJsonArray(loaded.json());
+              return new PipelineHandle(stages, loaded.lastModified());
+          });
+      }
+  }
+  ```
+
+- **Globals**: supply immutable values (tenant, feature flags) through the `globals` map instead of hard-coding them in the pipeline JSON.
+- **Error handling**: catch `IllegalArgumentException` and `UnsupportedOperationException` to surface actionable diagnostics back to the client.
+
 ## Stage Syntax Cheatsheet
 
 - Every stage is a single-key object: `{ "$stageName": <payload> }`.
@@ -247,6 +274,7 @@ Tips:
 
 - Stages receive `vars` populated with `$$ROOT`, `$$CURRENT`, and any globals supplied when executing the pipeline.
 - Use `StageRegistry.getInstance().register(...)` during development or tests to inject stages without ServiceLoader wiring.
+- `StageRegistry` and `OperatorRegistry` are thread-safe singletons; register contributions during application bootstrap to avoid races.
 
 ## Additional Resources
 
@@ -254,3 +282,4 @@ Tips:
 - [Operator reference](../operators/index.md) for complete expression coverage.
 - [Enrichment operators](../enrich/index.md) for `$httpCall`, `$sqlQuery`, and service integrations.
 - Fluxion Core repository (`fluxion-core-engine-java/docs/fluxion-core-developer-guide.md`) for engine internals and SPI details.
+- [LLM assistant notes](../shared/llm-assistant-notes.md) to keep generated answers aligned with current capabilities.

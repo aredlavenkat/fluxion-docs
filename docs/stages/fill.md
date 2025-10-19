@@ -47,6 +47,60 @@
 
 ---
 
+### 📥 Input
+
+```json
+[
+  {
+    "deviceId": "A",
+    "timestamp": 1,
+    "temperature": 20.0,
+    "status": "OK"
+  },
+  {
+    "deviceId": "A",
+    "timestamp": 2,
+    "temperature": null
+  },
+  {
+    "deviceId": "A",
+    "timestamp": 3,
+    "temperature": 24.0,
+    "status": "WARN"
+  }
+]
+```
+
+### 📤 Output
+
+```json
+[
+  {
+    "deviceId": "A",
+    "timestamp": 1,
+    "temperature": 20.0,
+    "status": "OK",
+    "quality": "unknown"
+  },
+  {
+    "deviceId": "A",
+    "timestamp": 2,
+    "temperature": 22.0,
+    "status": "OK",
+    "quality": "unknown"
+  },
+  {
+    "deviceId": "A",
+    "timestamp": 3,
+    "temperature": 24.0,
+    "status": "WARN",
+    "quality": "unknown"
+  }
+]
+```
+
+---
+
 ## 💡 Tips
 
 - The stage only overwrites fields that are `null` or missing; existing values are preserved.

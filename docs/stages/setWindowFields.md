@@ -61,6 +61,49 @@ Each emitted document keeps the original fields and adds `prevOrder`, `rank`, an
 
 ---
 
+### 📥 Input
+
+```json
+[
+  { "customer": { "tier": "gold" }, "eventTime": 1, "order": { "total": 100 } },
+  { "customer": { "tier": "gold" }, "eventTime": 2, "order": { "total": 120 } },
+  { "customer": { "tier": "gold" }, "eventTime": 3, "order": { "total": 90 } }
+]
+```
+
+### 📤 Output
+
+```json
+[
+  {
+    "customer": { "tier": "gold" },
+    "eventTime": 1,
+    "order": { "total": 100 },
+    "prevOrder": null,
+    "rank": 1,
+    "velocity": null
+  },
+  {
+    "customer": { "tier": "gold" },
+    "eventTime": 2,
+    "order": { "total": 120 },
+    "prevOrder": 100,
+    "rank": 2,
+    "velocity": 20
+  },
+  {
+    "customer": { "tier": "gold" },
+    "eventTime": 3,
+    "order": { "total": 90 },
+    "prevOrder": 120,
+    "rank": 3,
+    "velocity": -30
+  }
+]
+```
+
+---
+
 ## 🧩 Supported Window Functions
 
 | Function | Description |

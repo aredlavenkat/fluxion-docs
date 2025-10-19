@@ -4,6 +4,7 @@ theme:
 nav:
   - Home: index.md
   - Usage: usage.md
+  - What's New: changelog.md
   - Core Platform:
     - Overview: core/index.md
     - Integration Guide: core/integration-developer-guide.md
@@ -122,6 +123,7 @@ nav:
     - Kafka Source: connect/kafka.md
   - Operational Guides:
     - Resilience Patterns: shared/resilience.md
+    - Notes for LLM Assistants: shared/llm-assistant-notes.md
   - Examples Gallery:
     - Example Set 1: examples/exampleSet1.md
     - Example Set 2: examples/exampleSet2.md

@@ -61,7 +61,7 @@ Documents are mutable JSON wrappers. Use `toJson()` during development or extrac
 transformed.forEach(doc -> {
     System.out.println(doc.toJson());
     boolean isHot = (boolean) doc.get("isHot");
-    // continue with your business logic…
+    alertService.recordTemperature(doc.getString("device"), isHot);
 });
 ```
 
@@ -69,7 +69,39 @@ System variables such as `$$ROOT`, `$$CURRENT`, and `$$NOW` are automatically po
 
 ---
 
-## 5. Going Further
+## 5. Cache Parsed Pipelines
+
+Parsing JSON on every request adds avoidable overhead. Cache the `List<Stage>` once per pipeline/tenant and reuse it:
+
+```java
+private final LoadingCache<String, List<Stage>> pipelineCache =
+    Caffeine.newBuilder()
+            .maximumSize(128)
+            .build(name -> DocumentParser.getStagesFromJsonArray(loadPipelineJson(name)));
+
+public List<Document> execute(String pipelineName, List<Document> input) {
+    List<Stage> stages = pipelineCache.get(pipelineName);
+    return executor.run(input, stages, Map.of());
+}
+```
+
+When pipelines change, invalidate the cache entry to force a re-parse.
+
+---
+
+## 6. Error Handling Cheat Sheet
+
+| Exception | When it appears | Suggested response |
+|-----------|-----------------|--------------------|
+| `IllegalArgumentException` | Stage/operator payload is malformed (missing fields, wrong types) | Surface a 400-style error; include the message for faster debugging. |
+| `UnsupportedOperationException` | Pipeline contains a stage that Fluxion Core does not implement (`$merge`, `$out`, `$search`, `$vectorSearch`) | Remove or replace the stage; note the roadmap for upcoming modules. |
+| Custom `RuntimeException` | User-defined operator or stage threw an error | Validate inputs in custom code and wrap exceptions so they include context. |
+
+Wrap executor calls in a try/catch to translate these into your API’s error model.
+
+---
+
+## 7. Going Further
 
 - Need to extend the engine? See the [Integration Developer Guide](core/integration-developer-guide.md) for custom operators and stages.
 - Looking for stage/operator syntax? Head to the [Stages](stages/index.md) and [Operators](operators/index.md) references.
