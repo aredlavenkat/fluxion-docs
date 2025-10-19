@@ -7,6 +7,7 @@ This guide shows how to embed the Fluxion rule engine inside a Spring Boot appli
 ## 1. Add the starter dependency
 
 === "Maven"
+
     ```xml
     <dependency>
         <groupId>ai.fluxion</groupId>
@@ -16,6 +17,7 @@ This guide shows how to embed the Fluxion rule engine inside a Spring Boot appli
     ```
 
 === "Gradle"
+
     ```kotlin
     implementation("ai.fluxion:fluxion-rules-spring-boot-starter:$fluxionVersion")
     ```
@@ -233,6 +235,7 @@ The starter honours the rule-engine Service Provider Interfaces (SPIs), so any c
 1. **Create a contributor class.**
    - Actions: implement `ai.fluxion.rules.spi.RuleActionContributor` and return a `Map<String, RuleAction>`.
    - Hooks: implement `ai.fluxion.rules.spi.RuleHookContributor` and return maps for `RuleHook` and/or `RuleSetHook`.
+   - Both delegate to the shared `ai.fluxion.core.pipeline` infrastructure, so any action/hook you publish can be reused by other Fluxion engines (e.g., streaming) without additional wiring.
 2. **Register with ServiceLoader.** Add a descriptor file under `META-INF/services/` containing the fully-qualified class name.
 3. **Package on the classpath.** Include the contributor jar in your application; the starter’s registries load it via `ServiceLoader`.
 4. **Reference by name in DSL/Java.** Use the action/hook names in rule JSON or builder APIs (`builder.addHookByName("audit-before")`).
