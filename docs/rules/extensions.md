@@ -17,6 +17,25 @@ public final class CustomStageContributor implements StageHandlerContributor {
 
 Add the fully qualified class name to `META-INF/services/ai.fluxion.core.engine.spi.StageHandlerContributor`. `StageRegistry` automatically loads contributors at startup, making the new stage available to both pipelines and rules.
 
+## Manual action/hook registration
+
+You can register actions and hooks imperatively during application start-up. In a Spring Boot service, run the registration inside a `@PostConstruct` method:
+
+```java
+@Configuration
+class RuleEngineConfig {
+
+    @PostConstruct
+    void registerActionsAndHooks() {
+        RuleActionRegistry.register("flag-order", ctx -> ctx.putAttribute("decision", "flagged"));
+        RuleHookRegistry.registerRuleHook("audit-before", new AuditRuleHook());
+        RuleHookRegistry.registerRuleSetHook("audit-ruleset", new AuditRuleSetHook());
+    }
+}
+```
+
+Outside of Spring, execute the same registration logic when your application boots (e.g., in your dependency injection initializer or main method). Manual registration works well for small deployments or when actions are tightly coupled to a single service.
+
 ## Rule actions
 
 Implement `ai.fluxion.rules.spi.RuleActionContributor` to publish reusable actions.
@@ -33,6 +52,16 @@ public final class CustomerActions implements RuleActionContributor {
 ```
 
 Declare the contributor in `META-INF/services/ai.fluxion.rules.spi.RuleActionContributor`. `RuleActionRegistry` discovers actions automatically; resolve them by name or call `RuleActionRegistry.reload()` in tests to trigger discovery.
+
+### ServiceLoader checklist
+
+1. Implement the contributor interface (`RuleActionContributor`, `RuleHookContributor`, or `StageHandlerContributor`).
+2. Create the matching service descriptor file under `META-INF/services/` with the fully qualified class name (one per line if multiple).
+3. Package the implementation and descriptor in the same jar placed on the application classpath.
+4. Restart the application (or call the `reload()` helper in tests) to pick up new contributors.
+5. Use consistent naming (`team.feature.action-name`) to avoid collisions—when duplicate names exist, the last one registered wins.
+
+ServiceLoader-based contributors shine when you maintain a catalogue of reusable actions/hooks across multiple services.
 
 ## Rule and rule-set hooks
 

@@ -1,79 +1,134 @@
-# Integrating the Rule Engine
+# Integration Guide
 
-Fluxion's rule engine is lightweight enough to embed directly into microservices, stream processors, or serverless functions. This guide outlines common integration patterns.
+This recipe shows how to embed the rule engine directly inside a Java service. The example uses Spring Boot, but the same concepts apply to any DI framework.
 
-## Runtime deployment workflow
+## 1. Wire the engine and rule set
 
-1. **Authoring** – rules are created in JSON (or through the builders) and stored in version control or a rule registry.
-2. **Validation** – before deployment, run `RuleDslParser.parseWithLints` to surface issues, then persist only lint-free rule sets.
-3. **Distribution** – ship rule sets alongside your application binaries, fetch them from an API, or load them from a configuration store at runtime.
-4. **Execution** – instantiate `RuleEngine` once per service instance and reuse it. Rule definitions and sets are immutable, so you can safely cache them.
-5. **Monitoring** – leverage hook outputs, action side effects, and debug traces to collect metrics and structured logs.
-
-## Embedding in a service
+Create a configuration class that builds a singleton `RuleEngine` and a `RuleSet` parsed from JSON. The JSON can live on the classpath, a config service, or any storage of your choice.
 
 ```java
-public final class RuleService {
-    private final RuleEngine ruleEngine = new RuleEngine();
-    private volatile RuleSet activeRuleSet;
+@Configuration
+class RuleEngineConfig {
 
-    public void loadRules(String json) {
-        RuleDslParser parser = new RuleDslParser();
-        RuleParseResult result = parser.parseWithLints(json);
-        if (result.hasLints()) {
-            throw new IllegalArgumentException("Invalid rules: " + result.lints());
-        }
-        activeRuleSet = result.ruleSet();
+    private final ResourceLoader resourceLoader;
+
+    RuleEngineConfig(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
     }
 
-    public List<RuleEvaluationResult> evaluate(List<Document> documents, boolean executeActions, boolean debug) {
-        RuleSet ruleSet = activeRuleSet;
-        if (ruleSet == null) {
-            throw new IllegalStateException("No rules loaded");
+    @Bean
+    RuleEngine ruleEngine() {
+        return new RuleEngine();
+    }
+
+    @Bean
+    RuleDslParser ruleDslParser() {
+        return new RuleDslParser();
+    }
+
+    @Bean
+    RuleSet ruleSet(RuleDslParser parser) throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:rules/orders.json");
+        String json = resource.getContentAsString(StandardCharsets.UTF_8);
+
+        RuleParseResult result = parser.parseWithLints(json);
+        if (result.hasLints()) {
+            throw new IllegalStateException("Rule errors: " + result.lints());
         }
-        if (executeActions) {
-            return ruleEngine.execute(documents, ruleSet, debug);
-        }
-        return ruleEngine.evaluate(documents, ruleSet, debug);
+        return result.ruleSet();
+    }
+
+    @PostConstruct
+    void registerActionsAndHooks() {
+        RuleActionRegistry.register("flag-order", ctx -> ctx.putAttribute("decision", "flagged"));
+        // Register hooks similarly or rely on ServiceLoader contributors.
     }
 }
 ```
 
-## Hot reloading
+**Thread-safety guidance**
 
-Because `RuleSet` instances are immutable, you can safely swap them atomically (e.g., using `volatile` or `AtomicReference`). Make sure to validate and lint new rule sets before replacing the active one. Keep previous versions available for rollback.
+- Share a single `RuleEngine` bean; it is stateless and safe across threads.
+- Treat `RuleSet` as immutable; reload it atomically if you need hot updates (e.g., using `AtomicReference<RuleSet>`).
+- Reuse `RuleDslParser` if you frequently reload rule sets.
 
-## Scaling considerations
+## 2. Inject the engine where you need it
 
-- **Thread safety**: `RuleEngine` is stateless; you can share one instance across threads. Contexts and matches are local to each evaluation call.
-- **Stage registry extensions**: if you rely on custom stage handlers, ensure their modules are on the service classpath before the engine initialises.
-- **Action side effects**: actions execute synchronously during `execute`. Use asynchronous adapters or queueing if actions perform network or I/O work.
-- **Debug mode**: enable debug traces sparingly in production—they snapshot documents and can increase memory usage.
+```java
+@RestController
+@RequestMapping("/rules")
+class RuleController {
 
-## Service configuration template
+    private final RuleEngine ruleEngine;
+    private final Supplier<RuleSet> ruleSetSupplier;
 
-```yaml
-fluxion:
-  rules:
-    source: s3://config/rules/orders.json
-    refreshInterval: 5m
-    debugEnabled: false
-    actionRegistry:
-      modules:
-        - ai.fluxion.rules.actions.BuiltinActions
-        - com.example.rules.actions.CustomContributor
+    RuleController(RuleEngine ruleEngine, RuleSet ruleSet) {
+        this.ruleEngine = ruleEngine;
+        this.ruleSetSupplier = () -> ruleSet; // Replace with AtomicReference for hot reloads.
+    }
+
+    @PostMapping("/evaluate")
+    List<RuleEvaluationResult> evaluate(@RequestBody Map<String, Object> payload,
+                                        @RequestParam(defaultValue = "false") boolean execute,
+                                        @RequestParam(defaultValue = "false") boolean debug) {
+        Document document = new Document(payload);
+        RuleSet ruleSet = ruleSetSupplier.get();
+        if (execute) {
+            return ruleEngine.execute(List.of(document), ruleSet, debug);
+        }
+        return ruleEngine.evaluate(List.of(document), ruleSet, debug);
+    }
+}
 ```
 
-This example configuration declares where rules are fetched, how often they refresh, and which modules expose actions/hooks. Adapt it to your configuration system (Spring Boot, Micronaut, Quarkus, etc.).
+You can adapt the same pattern for message listeners, schedulers, or event handlers; just inject the `RuleEngine` and `RuleSet` wherever you need rule evaluation.
 
-## Integration with connectors & enrichers
+## 3. Reloading rules
 
-The rule engine operates solely on `Document` objects. Use Fluxion Connectors to ingest data (Kafka, HTTP, etc.), Fluxion Enrich to add pre-processing operators, then hand the prepared documents to the rule engine. Many teams schedule rule evaluation as the final stage after enrichment and transformation.
+To support dynamic updates, wrap the `RuleSet` in an `AtomicReference` and schedule a task that pulls new JSON, validates it, and swaps the reference:
 
-## Observability
+```java
+@Component
+class RuleReloader {
 
-- Share structured context data via action attributes or hooks.
-- Export `RuleDebugStageTrace` entries to your logging pipeline when troubleshooting.
-- Collect counts of matches per rule to monitor drift or unexpected behaviour.
+    private final AtomicReference<RuleSet> ruleSetRef = new AtomicReference<>();
+    private final RuleDslParser parser;
+    private final RuleEngine ruleEngine;
 
-With these patterns in place, the rule engine can power decisioning workloads ranging from fraud detection to entitlement checks with minimal operational friction.
+    RuleReloader(RuleDslParser parser, RuleEngine ruleEngine) {
+        this.parser = parser;
+        this.ruleEngine = ruleEngine;
+    }
+
+    @Scheduled(fixedDelayString = "PT5M")
+    void refresh() throws IOException {
+        String json = fetchFromS3("s3://config/rules/orders.json");
+        RuleParseResult result = parser.parseWithLints(json);
+        if (!result.hasLints()) {
+            ruleSetRef.set(result.ruleSet());
+        } else {
+            log.warn("Skipping rule update due to lints: {}", result.lints());
+        }
+    }
+
+    RuleSet currentRuleSet() {
+        return ruleSetRef.get();
+    }
+}
+```
+
+Pass `ruleSetRef::get` into your controllers/services so they always read the most recent version.
+
+## 4. Observability & debugging
+
+- Enable debug mode (`evaluate(..., true)`) when diagnosing issues; inspect `context.debugTrace()` for per-stage data.
+- Export metrics via the built-in OpenTelemetry bridge (configure `OTEL_*` environment variables).
+- Log `RuleEvaluationResult.matches()` and shared attributes to trace decisions.
+
+## 5. Actions and hooks
+
+- Register actions manually (as shown above) or via ServiceLoader contributors.
+- Use `RuleHookRegistry.addHookByName` / `RuleSet.Builder.addHookByName` when consuming contributors by name.
+- Keep actions idempotent; they may run again if you call `execute` multiple times.
+
+With these patterns, you can embed Fluxion’s rule engine directly into your service while retaining full control over configuration, deployment, and lifecycle.
