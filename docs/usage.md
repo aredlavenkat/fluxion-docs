@@ -1,68 +1,78 @@
-# 📘 Usage Guide
+# Usage Guide
 
-This guide walks you through using Fluxion pipelines for common aggregation tasks.
+This guide walks through the core workflow for running Fluxion pipelines inside a Java service. The current focus is on single-document and request/response processing. (Future releases will add dedicated aggregation helpers.)
 
 ---
 
-## ✅ 1. Creating a Pipeline
+## 1. Describe the Pipeline
 
-A pipeline is an array of stages:
+Pipelines reuse MongoDB’s stage syntax. Store them as JSON or build them programmatically. This example enriches a device reading with derived fields.
 
 ```json
 [
   { "$match": { "status": "active" } },
-  { "$group": { "_id": "$category", "total": { "$sum": "$amount" } } }
+  { "$addFields": {
+      "isHot": { "$gt": ["$temperatureC", 30] },
+      "temperatureF": { "$add": [{ "$multiply": ["$temperatureC", 1.8] }, 32] }
+    }
+  }
 ]
 ```
 
 ---
 
-## ✅ 2. Running a Pipeline
+## 2. Load Documents and Stages
 
-You can run it via the `MongoPipelineExecutor`:
+The helper `DocumentParser` turns JSON arrays into Fluxion `Document` and `Stage` instances. You can also build them manually if you prefer.
 
-```python
-from aggregator.executor import MongoPipelineExecutor
+```java
+List<Document> input = DocumentParser.getDocumentsFromJsonArray("""
+  [
+    { "device": "sensor-1", "status": "active", "temperatureC": 18.6 },
+    { "device": "sensor-2", "status": "offline", "temperatureC": 31.2 }
+  ]
+""");
 
-executor = MongoPipelineExecutor()
-result = executor.execute(documents, pipeline)
+List<Stage> pipeline = DocumentParser.getStagesFromJsonArray(Files.readString(
+    Path.of("pipelines/temperature.json")
+));
 ```
 
 ---
 
-## ✅ 3. Example with Variables
+## 3. Execute with `PipelineExecutor`
 
-Fluxion supports variables like `$$ROOT`, `$$CURRENT`, `$$NOW`:
+`PipelineExecutor` is the primary entry point for integrators. It accepts the documents, stage list, and optional globals. Each input document is evaluated independently.
 
-```json
-{
-  "$addFields": {
-    "createdAt": "$$NOW",
-    "copy": "$$ROOT"
-  }
-}
+```java
+PipelineExecutor executor = new PipelineExecutor();
+Map<String, Object> globals = Map.of("tenantId", "acme");
+
+List<Document> transformed = executor.run(input, pipeline, globals);
 ```
 
 ---
 
-## ✅ 4. Advanced Nesting
+## 4. Inspect Results
 
-You can nest operators like:
+Documents are mutable JSON wrappers. Use `toJson()` during development or extract individual fields for downstream processing.
 
-```json
-{
-  "$addFields": {
-    "final_score": {
-      "$reduce": {
-        "input": "$scores",
-        "initialValue": 0,
-        "in": { "$add": ["$$value", "$$this"] }
-      }
-    }
-  }
-}
+```java
+transformed.forEach(doc -> {
+    System.out.println(doc.toJson());
+    boolean isHot = (boolean) doc.get("isHot");
+    // continue with your business logic…
+});
 ```
+
+System variables such as `$$ROOT`, `$$CURRENT`, and `$$NOW` are automatically populated while the pipeline runs.
 
 ---
 
-For more examples, see the [Examples Gallery](examples/exampleSet1.md).
+## 5. Going Further
+
+- Need to extend the engine? See the [Integration Developer Guide](core/integration-developer-guide.md) for custom operators and stages.
+- Looking for stage/operator syntax? Head to the [Stages](stages/index.md) and [Operators](operators/index.md) references.
+- Want ready-made scenarios? Explore the [Examples Gallery](examples/exampleSet1.md).
+
+You now have everything required to execute pipelines inside your own service. Iterate on the pipeline JSON, re-run the executor, and ship when the results match your expectations.

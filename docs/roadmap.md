@@ -10,7 +10,7 @@ features delivered in each phase, and potential future enhancements.
 ---
 
 ## ✅ Phase 1: Core Framework Setup
-- Basic `MongoPipelineExecutor` created
+- Basic `PipelineExecutor` created
 - Initial support for `$match`, `$project`, `$group`, `$sort`
 - Core ExpressionEvaluator engine
 
@@ -24,7 +24,7 @@ features delivered in each phase, and potential future enhancements.
 ---
 
 ## ✅ Phase 3: Deep Expression Language
-- Expression Dispatcher (`expression_dispatcher.py`) with full operator system
+- Expression dispatcher with full operator system
 - Support for `$sum`, `$avg`, `$min`, `$max`, `$add`, `$subtract`, `$multiply`, `$divide`
 - Early testing framework set up
 
@@ -95,9 +95,9 @@ features delivered in each phase, and potential future enhancements.
 
 # 📢 Status
 
-✅ Fluxion is **production-ready** for in-memory document aggregation.
+✅ Fluxion is **production-ready** for in-memory document pipeline execution.
 
-✅ Matches 90–95% of real MongoDB aggregation use-cases.
+✅ Matches 90–95% of MongoDB pipeline semantics used in production workloads.
 
 ✅ Extensible and easily embeddable in custom projects.
 
@@ -107,6 +107,6 @@ features delivered in each phase, and potential future enhancements.
 
 - [🚀 Home](index.md)
 - [📖 Usage Guide](usage.md)
-- [⚙️ Aggregation Stages Reference](stages.md)
-- [🛠️ Operators and Expressions](operators.md)
-- [🧠 Internals and Architecture](internals.md)
+- [⚙️ Stage Reference](stages/index.md)
+- [🛠️ Operators and Expressions](operators/index.md)
+- [🧠 Integration Developer Guide](core/integration-developer-guide.md)

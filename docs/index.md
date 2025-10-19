@@ -1,56 +1,45 @@
-# 🚀 Fluxion Aggregator Documentation
+# Fluxion Pipeline Engine
 
-Welcome to the official developer documentation for the **Fluxion Aggregator Framework** — a high-performance rule engine and aggregation system inspired by MongoDB, optimized for complex nested pipelines and ecommerce use cases.
+Fluxion lets you execute Mongo-style pipelines directly in your JVM services. It preserves the familiar stage and operator vocabulary while focusing on single-document and request/response scenarios today (bulk aggregation support will arrive later).
 
----
+## Key Capabilities
 
-## 📦 What is Fluxion?
+- End-to-end pipeline execution via `PipelineExecutor`
+- 200+ documented operators and 40+ stages with Mongo semantics
+- System variables such as `$$ROOT`, `$$CURRENT`, `$$NOW`, `$$REMOVE`
+- JSON-first workflow with helpers for parsing pipelines and documents
+- Extension hooks for custom operators or stages
 
-Fluxion is a MongoDB-like aggregation engine built for structured JSON documents. It supports:
+## Quick Start
 
-- 40+ Aggregation **Stages**
-- 200+ Expression **Operators**
-- System Variables (`$$ROOT`, `$$CURRENT`, `$$NOW`, `$$REMOVE`, etc.)
-- Deeply **Nested Pipelines**
-- Advanced support for `$facet`, `$group`, `$bucket`, `$map`, `$filter`, `$reduce`, `$switch`, `$expr`, `$lookup`, and more.
+```java
+List<Document> input = DocumentParser.getDocumentsFromJsonArray("""
+  [
+    { "device": "sensor-1", "status": "active", "temperature": 18.6 },
+    { "device": "sensor-1", "status": "active", "temperature": 19.1 }
+  ]
+""");
 
----
+List<Stage> pipeline = DocumentParser.getStagesFromJsonArray("""
+  [
+    { "$match": { "status": "active" } },
+    { "$addFields": { "fahrenheit": { "$add": [{ "$multiply": ["$temperature", 1.8] }, 32] } } }
+  ]
+""");
 
-## 🧭 Quick Navigation
-
-- 📘 [Usage Guide](usage.md)
-- 📊 [Stages Overview](stages/)
-- 🧮 [Operators Reference](operators/)
-- 🛒 [Ecommerce Examples](examples/examples/exampleSet1.md)
-- 🧠 [Glossary of Terms](glossary.md)
-- 🗺️ [Roadmap & Release Phases](roadmap.md)
-
----
-
-## 🛠️ Example Pipeline
-
-```json
-[
-  { "$match": { "status": "active" } },
-  { "$unwind": "$items" },
-  { "$group": {
-      "_id": "$items.category",
-      "total": { "$sum": "$items.price" }
-  }},
-  { "$sort": { "total": -1 } }
-]
+PipelineExecutor executor = new PipelineExecutor();
+List<Document> transformed = executor.run(input, pipeline, Map.of());
 ```
 
----
+Check the [Usage Guide](usage.md) for a step-by-step walkthrough and additional examples.
 
-## 🎯 Why Use Fluxion?
+## Navigate the Docs
 
-✅ Familiar MongoDB-style syntax  
-✅ Works on any Python backend  
-✅ Supports system variables and expressions  
-✅ Ideal for ecommerce & analytics pipelines  
-✅ Fully unit-tested and modular
+- 📘 [Usage Guide](usage.md) – load documents, run pipelines, inspect results
+- 🧰 [Integration Developer Guide](core/integration-developer-guide.md) – API details and extension patterns
+- 📊 [Stages Reference](stages/index.md) – payload shapes and examples
+- 🧮 [Operators Reference](operators/index.md) – syntax and behaviour
+- 🧠 [Glossary](glossary.md) – terminology used across the project
+- 🗺️ [Roadmap](roadmap.md) – upcoming features and milestones
 
----
-
-Start exploring from the sidebar or open the [Usage Guide](usage.md) to begin!
+Fluxion is designed to embed cleanly into your applications. Start experimenting with the quick start above, then dive into the references when you need exact syntax. Continuous feedback is welcome!
