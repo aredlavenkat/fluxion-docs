@@ -1,8 +1,29 @@
 # $ceil
 
-Detailed documentation for `$ceil` operator.
+Rounds a numeric expression up to the nearest integer.
 
-Example:
+## Syntax
+
 ```json
-{ "$ceil": [1, 2] }
+{ "$ceil": <numberExpression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "measurement": 12.01 }
+```
+
+### Stage
+
+```json
+{ "$project": { "roundedUp": { "$ceil": "$measurement" } } }
+```
+
+### Output
+
+```json
+{ "roundedUp": 13 }
 ```

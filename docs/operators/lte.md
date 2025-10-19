@@ -1,8 +1,29 @@
 # $lte
 
-Detailed documentation for `$lte` operator.
+Returns `true` when the first expression evaluates less than or equal to the second.
 
-Example:
+## Syntax
+
 ```json
-{ "$lte": [1, 2] }
+{ "$lte": [ <expression1>, <expression2> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "inventory": 5 }
+```
+
+### Stage
+
+```json
+{ "$project": { "lowStock": { "$lte": ["$inventory", 5] } } }
+```
+
+### Output
+
+```json
+{ "lowStock": true }
 ```

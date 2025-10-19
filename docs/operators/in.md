@@ -1,8 +1,29 @@
 # $in
 
-Detailed documentation for `$in` operator.
+Checks whether a value exists in an array.
 
-Example:
+## Syntax
+
 ```json
-{ "$in": [1, 2] }
+{ "$in": [ <expression>, <arrayExpression> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "tags": ["beta", "feature-flag", "ios"] }
+```
+
+### Stage
+
+```json
+{ "$project": { "isIos": { "$in": ["ios", "$tags"] } } }
+```
+
+### Output
+
+```json
+{ "isIos": true }
 ```

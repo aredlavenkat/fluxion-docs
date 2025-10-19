@@ -1,8 +1,29 @@
 # $abs
 
-Detailed documentation for `$abs` operator.
+Returns the absolute value of a numeric expression.
 
-Example:
+## Syntax
+
 ```json
-{ "$abs": [1, 2] }
+{ "$abs": <numberExpression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "delta": -42 }
+```
+
+### Stage
+
+```json
+{ "$project": { "deltaAbs": { "$abs": "$delta" } } }
+```
+
+### Output
+
+```json
+{ "deltaAbs": 42 }
 ```

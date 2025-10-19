@@ -1,8 +1,29 @@
 # $lt
 
-Detailed documentation for `$lt` operator.
+Returns `true` when the first expression evaluates less than the second.
 
-Example:
+## Syntax
+
 ```json
-{ "$lt": [1, 2] }
+{ "$lt": [ <expression1>, <expression2> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "temperature": 12 }
+```
+
+### Stage
+
+```json
+{ "$project": { "belowFreezing": { "$lt": ["$temperature", 0] } } }
+```
+
+### Output
+
+```json
+{ "belowFreezing": false }
 ```

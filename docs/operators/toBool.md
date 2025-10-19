@@ -1,8 +1,29 @@
 # $toBool
 
-Detailed documentation for `$toBool` operator.
+Converts a value to a boolean using MongoDB’s truthiness rules.
 
-Example:
+## Syntax
+
 ```json
-{ "$toBool": [1, 2] }
+{ "$toBool": <expression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "flag": "true" }
+```
+
+### Stage
+
+```json
+{ "$project": { "asBoolean": { "$toBool": "$flag" } } }
+```
+
+### Output
+
+```json
+{ "asBoolean": true }
 ```

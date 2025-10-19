@@ -1,8 +1,29 @@
 # $eq
 
-Detailed documentation for `$eq` operator.
+Returns `true` when the two expressions evaluate to the same value.
 
-Example:
+## Syntax
+
 ```json
-{ "$eq": [1, 2] }
+{ "$eq": [ <expression1>, <expression2> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "plan": "premium" }
+```
+
+### Stage
+
+```json
+{ "$project": { "isPremium": { "$eq": ["$plan", "premium"] } } }
+```
+
+### Output
+
+```json
+{ "isPremium": true }
 ```

@@ -1,8 +1,29 @@
 # $ln
 
-Detailed documentation for `$ln` operator.
+Computes the natural logarithm (base `e`) of a numeric expression.
 
-Example:
+## Syntax
+
 ```json
-{ "$ln": [1, 2] }
+{ "$ln": <numberExpression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "value": 54.6 }
+```
+
+### Stage
+
+```json
+{ "$project": { "naturalLog": { "$ln": "$value" } } }
+```
+
+### Output
+
+```json
+{ "naturalLog": 3.999093 }
 ```

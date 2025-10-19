@@ -1,8 +1,29 @@
 # $toInt
 
-Detailed documentation for `$toInt` operator.
+Converts a value to a 32-bit integer, truncating toward zero.
 
-Example:
+## Syntax
+
 ```json
-{ "$toInt": [1, 2] }
+{ "$toInt": <expression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "quantity": "15" }
+```
+
+### Stage
+
+```json
+{ "$project": { "quantity": { "$toInt": "$quantity" } } }
+```
+
+### Output
+
+```json
+{ "quantity": 15 }
 ```

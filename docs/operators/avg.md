@@ -1,8 +1,29 @@
 # $avg
 
-Detailed documentation for `$avg` operator.
+Calculates the arithmetic mean of the supplied numeric values.
 
-Example:
+## Syntax
+
 ```json
-{ "$avg": [1, 2] }
+{ "$avg": <arrayExpression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "scores": [90, 85, 95] }
+```
+
+### Stage
+
+```json
+{ "$project": { "averageScore": { "$avg": "$scores" } } }
+```
+
+### Output
+
+```json
+{ "averageScore": 90 }
 ```

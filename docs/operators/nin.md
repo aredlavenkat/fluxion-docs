@@ -1,8 +1,29 @@
 # $nin
 
-Detailed documentation for `$nin` operator.
+Checks whether a value does **not** exist in an array.
 
-Example:
+## Syntax
+
 ```json
-{ "$nin": [1, 2] }
+{ "$nin": [ <expression>, <arrayExpression> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "roles": ["viewer", "auditor"] }
+```
+
+### Stage
+
+```json
+{ "$project": { "isAdmin": { "$nin": ["admin", "$roles"] } } }
+```
+
+### Output
+
+```json
+{ "isAdmin": true }
 ```

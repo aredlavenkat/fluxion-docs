@@ -1,8 +1,29 @@
 # $gt
 
-Detailed documentation for `$gt` operator.
+Returns `true` when the first expression evaluates greater than the second.
 
-Example:
+## Syntax
+
 ```json
-{ "$gt": [1, 2] }
+{ "$gt": [ <expression1>, <expression2> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "temperature": 31 }
+```
+
+### Stage
+
+```json
+{ "$project": { "isHot": { "$gt": ["$temperature", 30] } } }
+```
+
+### Output
+
+```json
+{ "isHot": true }
 ```

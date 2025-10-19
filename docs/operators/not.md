@@ -1,8 +1,29 @@
 # $not
 
-Detailed documentation for `$not` operator.
+Returns the logical negation of the supplied expression.
 
-Example:
+## Syntax
+
 ```json
-{ "$not": [1, 2] }
+{ "$not": [ <expression> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "isDeleted": false }
+```
+
+### Stage
+
+```json
+{ "$project": { "isActive": { "$not": ["$isDeleted"] } } }
+```
+
+### Output
+
+```json
+{ "isActive": true }
 ```

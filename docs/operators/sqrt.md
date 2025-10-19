@@ -1,8 +1,29 @@
 # $sqrt
 
-Detailed documentation for `$sqrt` operator.
+Computes the square root of a numeric expression.
 
-Example:
+## Syntax
+
 ```json
-{ "$sqrt": [1, 2] }
+{ "$sqrt": <numberExpression> }
+```
+
+## Example
+
+### Input
+
+```json
+{ "variance": 9 }
+```
+
+### Stage
+
+```json
+{ "$project": { "stdDev": { "$sqrt": "$variance" } } }
+```
+
+### Output
+
+```json
+{ "stdDev": 3 }
 ```

@@ -1,8 +1,29 @@
 # $pow
 
-Detailed documentation for `$pow` operator.
+Raises a number to the specified exponent.
 
-Example:
+## Syntax
+
 ```json
-{ "$pow": [1, 2] }
+{ "$pow": [ <baseExpression>, <exponentExpression> ] }
+```
+
+## Example
+
+### Input
+
+```json
+{ "radius": 3 }
+```
+
+### Stage
+
+```json
+{ "$project": { "areaFactor": { "$pow": ["$radius", 2] } } }
+```
+
+### Output
+
+```json
+{ "areaFactor": 9 }
 ```
