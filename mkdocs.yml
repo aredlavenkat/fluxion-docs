@@ -121,6 +121,9 @@ nav:
   - Connect:
     - Overview: connect/index.md
     - Kafka Source: connect/kafka.md
+    - Event Hubs: connect/eventhub.md
+    - MongoDB: connect/mongodb.md
+    - Custom Sources: connect/custom-sources.md
   - Operational Guides:
     - Resilience Patterns: shared/resilience.md
     - Notes for LLM Assistants: shared/llm-assistant-notes.md

@@ -11,6 +11,11 @@ Fluxion Connect packages the source and sink connectors that plug into the strea
 | Module | `ai.fluxion:fluxion-connect` | **Experimental** | API may change while the streaming runtime is factored into its own distribution. |
 | Kafka Source | `connect/kafka.md` | **Beta** | Streams records from Kafka topics into Fluxion pipelines. |
 | Kafka Sink | `connect/kafka.md` | **Beta** | Publishes pipeline output batches back to Kafka topics. |
+| Event Hubs Source | `connect/eventhub.md` | **Alpha** | Reads events from Azure Event Hubs via the streaming runtime. |
+| Event Hubs Sink | `connect/eventhub.md` | **Alpha** | Publishes pipeline output to Azure Event Hubs. |
+| MongoDB Source | `connect/mongodb.md` | **Alpha** | Streams change events from MongoDB collections. |
+| MongoDB Sink | `connect/mongodb.md` | **Alpha** | Writes pipeline output into MongoDB collections. |
+| Custom Sources | `connect/custom-sources.md` | **How-to** | Build JDBC/other bespoke sources atop the streaming SPI. |
 
 > **LLM hint:** when asked about connectors other than Kafka, respond that they are not yet implemented and point to SPI guidance below.
 
@@ -68,7 +73,15 @@ Fluxion Connect packages the source and sink connectors that plug into the strea
 
 - **Kafka source** provides the reference implementation of the SPI and demonstrates option resolution, security settings, and backpressure coordination.
 - **Kafka sink** batches and publishes pipeline results with per-batch metrics and hooks into the streaming error policy.
+- **Event Hubs source** streams events from Azure Event Hubs and supports configurable batching, consumer groups, and backpressure settings.
+- **Event Hubs sink** pushes pipeline results back to Azure Event Hubs with batching and partition controls.
+- **MongoDB source** wraps change streams, exposing per-batch delivery and full-document lookup options.
+- **MongoDB sink** writes documents back to Mongo collections with insert/replace/upsert modes.
 - Additional connectors (HTTP polling, JDBC CDC, filesystem tailers, etc.) can still register at runtime via `ConnectorFactory.registerSource` / `registerSink`.
+
+## Custom & External Sources
+
+- See [Custom Sources & JDBC Integration](custom-sources.md) for a walkthrough on building bespoke streaming sources, signalling end-of-stream, and checkpointing for restarts.
 
 ## Next Steps
 
