@@ -153,4 +153,10 @@ If the sink maintains external state (e.g., dedup tables), restore that alongsid
 - [ ] Return an empty result / `null` when finished so the executor can exit.
 - [ ] Start the pipeline by calling the executor (nothing happens until you do).
 
-With that, any JDBC query (or other custom feed) can participate in the Fluxion pipeline just like the built-in connectors. Keep the option schema and ServiceLoader wiring if you want to distribute it as a proper connector alongside `fluxion-connect`.
+With that, any JDBC query (or other custom feed) can participate in the Fluxion pipeline just like the built-in connectors.
+
+### Batch Jobs
+
+> **Tip:** With a JDBC (or custom) source you can treat the pipeline as a batch job: iterate rows one by one, run your decision logic inside pipeline stages, update downstream systems via sinks, and the executor will shut down automatically once the source reports end-of-stream. Even though the source feeds rows sequentially, the pipeline can still fan out work—set `directHandoff(false)` or tune worker threads if you want stages to process documents in parallel. That way you get batch semantics without giving up parallel processing across pipeline stages.
+
+Keep the option schema and ServiceLoader wiring if you want to distribute it as a proper connector alongside `fluxion-connect`.
