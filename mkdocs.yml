@@ -5,125 +5,132 @@ nav:
   - Home: index.md
   - Usage: usage.md
   - What's New: changelog.md
-  - Core Platform:
-    - Overview: core/index.md
-    - Integration Guide: core/integration-developer-guide.md
-    - Stages:
-      - Overview: stages/index.md
-      - $addFields: stages/addFields.md
-      - $bucket: stages/bucket.md
-      - $bucketAuto: stages/bucketAuto.md
-      - $densify: stages/densify.md
-      - $facet: stages/facet.md
-      - $group: stages/group.md
-      - $limit: stages/limit.md
-      - $lookup: stages/lookup.md
-      - $match: stages/match.md
-      - $project: stages/project.md
-      - $replaceRoot: stages/replaceRoot.md
-      - $replaceWith: stages/replaceWith.md
-      - $set: stages/set.md
-      - $fill: stages/fill.md
-      - $skip: stages/skip.md
-      - $sort: stages/sort.md
-      - $sortByCount: stages/sortByCount.md
-      - $unwind: stages/unwind.md
-      - $setWindowFields: stages/setWindowFields.md
-      - $sampleRate: stages/sampleRate.md
-    - Operators:
-      - Overview: operators/index.md
-      - $abs: operators/abs.md
-      - $add: operators/add.md
-      - $allElementsTrue: operators/allElementsTrue.md
-      - $and: operators/and.md
-      - $anyElementTrue: operators/anyElementTrue.md
-      - $arrayElemAt: operators/arrayElemAt.md
-      - $arrayToObject: operators/arrayToObject.md
-      - $avg: operators/avg.md
-      - $ceil: operators/ceil.md
-      - $concat: operators/concat.md
-      - $concatArrays: operators/concatArrays.md
-      - $cond: operators/cond.md
-      - $convert: operators/convert.md
-      - $divide: operators/divide.md
-      - $eq: operators/eq.md
-      - $exp: operators/exp.md
-      - $filter: operators/filter.md
-      - $floor: operators/floor.md
-      - $function: operators/function.md
-      - $getField: operators/getField.md
-      - $gt: operators/gt.md
-      - $gte: operators/gte.md
-      - $ifNull: operators/ifNull.md
-      - $in: operators/in.md
-      - $indexOfArray: operators/indexOfArray.md
-      - $ln: operators/ln.md
-      - $log10: operators/log10.md
-      - $lt: operators/lt.md
-      - $lte: operators/lte.md
-      - $map: operators/map.md
-      - $max: operators/max.md
-      - $mergeObjects: operators/mergeObjects.md
-      - $min: operators/min.md
-      - $multiply: operators/multiply.md
-      - $ne: operators/ne.md
-      - $nin: operators/nin.md
-      - $not: operators/not.md
-      - $objectToArray: operators/objectToArray.md
-      - $or: operators/or.md
-      - $pow: operators/pow.md
-      - $reduce: operators/reduce.md
-      - $reverseArray: operators/reverseArray.md
-      - $round: operators/round.md
-      - $setField: operators/setField.md
-      - $size: operators/size.md
-      - $slice: operators/slice.md
-      - $split: operators/split.md
-      - $sqrt: operators/sqrt.md
-      - $strcasecmp: operators/strcasecmp.md
-      - $substr: operators/substr.md
-      - $subtract: operators/subtract.md
-      - $sum: operators/sum.md
-      - $switch: operators/switch.md
-      - $toBool: operators/toBool.md
-      - $toDate: operators/toDate.md
-      - $toDouble: operators/toDouble.md
-      - $toInt: operators/toInt.md
-      - $toLower: operators/toLower.md
-      - $toString: operators/toString.md
-      - $toUpper: operators/toUpper.md
-      - $trunc: operators/trunc.md
-      - $unsetField: operators/unsetField.md
-      - $zip: operators/zip.md
-  - Rule Engine:
-    - Overview: rules/index.md
-    - Quick Start: rules/quickstart.md
-    - Authoring Rule Sets: rules/authoring.md
-    - DSL Reference: rules/dsl-reference.md
-    - Runtime Execution: rules/runtime.md
-    - API Reference: rules/api.md
-    - Validation & Linting: rules/validation.md
-    - Extensions & SPIs: rules/extensions.md
-    - Testing & Debugging: rules/testing.md
-    - Best Practices: rules/best-practices.md
-    - Lifecycle & Governance: rules/lifecycle.md
-    - Tooling & IDE Support: rules/tooling.md
-    - Examples: rules/examples.md
-    - Integration:
-      - Runtime Integration: rules/integration.md
-      - Spring Boot Starter Integration: rules/spring-boot-integration.md
-    - Domain Glossary: rules/glossary.md
-  - Enrich:
-    - Overview: enrich/index.md
-    - Operators:
-      - $httpCall: enrich/operators/httpCall.md
-      - $sqlQuery: enrich/operators/sqlQuery.md
-  - Connect:
-    - Overview: connect/index.md
-    - Kafka Source: connect/kafka.md
-    - Event Hubs: connect/eventhub.md
-    - MongoDB: connect/mongodb.md
-    - Custom Sources: connect/custom-sources.md
+  - Platform Architecture:
+    - Overview: platform/overview.md
+  - Platform Modules:
+    - Fluxion Core:
+      - Overview: core/index.md
+      - Integration Guide: core/integration-developer-guide.md
+      - Stages:
+        - Overview: stages/index.md
+        - $addFields: stages/addFields.md
+        - $bucket: stages/bucket.md
+        - $bucketAuto: stages/bucketAuto.md
+        - $densify: stages/densify.md
+        - $facet: stages/facet.md
+        - $group: stages/group.md
+        - $limit: stages/limit.md
+        - $lookup: stages/lookup.md
+        - $match: stages/match.md
+        - $project: stages/project.md
+        - $replaceRoot: stages/replaceRoot.md
+        - $replaceWith: stages/replaceWith.md
+        - $set: stages/set.md
+        - $fill: stages/fill.md
+        - $skip: stages/skip.md
+        - $sort: stages/sort.md
+        - $sortByCount: stages/sortByCount.md
+        - $unwind: stages/unwind.md
+        - $setWindowFields: stages/setWindowFields.md
+        - $sampleRate: stages/sampleRate.md
+      - Operators:
+        - Overview: operators/index.md
+        - $abs: operators/abs.md
+        - $add: operators/add.md
+        - $allElementsTrue: operators/allElementsTrue.md
+        - $and: operators/and.md
+        - $anyElementTrue: operators/anyElementTrue.md
+        - $arrayElemAt: operators/arrayElemAt.md
+        - $arrayToObject: operators/arrayToObject.md
+        - $avg: operators/avg.md
+        - $ceil: operators/ceil.md
+        - $concat: operators/concat.md
+        - $concatArrays: operators/concatArrays.md
+        - $cond: operators/cond.md
+        - $convert: operators/convert.md
+        - $divide: operators/divide.md
+        - $eq: operators/eq.md
+        - $exp: operators/exp.md
+        - $filter: operators/filter.md
+        - $floor: operators/floor.md
+        - $function: operators/function.md
+        - $getField: operators/getField.md
+        - $gt: operators/gt.md
+        - $gte: operators/gte.md
+        - $ifNull: operators/ifNull.md
+        - $in: operators/in.md
+        - $indexOfArray: operators/indexOfArray.md
+        - $ln: operators/ln.md
+        - $log10: operators/log10.md
+        - $lt: operators/lt.md
+        - $lte: operators/lte.md
+        - $map: operators/map.md
+        - $max: operators/max.md
+        - $mergeObjects: operators/mergeObjects.md
+        - $min: operators/min.md
+        - $multiply: operators/multiply.md
+        - $ne: operators/ne.md
+        - $nin: operators/nin.md
+        - $not: operators/not.md
+        - $objectToArray: operators/objectToArray.md
+        - $or: operators/or.md
+        - $pow: operators/pow.md
+        - $reduce: operators/reduce.md
+        - $reverseArray: operators/reverseArray.md
+        - $round: operators/round.md
+        - $setField: operators/setField.md
+        - $size: operators/size.md
+        - $slice: operators/slice.md
+        - $split: operators/split.md
+        - $sqrt: operators/sqrt.md
+        - $strcasecmp: operators/strcasecmp.md
+        - $substr: operators/substr.md
+        - $subtract: operators/subtract.md
+        - $sum: operators/sum.md
+        - $switch: operators/switch.md
+        - $toBool: operators/toBool.md
+        - $toDate: operators/toDate.md
+        - $toDouble: operators/toDouble.md
+        - $toInt: operators/toInt.md
+        - $toLower: operators/toLower.md
+        - $toString: operators/toString.md
+        - $toUpper: operators/toUpper.md
+        - $trunc: operators/trunc.md
+        - $unsetField: operators/unsetField.md
+        - $zip: operators/zip.md
+    - Fluxion Connect:
+      - Overview: connect/index.md
+      - Kafka Source: connect/kafka.md
+      - Event Hubs: connect/eventhub.md
+      - MongoDB: connect/mongodb.md
+      - Custom Sources: connect/custom-sources.md
+    - Fluxion Enrich:
+      - Overview: enrich/index.md
+      - Operators:
+        - $httpCall: enrich/operators/httpCall.md
+        - $sqlQuery: enrich/operators/sqlQuery.md
+  - Execution Runtimes:
+    - Rule Engine:
+      - Overview: rules/index.md
+      - Quick Start: rules/quickstart.md
+      - Authoring Rule Sets: rules/authoring.md
+      - DSL Reference: rules/dsl-reference.md
+      - Runtime Execution: rules/runtime.md
+      - API Reference: rules/api.md
+      - Validation & Linting: rules/validation.md
+      - Extensions & SPIs: rules/extensions.md
+      - Testing & Debugging: rules/testing.md
+      - Best Practices: rules/best-practices.md
+      - Lifecycle & Governance: rules/lifecycle.md
+      - Tooling & IDE Support: rules/tooling.md
+      - Examples: rules/examples.md
+      - Integration:
+        - Runtime Integration: rules/integration.md
+        - Spring Boot Starter Integration: rules/spring-boot-integration.md
+      - Domain Glossary: rules/glossary.md
+    - Streaming Engine:
+      - Overview: streaming/index.md
+      - Quick Start: streaming/quickstart.md
   - Operational Guides:
     - Resilience Patterns: shared/resilience.md
     - Notes for LLM Assistants: shared/llm-assistant-notes.md

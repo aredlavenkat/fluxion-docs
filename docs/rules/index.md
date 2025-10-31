@@ -29,6 +29,9 @@ Fluxion's rule engine lets you layer decision logic on top of aggregation pipeli
 - **RuleEngine** evaluates documents against rule sets built from the DSL or Java builders.
 - **Downstream systems** receive passes, transformed documents, and action side-effects.
 
+If you need the full stack view, the [Platform Architecture overview](../platform/overview.md)
+explains how the Rule Engine layers above Fluxion Core, Connect, and Enrich.
+
 ### Reading guide
 
 | Section | Use it when |
