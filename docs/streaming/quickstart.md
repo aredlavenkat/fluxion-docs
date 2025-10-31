@@ -105,3 +105,5 @@ or a fatal error policy triggers a shutdown.
    deployment in production environments.
 4. Dive into advanced topics for error policies, observability, and deployment
    in the [Streaming Engine overview](index.md#error-handling-strategies).
+5. Review which aggregation stages fit streaming versus batch workloads in the
+   [Stage Support Matrix](stage-compatibility.md).

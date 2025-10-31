@@ -105,3 +105,10 @@ lag breaches a threshold.
   to confirm determinism.
 - **Failure drills** – Regularly exercise retries, dead-letter routing, and
   resuming from checkpoints to ensure operational runbooks remain accurate.
+
+## Choosing the right stages
+
+Not every aggregation stage is equally valuable in streaming scenarios. Consult
+the [Stage Support Matrix](stage-compatibility.md) for guidance on which stages
+are stream-friendly today and which ones are better saved for the upcoming
+batch job engine.
