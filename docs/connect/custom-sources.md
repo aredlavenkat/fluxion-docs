@@ -1,22 +1,34 @@
 # Custom Sources & JDBC Integration
 
-Fluxion’s streaming runtime lets you plug in any data source you like, not just the built-in Kafka/Event Hubs/Mongo connectors. This note walks through implementing a JDBC-backed source, signalling pipeline shutdown when the feed runs dry, and restarting from checkpoints.
+Build bespoke streaming sources (e.g., JDBC, REST, proprietary queues) by
+implementing the streaming SPI. This guide shows how to implement a JDBC-backed
+source, signal end-of-stream, and resume from checkpoints.
 
 ---
 
-## When to Build a Custom Source
+## 1. Prerequisites
 
-Reach for a custom source when you need to:
-
-- Read from a database or API the platform doesn’t ship with yet.
-- Transform harvested records before they hit the pipeline.
-- Control batching/back-pressure yourself (e.g., to respect upstream rate limits).
-
-The contract is straightforward: implement `StreamingSource` (or extend `AbstractAsyncStreamingSource`) and return batches of `Document`s. The pipeline executor drives the loop for you.
+| Requirement | Notes |
+| --- | --- |
+| Dependency | `ai.fluxion:fluxion-core` (streaming runtime) and your JDBC driver. |
+| Data source | Database/API with incremental offsets (primary key, timestamp, resume token). |
+| Checkpoint store | Persist offsets using `StreamingContext.stateStore()` or external storage. |
 
 ---
 
-## Minimal JDBC Source Example
+## 2. When to build a custom source
+
+- No built-in connector exists for your system.
+- You need custom batching/backpressure behaviour.
+- You want to enrich/transform records before they hit the pipeline.
+
+The contract is straightforward: implement `StreamingSource` or extend
+`AbstractAsyncStreamingSource`, returning batches of `Document`s. The pipeline
+executor owns polling, backpressure, and shutdown.
+
+---
+
+## 3. Minimal JDBC source example
 
 ```java
 class JdbcStreamingSource extends AbstractAsyncStreamingSource {
@@ -34,7 +46,7 @@ class JdbcStreamingSource extends AbstractAsyncStreamingSource {
     @Override
     protected List<Document> poll() {
         if (finished) {
-            return null;                  // signals end-of-stream to the base class
+            return null; // signals end-of-stream
         }
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(
@@ -51,7 +63,7 @@ class JdbcStreamingSource extends AbstractAsyncStreamingSource {
                     offset = rs.getLong("id");
                 }
                 if (batch.isEmpty()) {
-                    finished = true;       // no more rows; next invocation returns null
+                    finished = true;
                 }
                 return batch;
             }
@@ -62,12 +74,17 @@ class JdbcStreamingSource extends AbstractAsyncStreamingSource {
 }
 ```
 
-- Returning `null` tells `AbstractAsyncStreamingSource` to enqueue an end-of-stream marker. The executor notices and shuts the pipeline down cleanly.
-- If you need retry logic/backoff, wrap the polling code accordingly or use the error policy hooks.
+**Highlights**
+
+- Returning `null` tells `AbstractAsyncStreamingSource` to enqueue an
+  end-of-stream marker. The executor flushes remaining stages and closes sinks.
+- Wrap polling in retry/backoff logic (or rely on `StreamingErrorPolicy`) if
+  your data source can transiently fail.
+- Persist `offset` (primary key) to resume after restarts.
 
 ---
 
-## Wiring Into the Pipeline
+## 4. Wiring into a pipeline
 
 ```java
 StreamingSource source = new JdbcStreamingSource(dataSource, 64, 500);
@@ -79,42 +96,31 @@ StreamingRuntimeConfig config = StreamingRuntimeConfig.builder()
 
 StreamingPipelineExecutor executor =
         new StreamingPipelineExecutor(500, config, StreamingErrorPolicy.failFast());
-executor.processStream(source, List.of(/* aggregation stages */), sink, new StreamingContext());
+executor.processStream(source, stages, sink, new StreamingContext());
 ```
 
-Key calls to remember:
+Steps:
 
-1. Create your source and sink.
-2. Build `StreamingRuntimeConfig` / `StreamingContext`.
-3. Invoke `processStream(..)` (or go through `StreamingPipelineOrchestrator`). The executor owns the main loop and calls `source.next()` until you signal completion.
+1. Instantiate source and sink.
+2. Build `StreamingRuntimeConfig` and `StreamingContext`.
+3. Invoke `processStream(..)` or use `StreamingPipelineOrchestrator`.
 
-If your source drains completely, the executor closes both the source and sink automatically.
+Nothing happens until you call the executor.
 
 ---
 
-## Stopping & Restarting
+## 5. Stopping & restarting
 
-### Graceful Stop
-
-Most JDBC-style sources are finite. Once you hit the end, return an empty batch so the executor can drain the pipeline and exit:
+### Signal completion
 
 ```java
-@Override
-protected List<Document> poll() {
-    List<Document> batch = fetchNextPage();
-    if (batch.isEmpty()) {
-        finished = true;
-        return null; // signals end-of-stream to AbstractAsyncStreamingSource
-    }
-    return batch;
+if (batch.isEmpty()) {
+    finished = true;
+    return null; // executor shuts the pipeline down
 }
 ```
 
-The runtime notices the end-of-stream marker, flushes the remaining stages, closes the sink, and stops. If you need to halt early—e.g., a maintenance window—call `source.cancel()`, which interrupts the worker thread and closes resources.
-
-### Checkpoints & Resume Tokens
-
-Persist the current offset (or resume token) so you can resume later. With JDBC this is often the last processed primary key:
+### Persist checkpoints
 
 ```java
 private void storeCheckpoint(long id, StreamingContext context) {
@@ -122,41 +128,64 @@ private void storeCheckpoint(long id, StreamingContext context) {
 }
 ```
 
-For change streams or messaging systems that emit resume tokens, stash the token from `_meta` in the same state store.
-
-### Restarting the Pipeline
-
-When you’re ready to resume:
+### Resume from checkpoint
 
 ```java
 long lastId = Optional.ofNullable(context.stateStore()
         .<Long>get("jdbc-source", "lastId"))
         .orElse(0L);
-StreamingSource source = new JdbcStreamingSource(dataSource, 64, 500, lastId);
+StreamingSource source = new JdbcStreamingSource(dataSource, 64, 500 /* batch */, lastId);
 new StreamingPipelineExecutor(500, config, StreamingErrorPolicy.failFast())
         .processStream(source, stages, sink, context);
 ```
 
-1. Load the stored checkpoint/resume token.
-2. Rebuild the source with that starting position.
-3. Run the pipeline again.
-
-If the sink maintains external state (e.g., dedup tables), restore that alongside your checkpoint to keep the system consistent.
+Also restore sink state if downstream systems require idempotence.
 
 ---
 
-## Quick Checklist
+## 6. Checklist
 
-- [ ] Select between `StreamingSource` (simple) and `AbstractAsyncStreamingSource` (background worker & queue).
-- [ ] Convert each record to a Fluxion `Document`.
-- [ ] Persist a bookmark if you need to resume later.
-- [ ] Return an empty result / `null` when finished so the executor can exit.
-- [ ] Start the pipeline by calling the executor (nothing happens until you do).
+| Step | Ensure |
+| --- | --- |
+| Source implementation | Converts each record to a Fluxion `Document`. |
+| Queue/backpressure | Tune `queueCapacity` to balance latency vs. memory. |
+| Checkpoints | Persist offsets/resume tokens via `StreamingContext`. |
+| Completion signal | Return `null` or empty batch when no records remain. |
+| Error handling | Combine with `StreamingErrorPolicy` for retries/DLQs. |
 
-With that, any JDBC query (or other custom feed) can participate in the Fluxion pipeline just like the built-in connectors.
+---
 
-### Batch Jobs
+## 7. Batch job pattern
 
-> **Tip:** With a JDBC (or custom) source you can treat the pipeline as a batch job: iterate rows one by one, run your decision logic inside pipeline stages, update downstream systems via sinks, and the executor will shut down automatically once the source reports end-of-stream. Even though the source feeds rows sequentially, the pipeline can still fan out work—set `directHandoff(false)` or tune worker threads if you want stages to process documents in parallel. That way you get batch semantics without giving up parallel processing across pipeline stages.
+Treat finite sources (JDBC, CSV) like batch jobs:
 
-Keep the option schema and ServiceLoader wiring if you want to distribute it as a proper connector alongside `fluxion-connect`.
+- Iterate rows sequentially.
+- Run decision logic inside Fluxion stages.
+- Use sinks to update downstream systems.
+- Once the source is exhausted and signals completion, the executor terminates.
+
+You can still enable parallelism by adjusting `StreamingRuntimeConfig` (e.g.,
+`directHandoff(false)`, custom worker pools).
+
+---
+
+## 8. Testing
+
+- Write unit tests for your source implementation with in-memory databases (H2).
+- Run streaming tests:
+  ```bash
+  mvn -pl fluxion-core -am test -Dtest=*StreamingPipeline*
+  ```
+
+---
+
+## 9. References
+
+| Path | Description |
+| --- | --- |
+| `fluxion-core/src/main/java/.../StreamingSource.java` | Core source interface. |
+| `fluxion-core/src/main/java/.../AbstractAsyncStreamingSource.java` | Base class with polling thread + queue. |
+| `fluxion-core/src/main/java/.../StreamingPipelineExecutor.java` | Orchestrator entry point. |
+| `fluxion-docs/docs/streaming/quickstart.md` | Pipeline example (Kafka → HTTP). |
+
+Use this template to add JDBC or other bespoke sources to the Fluxion streaming runtime.

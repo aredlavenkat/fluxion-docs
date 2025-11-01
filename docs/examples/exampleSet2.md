@@ -1,125 +1,122 @@
-# Fluxion Executor Test Suite — Developer Documentation
+# Executor Test Suite – Scenario Guide
 
-This document includes test-by-test explanations for basic `$match`, `$project`, `$replaceWith`, and system variable usage in `test_executor.py`.
+Friendly breakdown of the unit tests in `fluxion-core/src/test/java/.../PipelineExecutorTest.java`
+covering `$match`, `$project`, system variables, and computed fields.
 
 ---
 
-## ✅ test_simple_match_pipeline
+## How to run the tests
 
-### 📖 Description
+```bash
+mvn -pl fluxion-core test -Dtest=PipelineExecutorTest
+```
 
-Filters documents where `value >= 20` using `$match`.
+Or run the entire module:
 
-### 📥 Input Document
+```bash
+mvn -pl fluxion-core -am test
+```
+
+---
+
+## Scenario matrix
+
+| Test | Purpose | Key stages/operators |
+| --- | --- | --- |
+| `test_simple_match_pipeline` | Filter documents where `value >= 20`. | `$match`, comparison operators |
+| `test_project_include_fields` | Return only `name` and `age`. | `$project` (inclusion) |
+| `test_project_exclude_fields` | Remove `city` field. | `$project` (exclusion) |
+| `test_project_computed_fields` | Add `total` via `$multiply`. | `$project`, `$multiply` |
+| `test_project_exclude_id` | Remove `_id` while keeping `name`. | `$project`, `_id` handling |
+| `test_project_nested_fields` | Project nested subfields (`user.profile.first_name`). | `$project`, dotted paths |
+
+Each scenario below lists the input, pipeline, and expected output so you can
+replicate the behaviour in your own tests or services.
+
+---
+
+### 1. `test_simple_match_pipeline`
 
 ```json
+Input:
 [
   { "value": 10 },
   { "value": 20 },
   { "value": 30 }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   { "$match": { "value": { "$gte": 20 } } }
 ]
-```
 
-### 📤 Output
-
-```json
+Output:
 [
   { "value": 20 },
   { "value": 30 }
 ]
 ```
 
+**Tip:** `$match` supports the full MongoDB query syntax, including compound
+conditions (`$and`, `$or`).
+
 ---
 
-## ✅ test_project_include_fields
-
-### 📖 Description
-
-Projects only selected fields (`name`, `age`).
-
-### 📥 Input Document
+### 2. `test_project_include_fields`
 
 ```json
+Input:
 [
   { "name": "Alice", "age": 30, "city": "New York" }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   { "$project": { "name": 1, "age": 1 } }
 ]
-```
 
-### 📤 Output
-
-```json
+Output:
 [
   { "name": "Alice", "age": 30 }
 ]
 ```
 
+**Tip:** When using inclusion, `_id` is present unless explicitly excluded.
+
 ---
 
-## ✅ test_project_exclude_fields
-
-### 📖 Description
-
-Excludes the `city` field explicitly.
-
-### 📥 Input Document
+### 3. `test_project_exclude_fields`
 
 ```json
+Input:
 [
   { "name": "Bob", "age": 25, "city": "Los Angeles" }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   { "$project": { "city": 0 } }
 ]
-```
 
-### 📤 Output
-
-```json
+Output:
 [
   { "name": "Bob", "age": 25 }
 ]
 ```
 
+**Tip:** Exclusion-style projections cannot mix inclusion (other than `_id`).
+
 ---
 
-## ✅ test_project_computed_fields
-
-### 📖 Description
-
-Adds computed field `total` using `$multiply`.
-
-### 📥 Input Document
+### 4. `test_project_computed_fields`
 
 ```json
+Input:
 [
   { "item": "A", "price": 10, "qty": 2 }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   {
     "$project": {
@@ -128,64 +125,45 @@ Adds computed field `total` using `$multiply`.
     }
   }
 ]
-```
 
-### 📤 Output
-
-```json
+Output:
 [
   { "item": "A", "total": 20 }
 ]
 ```
 
+**Tip:** Combine `$multiply` with `$add`/`$divide` for discount or tax
+calculations.
+
 ---
 
-## ✅ test_project_exclude_id
-
-### 📖 Description
-
-Excludes `_id` field while projecting `name`.
-
-### 📥 Input Document
+### 5. `test_project_exclude_id`
 
 ```json
+Input:
 [
   { "_id": 123, "name": "Charlie", "city": "Miami" }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   { "$project": { "_id": 0, "name": 1 } }
 ]
-```
 
-### 📤 Output
-
-```json
+Output:
 [
   { "name": "Charlie" }
 ]
 ```
 
----
-
-_(More cases like nested fields, computed renames, and variable-based projections can follow here.)_
-
+**Tip:** This is a common pattern when returning documents over REST APIs.
 
 ---
 
-## ✅ test_project_nested_fields
-
-### 📖 Description
-
-Projects a nested subfield (`user.profile.first_name`) and `age`.
-
-### 📥 Input Document
+### 6. `test_project_nested_fields`
 
 ```json
+Input:
 [
   {
     "user": {
@@ -197,7 +175,29 @@ Projects a nested subfield (`user.profile.first_name`) and `age`.
     "age": 40
   }
 ]
+
+Pipeline:
+[
+  { "$project": { "user.profile.first_name": 1, "age": 1, "_id": 0 } }
+]
+
+Output:
+[
+  {
+    "user": { "profile": { "first_name": "Dana" } },
+    "age": 40
+  }
+]
 ```
+
+**Tip:** Use dotted paths to include/exclude nested fields. Combine with
+`$map`/`$filter` when the nesting involves arrays.
+
+---
+
+Feel free to extend the suite with additional cases (renamed fields, computed
+aliases, system variable usage). The structure above keeps everything explicit
+for humans and assistants alike.
 
 ### 📌 Pipeline
 

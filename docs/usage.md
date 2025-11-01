@@ -1,12 +1,26 @@
 # Usage Guide
 
-This guide walks through the core workflow for running Fluxion pipelines inside a Java service. The current focus is on single-document and request/response processing. (Future releases will add dedicated aggregation helpers.)
+Step-by-step walkthrough for running Fluxion pipelines inside a Java service. This
+focuses on single-document/request-response scenarios; streaming pipelines have
+separate guides.
 
 ---
 
-## 1. Describe the Pipeline
+## 1. Prerequisites
 
-Pipelines reuse MongoDB’s stage syntax. Store them as JSON or build them programmatically. This example enriches a device reading with derived fields.
+| Requirement | Notes |
+| --- | --- |
+| Fluxion module | Add `ai.fluxion:fluxion-core` to your build. |
+| Runtime | Java 21+ |
+| Pipeline definition | JSON file or programmatic builder. |
+| Optional helpers | Caching library (e.g., Caffeine) if you want to reuse parsed stages. |
+
+---
+
+## 2. Describe the pipeline
+
+Pipelines reuse MongoDB’s stage syntax. Store them in JSON or construct them in
+code. Example: enrich a device reading with derived fields.
 
 ```json
 [
@@ -21,9 +35,9 @@ Pipelines reuse MongoDB’s stage syntax. Store them as JSON or build them progr
 
 ---
 
-## 2. Load Documents and Stages
+## 3. Parse documents and stages
 
-The helper `DocumentParser` turns JSON arrays into Fluxion `Document` and `Stage` instances. You can also build them manually if you prefer.
+Use `DocumentParser` to load JSON into Fluxion types (or build them manually).
 
 ```java
 List<Document> input = DocumentParser.getDocumentsFromJsonArray("""
@@ -33,29 +47,30 @@ List<Document> input = DocumentParser.getDocumentsFromJsonArray("""
   ]
 """);
 
-List<Stage> pipeline = DocumentParser.getStagesFromJsonArray(Files.readString(
-    Path.of("pipelines/temperature.json")
-));
+List<Stage> pipeline = DocumentParser.getStagesFromJsonArray(
+    Files.readString(Path.of("pipelines/temperature.json"))
+);
 ```
 
 ---
 
-## 3. Execute with `PipelineExecutor`
+## 4. Execute with `PipelineExecutor`
 
-`PipelineExecutor` is the primary entry point for integrators. It accepts the documents, stage list, and optional globals. Each input document is evaluated independently.
+`PipelineExecutor` runs each document independently against the stage list.
+Optionally pass globals.
 
 ```java
 PipelineExecutor executor = new PipelineExecutor();
 Map<String, Object> globals = Map.of("tenantId", "acme");
-
 List<Document> transformed = executor.run(input, pipeline, globals);
 ```
 
 ---
 
-## 4. Inspect Results
+## 5. Inspect results
 
-Documents are mutable JSON wrappers. Use `toJson()` during development or extract individual fields for downstream processing.
+Documents are mutable JSON wrappers. Log them or extract fields for downstream
+processing.
 
 ```java
 transformed.forEach(doc -> {
@@ -65,13 +80,14 @@ transformed.forEach(doc -> {
 });
 ```
 
-System variables such as `$$ROOT`, `$$CURRENT`, and `$$NOW` are automatically populated while the pipeline runs.
+System variables (`$$ROOT`, `$$CURRENT`, `$$NOW`, etc.) are available during execution.
 
 ---
 
-## 5. Cache Parsed Pipelines
+## 6. Cache parsed pipelines
 
-Parsing JSON on every request adds avoidable overhead. Cache the `List<Stage>` once per pipeline/tenant and reuse it:
+Parsing JSON on every request is wasteful. Cache the `List<Stage>` once per
+pipeline/tenant and reuse it.
 
 ```java
 private final LoadingCache<String, List<Stage>> pipelineCache =
@@ -85,26 +101,41 @@ public List<Document> execute(String pipelineName, List<Document> input) {
 }
 ```
 
-When pipelines change, invalidate the cache entry to force a re-parse.
+Invalidate the cache entry whenever the pipeline definition changes.
 
 ---
 
-## 6. Error Handling Cheat Sheet
+## 7. Error-handling cheat sheet
 
 | Exception | When it appears | Suggested response |
-|-----------|-----------------|--------------------|
-| `IllegalArgumentException` | Stage/operator payload is malformed (missing fields, wrong types) | Surface a 400-style error; include the message for faster debugging. |
-| `UnsupportedOperationException` | Pipeline contains a stage that Fluxion Core does not implement (`$merge`, `$out`, `$search`, `$vectorSearch`) | Remove or replace the stage; note the roadmap for upcoming modules. |
-| Custom `RuntimeException` | User-defined operator or stage threw an error | Validate inputs in custom code and wrap exceptions so they include context. |
+| --- | --- | --- |
+| `IllegalArgumentException` | Stage/operator payload malformed (missing fields, wrong types). | Return a 400-style error with the message for debugging. |
+| `UnsupportedOperationException` | Pipeline contains an unimplemented stage (`$merge`, `$out`, `$search`, `$vectorSearch`). | Remove/replace the stage; check the roadmap. |
+| Custom `RuntimeException` | User-defined operator/stage threw an error. | Validate inputs and wrap exceptions with context. |
 
-Wrap executor calls in a try/catch to translate these into your API’s error model.
+Wrap executor calls in try/catch blocks to translate these into your API’s error model.
 
 ---
 
-## 7. Going Further
+## 8. Testing & validation
 
-- Need to extend the engine? See the [Integration Developer Guide](core/integration-developer-guide.md) for custom operators and stages.
-- Looking for stage/operator syntax? Head to the [Stages](stages/index.md) and [Operators](operators/index.md) references.
-- Want ready-made scenarios? Explore the [Examples Gallery](examples/exampleSet1.md).
+1. Write regression tests using the examples from `docs/examples/` or your own fixtures.
+2. Run the core module tests to ensure behaviour matches expectations:
+   ```bash
+   mvn -pl fluxion-core test
+   ```
+3. Use debug tracing (`PipelineDebugStageTrace`) when troubleshooting stage behaviour.
 
-You now have everything required to execute pipelines inside your own service. Iterate on the pipeline JSON, re-run the executor, and ship when the results match your expectations.
+---
+
+## 9. Going further
+
+- [Integration Developer Guide](core/integration-developer-guide.md) – custom
+  operators/stages, SPI registration.
+- [Stages](stages/index.md) & [Operators](operators/index.md) – reference material.
+- [Examples Gallery](examples/exampleSet1.md) – advanced pipelines to copy and adapt.
+- [Workflow → Temporal Bridge](workflow/temporal.md) – orchestrate rules inside Temporal workflows.
+
+This pattern scales from simple request/response services to complex rule
+engines. Iterate on the pipeline JSON, rerun the executor, and deploy when the
+results look right.

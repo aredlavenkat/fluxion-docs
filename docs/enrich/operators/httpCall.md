@@ -1,8 +1,22 @@
 # `$httpCall`
 
-Performs an HTTP request during pipeline evaluation. Requests can target a literal URL or reuse a named `HttpConnector` for shared configuration.
+Performs an HTTP request during pipeline evaluation. Supports dynamic URL/parameter
+substitution, custom headers, payloads, and optional resilience settings (retry,
+circuit breaker).
 
-## Syntax
+---
+
+## 1. Prerequisites
+
+| Requirement | Notes |
+| --- | --- |
+| Dependency | `ai.fluxion:fluxion-enrich` plus HTTP client dependencies (e.g., `okhttp`). |
+| Connection registry | Optional `HttpConnector` registration for shared base URLs/auth. |
+| Resilience | Resilience4j (optional) for retry/circuit breaker configuration. |
+
+---
+
+## 2. Syntax
 
 ```json
 {
@@ -24,33 +38,74 @@ Performs an HTTP request during pipeline evaluation. Requests can target a liter
 }
 ```
 
-## Options
+---
+
+## 3. Options
 
 | Field | Description | Default |
 | --- | --- | --- |
-| `connection` | Name of the registered `HttpConnector` providing base URL, headers, or auth. Optional when `url` is supplied. | `null` |
-| `url` | Request URL template. Path parameters wrapped in `{}` are substituted with resolved `params`. Required if connection does not specify a URL. | Connector URL |
-| `method` | HTTP method (GET, POST, PUT, PATCH, DELETE, etc.). | `GET` |
-| `headers` | Map of header names to expressions. Resolved per request. | `{}` |
-| `params` | Key/value expressions appended as query string parameters and used for `{param}` replacements. | `{}` |
-| `body` | Expression resolved to build the request body. Objects are JSON encoded automatically. | `null` |
-| `responsePath` | JSON Pointer applied to the decoded response body (e.g., `/data/items/0`). | Entire response |
+| `connection` | Name of registered `HttpConnector`. Optional when `url` provided. | `null` |
+| `url` | Request URL template. `{}` placeholders replaced by `params`. | Connector URL |
+| `method` | HTTP verb (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, etc.). | `GET` |
+| `headers` | Map of header expressions (evaluated per request). | `{}` |
+| `params` | Map of query/path parameters. | `{}` |
+| `body` | Expression evaluated for the request body (JSON encoded if object). | `null` |
+| `responsePath` | JSON Pointer applied to the parsed response body. | Entire payload |
 | `connectTimeoutMs` | Connection timeout in milliseconds. | `5000` |
 | `readTimeoutMs` | Read timeout in milliseconds. | `5000` |
-| `retry` | Resilience4j retry configuration (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
-| `circuitBreaker` | Resilience4j circuit breaker configuration (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
+| `retry` | Resilience4j retry config (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
+| `circuitBreaker` | Resilience4j circuit breaker config. | Disabled |
 
-> ℹ️ Refer to the shared [Resilience Patterns](../../shared/resilience.md) page for the full list of retry and circuit-breaker fields with defaults.
+---
 
-## Response Handling
+## 4. Examples
 
-- Responses are parsed as JSON. Primitive or array responses are preserved.
-- When `responsePath` is supplied, the pointer is resolved against the parsed payload.
-- HTTP status codes ≥ 400 cause the operator to throw, participating in retry/breaker logic if enabled.
+### Simple GET with query params
 
-## Connectors
+```json
+{
+  "$httpCall": {
+    "method": "GET",
+    "url": "https://api.weather/v1/city",
+    "params": { "zip": "$address.zip" }
+  }
+}
+```
 
-`HttpConnector` instances allow you to centralise base URLs, default headers, and authentication tokens:
+### POST with connector + JSON body
+
+```json
+{
+  "$httpCall": {
+    "connection": "userService",
+    "method": "POST",
+    "url": "/users/{id}",
+    "params": { "id": "$user.id" },
+    "headers": { "X-Request-Id": "$request.traceId" },
+    "body": {
+      "email": "$user.email",
+      "status": "$user.status"
+    },
+    "responsePath": "/data"
+  }
+}
+```
+
+---
+
+## 5. Response handling
+
+- Responses are parsed as JSON. Arrays/primitives are preserved.
+- If `responsePath` is provided, the JSON Pointer is resolved to select part of
+  the payload.
+- HTTP status codes ≥ 400 throw an exception; retry/breaker logic handles the
+  exception if configured.
+
+---
+
+## 6. Connectors
+
+Register connectors once and reference them by name:
 
 ```java
 ConnectorManager.register("userService", new HttpConnector(
@@ -59,8 +114,37 @@ ConnectorManager.register("userService", new HttpConnector(
 ));
 ```
 
-Operators reference the connector by name, layering additional headers or overriding the URL as needed.
+Pipelines can override headers or provide additional path/query parameters.
 
-## Resilience
+---
 
-Supplying a unique `name` lets multiple pipelines share the same Resilience4j state. See [Resilience Patterns](../../shared/resilience.md) for configuration details and best practices.
+## 7. Troubleshooting
+
+| Symptom | Possible cause | Remedy |
+| --- | --- | --- |
+| `IllegalArgumentException: url missing` | Neither `url` nor connector base URL provided. | Supply `url` or configure the connector with a base URL. |
+| Timeout exceptions | Slow downstream service. | Increase `connectTimeoutMs`/`readTimeoutMs` or configure retries. |
+| `JsonProcessingException` | Response body not JSON. | Wrap operator in `$function` to handle plain text/binary payloads. |
+| Circuit breaker always open | Shared breaker between unrelated endpoints. | Use unique breaker names per service. |
+
+---
+
+## 8. Testing
+
+- Run enrichment tests:
+  ```bash
+  mvn -pl fluxion-enrich -am test -Dtest=*HttpCall*
+  ```
+- Use mock web servers (e.g., OkHttp MockWebServer) to simulate behaviour during CI.
+
+---
+
+## 9. References
+
+| Path | Description |
+| --- | --- |
+| `fluxion-enrich/src/main/java/.../HttpCallOperator.java` | Operator implementation. |
+| `fluxion-enrich/src/test/java/.../HttpCallOperatorTest.java` | Unit/integration tests. |
+| [Resilience Patterns](../../shared/resilience.md) | Retry/circuit breaker configuration. |
+
+Use `$httpCall` for declarative service calls in both rule and streaming pipelines.

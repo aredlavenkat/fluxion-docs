@@ -1,39 +1,50 @@
 # Enrichment Module Overview
 
-Fluxion Enrich extends the aggregation engine with operators that call out to external services or data stores during pipeline evaluation. The module is optional—add it when pipelines need to fan out to HTTP or SQL back-ends.
+Fluxion Enrich adds operators that call external services or data stores during
+pipeline execution. Use it when a pipeline needs to fetch HTTP resources or run
+SQL queries inline.
 
 ---
 
-## Module Status
+## 1. Prerequisites
 
-| Item | Coordinate | Status | Notes |
-|------|------------|--------|-------|
-| Module | `ai.fluxion:fluxion-enrich` | **Beta** | APIs may evolve while the shared resilience layer stabilises. |
-| `$httpCall` | `enrich/operators/httpCall.md` | **Stable** | Supports JSON payloads, headers, query params, and response extraction. |
-| `$sqlQuery` | `enrich/operators/sqlQuery.md` | **Beta** | Tested with PostgreSQL/MySQL drivers via JDBC. Returned rows are materialised into embedded documents. |
-
-> **LLM hint:** when asked about enrichment operators beyond HTTP/SQL, respond that they are not yet implemented.
-
-## Capabilities
-
-- Declarative service calls via `$httpCall`, with support for dynamic headers, params, request bodies, and JSON pointer extraction.
-- SQL lookups through `$sqlQuery`, binding expression results into prepared statements and mapping rows back to documents.
-- Shared Resilience4j scaffolding (retry + circuit breaker) that mirrors the patterns used in the streaming runtime.
-- Connector registry integration so operators can reference named HTTP or SQL connections managed by the platform.
-
-## Quick Links
-
-- [`$httpCall` operator](operators/httpCall.md)
-- [`$sqlQuery` operator](operators/sqlQuery.md)
-- [Examples gallery](../examples/exampleSet1.md) for real-world pipelines that mix core and enrichment features.
-
-Additional enrichment helpers (batch HTTP, cached lookups, etc.) will be documented here as they are implemented.
+| Requirement | Notes |
+| --- | --- |
+| Fluxion modules | `fluxion-core`, `fluxion-enrich`; optionally `fluxion-connect` for connector integration. |
+| HTTP/SQL back-ends | Services or databases reachable from your pipelines. |
+| Configuration | Named connections (e.g., Spring beans) for HTTP and SQL targets. |
+| Resilience layer | Optional Resilience4j dependencies for retries/circuit breakers (recommended). |
 
 ---
 
-## Sample Enrichment Flow
+## 2. Module status
 
-### HTTP Call Snippet
+| Item | Doc | Status | Notes |
+| --- | --- | --- | --- |
+| Module | – | **Beta** | APIs may evolve alongside the shared resilience layer. |
+| `$httpCall` | [operators/httpCall.md](operators/httpCall.md) | **Stable** | JSON payloads, headers, query params, response extraction. |
+| `$sqlQuery` | [operators/sqlQuery.md](operators/sqlQuery.md) | **Beta** | Prepared statements via JDBC (PostgreSQL/MySQL verified). |
+
+> If asked about additional enrichment operators, state that only HTTP/SQL are
+> available today and reference the SPI documentation for future extensions.
+
+---
+
+## 3. Capabilities
+
+- `$httpCall` – Declarative HTTP requests with dynamic path/headers/body and
+  JSON pointer extraction for responses.
+- `$sqlQuery` – Parameterised SQL lookups mapped back into embedded documents.
+- Shared Resilience4j scaffolding (retry + circuit breaker) mirroring the
+  streaming runtime.
+- Connection registry integration so pipelines can reference centrally managed
+  connection definitions.
+
+---
+
+## 4. Usage patterns
+
+### HTTP call
 
 ```json
 {
@@ -51,24 +62,11 @@ Additional enrichment helpers (batch HTTP, cached lookups, etc.) will be documen
 }
 ```
 
-- Request sent to the connection named `identity-service`.
+- `connection` refers to a named HTTP client configured in your application.
 - Path parameters resolve from the current document.
-- Response body is parsed and the `data` property is merged into the pipeline document.
+- `response.extract` uses JSON Pointer to select part of the payload.
 
-Sample interaction:
-
-```
-GET /api/v1/profile/42 HTTP/1.1
-Host: identity-service.internal
-X-Trace-Id: 7d58...
-
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{ "data": { "id": 42, "email": "jane@example.com" } }
-```
-
-### SQL Lookup Snippet
+### SQL lookup
 
 ```json
 {
@@ -84,34 +82,54 @@ Content-Type: application/json
 }
 ```
 
-The operator executes a prepared statement, converts each row into a document, and assigns the resulting array to `orders`.
-
-Sample database interaction:
-
-```
--- Prepared statement
-select id, total from orders where customer_id = ? order by created desc limit 5;
-
--- Bound parameter
-? = 42
-
--- Result set
-id | total
----+-------
-501| 42.50
-498| 18.75
-```
-
-Pipeline output snippet:
-
-```json
-{ "orders": [ { "id": 501, "total": 42.50 }, { "id": 498, "total": 18.75 } ] }
-```
+- Prepared statement executed against the named JDBC connection.
+- Parameters can be literal values or expressions evaluated per document.
+- Result set is converted into an array of documents.
 
 ---
 
-## Operational Tips
+## 5. Configuration table
 
-- Configure connections centrally (e.g., Spring configuration) and reference them by name inside pipelines.
-- Take advantage of the built-in retry/circuit-breaker options when calling unstable services.
-- Enrichment operators run synchronously—they should remain lightweight to avoid blocking the pipeline thread.
+| Field | Operator | Description |
+| --- | --- | --- |
+| `connection` | HTTP/SQL | Logical connection name resolved by your app. |
+| `method` | HTTP | HTTP verb (`GET`, `POST`, …). |
+| `path`, `pathParams` | HTTP | URL templates and parameter bindings. |
+| `headers`, `query`, `body` | HTTP | Optional request metadata and payload. |
+| `response.extract` | HTTP | JSON pointer to select part of the response. |
+| `sql` | SQL | Prepared statement text. |
+| `params` | SQL | Array of bound parameters (expressions supported). |
+| `rowMapper` (future) | SQL | Hook for custom row mapping. |
+
+Configure connections via your DI framework (Spring beans, Micronaut singletons,
+manual registries) and reference by `connection` name inside pipeline definitions.
+
+---
+
+## 6. Operational guidance
+
+- Keep enrichment calls lightweight to avoid blocking pipeline threads.
+- Reuse resilience policies (retry, circuit breaker) to insulate downstream
+  services. `$httpCall` and `$sqlQuery` accept resilience configuration blocks.
+- Cache responses if the same upstream data is fetched frequently.
+- Monitor outbound call latency and error rates alongside pipeline metrics.
+
+---
+
+## 7. References
+
+| Path | Description |
+| --- | --- |
+| `fluxion-enrich/src/main/java/.../$httpCall` | Implementation of the HTTP operator. |
+| `fluxion-enrich/src/main/java/.../$sqlQuery` | JDBC-backed SQL operator. |
+| `fluxion-docs/docs/enrich/operators/httpCall.md` | Detailed HTTP options with examples. |
+| `fluxion-docs/docs/enrich/operators/sqlQuery.md` | Detailed SQL options with examples. |
+| `fluxion-docs/docs/examples/` | Pipelines mixing core and enrichment features. |
+
+Run enrichment tests with:
+
+```bash
+mvn -pl fluxion-enrich -am test
+```
+
+This validates HTTP/SQL operators and shared resilience components.

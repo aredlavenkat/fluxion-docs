@@ -1,53 +1,117 @@
 # Rule Engine Overview
 
-Fluxion's rule engine lets you layer decision logic on top of aggregation pipelines. A rule wraps an ordered list of stages, attaches metadata and salience (priority), and optionally triggers actions or hooks when the pipeline passes. This section documents everything you need to author, validate, extend, and run rules—whether you are building tooling, integrating the runtime, or designing new SPIs.
+Fluxion’s rule engine lets you wrap aggregation pipelines in declarative rules.
+Each rule evaluates a document, tracks salience (priority), executes actions, and
+exposes hooks/state you can integrate into services or workflow engines.
 
-**Key capabilities**
+---
 
-- *Pipeline native*: reuse the same aggregation operators and stages already available in Fluxion.
-- *Priority control*: rules are sorted in descending salience so the most important decisions run first.
-- *Rich context*: rule and rule-set metadata flow into evaluation results and can be surfaced to downstream systems.
-- *Hook + action model*: pre/post evaluation hooks and pluggable actions allow enrichment, side-effects, and auditing.
-- *Static validation*: missing stages, unsupported operators, and duplicate salience values are detected before runtime.
-- *Debuggable execution*: optional debug tracing captures stage-by-stage inputs/outputs for any rule run.
-- *Extensibility*: ServiceLoader-based SPIs let you publish custom stages, actions, and hooks from external modules.
+## 1. Prerequisites
 
-### How the rule engine fits the platform
+| Requirement | Notes |
+| --- | --- |
+| Fluxion modules | `fluxion-core`, `fluxion-rules`, optional `fluxion-enrich` for external lookups. |
+| Runtime | JVM service/worker where you evaluate rules. |
+| DSL / JSON | Rule-set definitions (JSON DSL or builder API). |
+| Persistence (optional) | Wherever you store rule sets (Git, DB, config service). |
+
+---
+
+## 2. Core components
+
+| Component | Purpose |
+| --- | --- |
+| `RuleDefinition` | Declares stages, salience, actions, metadata, and hooks for one rule. |
+| `RuleSet` | Ordered collection of rules plus shared metadata and hooks. |
+| `RuleEngine` | Evaluates documents against a rule set, returning passes and shared attributes. |
+| `RuleAction` | Custom business logic triggered when a rule passes. |
+| `RuleHook` / `RuleSetHook` | Pre/post evaluation callbacks for enrichment or auditing. |
+| `RuleValidator` / `RuleLintCollector` | Static analysis to catch issues before runtime. |
+
+### Platform context
 
 ```
 ┌────────────┐    documents     ┌────────────┐    passes/actions     ┌────────────┐
 │ Connectors │ ───────────────▶ │ RuleEngine │ ────────────────────▶ │ Downstream │
-└────────────┘  (Fluxion Docs)  └─────▲──────┘    (hooks/actions)    └─────▲──────┘
-                                       │                               │
-                                       │ rules + DSL                   │ shared attrs
-                              ┌────────┴────────┐                      │
-                              │ Rule DSL / API │◀─────────────────────┘
-                              └────────────────┘
+└────────────┘                  └─────▲──────┘                       └─────▲──────┘
+                                      │                                  │
+                                      │ Rule DSL / API                   │ Shared attrs
+                                      └──────────────────────────────────┘
 ```
 
-- **Connectors** ingest data from Kafka/HTTP/etc.
-- **RuleEngine** evaluates documents against rule sets built from the DSL or Java builders.
-- **Downstream systems** receive passes, transformed documents, and action side-effects.
+For a full stack view (Core ↔ Connect ↔ Enrich ↔ Engines), see the
+[Platform Architecture overview](../platform/overview.md).
 
-If you need the full stack view, the [Platform Architecture overview](../platform/overview.md)
-explains how the Rule Engine layers above Fluxion Core, Connect, and Enrich.
+---
 
-### Reading guide
+## 3. Evaluation flow
+
+1. **Document ingestion** – Connectors or application code supply a `Document`.
+2. **Rule iteration** – Rules are sorted by salience (highest first). Missing
+   stages or unsupported operators are rejected during validation.
+3. **Pipeline execution** – Each rule runs its Fluxion stages via `RulePipelineExecutor`.
+4. **Shared state update** – Rules can read/write `sharedAttributes` across the
+   entire rule set.
+5. **Actions & hooks** – On pass, actions run and hooks fire (`before/after`).
+6. **Result assembly** – `RuleEvaluationResult` captures passes, shared state,
+   debug traces, and stage metrics.
+
+---
+
+## 4. Capabilities at a glance
+
+- **Pipeline native** – Reuse the same stages/operators as streaming pipelines.
+- **Salience & priority** – Control the order in which rules execute.
+- **Shared context** – Pass data between rules via `sharedAttributes`.
+- **Hooks & actions** – Extend with ServiceLoader-based SPIs for side effects
+  (HTTP calls, notifications, auditing, etc.).
+- **Debug tracing** – Enable stage-by-stage traces for troubleshooting.
+- **Static linting** – `RuleValidator` and `RuleLintCollector` catch issues
+  before runtime (missing stages, duplicate salience, unsupported operators).
+
+---
+
+## 5. Integration checklist
+
+| Task | Reference |
+| --- | --- |
+| Load rule sets | `fluxion-rules/src/main/java/.../RuleSetLoader` or custom code. |
+| Validate rules | `RuleValidator.validateRule(...)`, `RuleLintCollector.collect(...)`. |
+| Evaluate | `RuleEngine.evaluate(...)` or `RuleEngine.execute(...)` (with actions). |
+| Inspect results | `RuleEvaluationResult` (passes, shared attributes, debug trace). |
+| Extend actions/hooks | Implement `RuleAction`, `RuleHook`, or `RuleSetHook` via ServiceLoader. |
+
+---
+
+## 6. Reading guide
 
 | Section | Use it when |
 | --- | --- |
-| [Quick Start](quickstart.md) | You want to try the engine end-to-end with working code samples. |
-| [Authoring Rule Sets](authoring.md) | You are designing the DSL payloads or using the builder APIs. |
-| [DSL Reference](dsl-reference.md) | You need a field-by-field schema for validation or tooling. |
-| [Runtime Execution](runtime.md) | You are integrating the `RuleEngine` inside a service. |
-| [API Reference](api.md) | You need a catalogue of domain types (`RuleDefinition`, `RuleSet`, etc.). |
-| [Validation & Linting](validation.md) | You are building authoring tooling or CI checks. |
-| [Testing & Debugging](testing.md) | You want reliable regression tests and troubleshooting guidance. |
-| [Extensions & SPIs](extensions.md) | You plan to publish custom stages/actions/hooks. |
-| [Best Practices](best-practices.md) | You want recommendations for salience, naming, and structure. |
-| [Lifecycle & Governance](lifecycle.md) | You manage versions, approvals, and deployments. |
-| [Integration Guide](integration.md) | You embed the engine into microservices or jobs. |
-| [Tooling & IDE Support](tooling.md) | You are building editors or VS Code extensions. |
-| [Examples](examples.md) | You learn best from copy/paste friendly walkthroughs. |
+| [Quick Start](quickstart.md) | Try the engine with runnable samples. |
+| [Authoring Rule Sets](authoring.md) | Design JSON DSL or builder-based rule definitions. |
+| [DSL Reference](dsl-reference.md) | Need field-by-field schema. |
+| [Runtime Execution](runtime.md) | Embed `RuleEngine` in a service or worker. |
+| [API Reference](api.md) | Explore domain types (`RuleDefinition`, `RuleSet`, etc.). |
+| [Validation & Linting](validation.md) | Build authoring tooling or CI checks. |
+| [Testing & Debugging](testing.md) | Add regression tests and debug tracing. |
+| [Extensions & SPIs](extensions.md) | Publish custom stages/actions/hooks. |
+| [Best Practices](best-practices.md) | Naming, salience, and structure tips. |
+| [Lifecycle & Governance](lifecycle.md) | Manage versions, approvals, deployments. |
+| [Integration Guide](integration.md) | Wire rules into jobs or microservices. |
+| [Tooling & IDE Support](tooling.md) | IDE/editor integration notes. |
+| [Examples](examples.md) | Copy/paste walkthroughs. |
 
-Use the navigation to dive into the sections that match your goal. Every page includes cross references so a reader—or an assistant—can understand the framework holistically.
+---
+
+## 7. Useful source files
+
+| Path | Why it matters |
+| --- | --- |
+| `fluxion-rules/src/main/java/.../RuleEngine.java` | Core evaluation logic. |
+| `fluxion-rules/src/main/java/.../RuleDefinition.java` | Builder + metadata for rules. |
+| `fluxion-rules/src/main/java/.../RuleSet.java` | Salience ordering, hooks, metadata storage. |
+| `fluxion-rules/src/main/java/.../RuleValidator.java` | Validation entry point. |
+| `fluxion-rules/src/test/java/...` | Sample rule JSON, unit tests, linting examples. |
+
+Use these references when implementing rule authoring tools, validation
+pipelines, or runtime integrations.

@@ -1,8 +1,21 @@
 # `$sqlQuery`
 
-Executes a parameterised SQL statement against a `SqlConnector` that has been registered with the enrichment connector registry.
+Executes a parameterised SQL statement through a registered `SqlConnector`. Ideal
+for enriching documents with relational data during pipeline evaluation.
 
-## Syntax
+---
+
+## 1. Prerequisites
+
+| Requirement | Notes |
+| --- | --- |
+| Dependency | `ai.fluxion:fluxion-enrich` plus JDBC driver (e.g., PostgreSQL, MySQL). |
+| Connection registry | Register `SqlConnector` instances in `ConnectorManager`. |
+| Resilience | Optional Resilience4j retry/circuit breaker configuration. |
+
+---
+
+## 2. Syntax
 
 ```json
 {
@@ -12,7 +25,6 @@ Executes a parameterised SQL statement against a `SqlConnector` that has been re
     "params": ["$user.id"],
     "expectSingle": true,
     "retry": {
-      "name": "orders-db-retry",
       "maxAttempts": 3,
       "waitDurationMs": 25,
       "multiplier": 2.0
@@ -27,31 +39,102 @@ Executes a parameterised SQL statement against a `SqlConnector` that has been re
 }
 ```
 
-## Options
+---
+
+## 3. Options
 
 | Field | Description | Default |
 | --- | --- | --- |
-| `connection` | Name of the `SqlConnector` registered in `ConnectorManager`. | **Required** |
-| `query` | SQL string to execute. Use positional `?` parameters for binding. | **Required** |
-| `params` | Array of expressions resolved before execution and bound in order. | `[]` |
-| `expectSingle` | When `true`, returns only the first row (or `null` when no rows). Otherwise returns the entire result set as a list of maps. | `false` |
-| `name` | Friendly name used to derive retry/breaker ids when none are supplied. | Derived from connection + query hash |
+| `connection` | Name of `SqlConnector` registered in the connector registry. | **Required** |
+| `query` | SQL statement with positional `?` parameters. | **Required** |
+| `params` | Array of expressions bound sequentially to `?` placeholders. | `[]` |
+| `expectSingle` | Return first row or `null` when no rows. If `false`, returns a list of rows. | `false` |
 | `retry` | Resilience4j retry configuration (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
-| `circuitBreaker` | Resilience4j circuit breaker configuration (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
+| `circuitBreaker` | Resilience4j circuit breaker configuration. | Disabled |
 
-> ℹ️ The shared [Resilience Patterns](../../shared/resilience.md) page lists every retry and circuit-breaker field with defaults and guidance.
+---
 
-## Returned Value
+## 4. Examples
 
-- When `expectSingle` is `true`, a single row is returned as a map keyed by column label.
-- Otherwise, the operator returns a list of row maps.
-- If no rows are returned and `expectSingle` is `true`, the value is `null`.
+### Fetch latest orders (multiple rows)
 
-## Testing Notes
+```json
+{
+  "$sqlQuery": {
+    "connection": "ordersDb",
+    "query": "SELECT id, total FROM orders WHERE customer_id = ? ORDER BY created DESC LIMIT 5",
+    "params": ["$customerId"]
+  }
+}
+```
 
-Integration tests under `fluxion-enrich` use an in-memory H2 database to exercise:
+### Fetch single profile record
 
-- Successful single-row and multi-row queries.
-- Retry behaviour on transient connection failures.
-- Circuit breaker transitions for repeated failures.
-- Disabled breaker scenarios to confirm baseline error propagation.
+```json
+{
+  "$sqlQuery": {
+    "connection": "profileDb",
+    "query": "SELECT email, country FROM profiles WHERE id = ?",
+    "params": ["$user.id"],
+    "expectSingle": true
+  }
+}
+```
+
+---
+
+## 5. Returned value
+
+- `expectSingle = true` → single row map or `null` if no rows.
+- `expectSingle = false` → list of row maps. Column labels become map keys.
+- Numeric/temporal types are mapped according to the JDBC driver.
+
+---
+
+## 6. Connectors
+
+Register connectors through `ConnectorManager`:
+
+```java
+ConnectorManager.register("ordersDb", new SqlConnector(
+        dataSource,
+        SqlConnector.Settings.builder().maxConnections(10).build()
+));
+```
+
+Supports connection pooling and connection-specific options.
+
+---
+
+## 7. Troubleshooting
+
+| Symptom | Possible cause | Remedy |
+| --- | --- | --- |
+| `IllegalArgumentException: connection missing` | `connection` field omitted. | Provide connector name. |
+| `SQLException` for syntax errors | Invalid SQL string. | Validate query manually or add integration tests. |
+| `Empty result when expectSingle` | Query returned zero rows. | Accept `null` or change query to enforce existence. |
+| `Duplicate key on sink` | Upsert logic in downstream sink misconfigured. | Check sink `mode`/`keyField`. |
+
+---
+
+## 8. Testing
+
+- Run enrichment tests:
+  ```bash
+  mvn -pl fluxion-enrich -am test -Dtest=*SqlQuery*
+  ```
+- Integration tests in the repo use H2 with prepared statements; replicate the
+  pattern to test against your own schema.
+
+---
+
+## 9. References
+
+| Path | Description |
+| --- | --- |
+| `fluxion-enrich/src/main/java/.../SqlQueryOperator.java` | Operator implementation. |
+| `fluxion-enrich/src/test/java/.../SqlQueryOperatorTest.java` | Test coverage (H2 + Resilience scenarios). |
+| [Resilience Patterns](../../shared/resilience.md) | Retry/circuit breaker configuration. |
+
+Use `$sqlQuery` to pull relational data into pipelines without embedding JDBC
+code directly in your services.

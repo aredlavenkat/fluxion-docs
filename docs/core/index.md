@@ -1,30 +1,95 @@
 # Core Platform Overview
 
-Fluxion Core provides the building blocks that power pipeline execution across every module. This page highlights the main entry points for application developers.
+Fluxion Core is the foundation for every module. It houses the pipeline executor,
+JSON parsers, stage/operator registries, and extension points you use to embed
+Fluxion in applications or build custom stages.
 
-## Pipeline Runtime
+---
 
-- **`PipelineExecutor`** – primary API for running pipelines in-process. Each document is evaluated independently against the stage list.
-- **`DocumentParser`** – parses JSON into `Document` and `Stage` objects so you can load definitions from config files.
-- **System variables** – `$$ROOT`, `$$CURRENT`, `$$NOW`, `$$REMOVE`, and friends are populated automatically while a pipeline runs.
-- **Stage & operator registries** – `StageRegistry` and `OperatorRegistry` expose 40+ stages and 200+ operators with MongoDB semantics.
+## 1. Prerequisites
 
-## Extension Points
+| Requirement | Notes |
+| --- | --- |
+| Fluxion dependency | Add `ai.fluxion:fluxion-core` to your build. |
+| Runtime | Java 21+ (same baseline as the rest of the platform). |
+| JSON pipelines | Store pipeline definitions as JSON or build them programmatically. |
+| Optional | `fluxion-enrich`, `fluxion-connect`, `fluxion-rules` when needed. |
 
-- Implement the `Operator` interface and register via `OperatorContributor` to add custom expressions.
-- Implement `StageHandler` and register via `StageHandlerContributor` to introduce domain-specific stages.
-- Use ServiceLoader descriptors (`META-INF/services/...`) so contributions are discovered automatically at runtime.
+---
 
-## Observability & Tooling
+## 2. Runtime components
 
-- `StageMetrics` captures per-stage counts and timings, with optional OTEL export via `StageMetricsOtelBridge`.
-- The core module ships with comprehensive JUnit coverage to protect behaviour across refactors.
-- Helper utilities in `ai.fluxion.core.util` make it easy to seed documents, compare output, and build fixtures for tests.
+| Component | Purpose |
+| --- | --- |
+| `PipelineExecutor` | Evaluates documents against a list of stages. |
+| `DocumentParser` | Parses JSON into `Document`/`Stage` objects. |
+| `Document` | Mutable JSON wrapper representing a record. |
+| `Stage` | Single pipeline stage (MongoDB syntax). |
+| System variables | `$$ROOT`, `$$CURRENT`, `$$NOW`, `$$REMOVE`, etc. available during evaluation. |
+| Registries | `StageRegistry`, `OperatorRegistry`, `ExpressionRegistry` expose built-in logic. |
 
-> Streaming connectors and orchestrators are moving to a separate module. Documentation for those components will return once the new packaging is settled.
+### Sample usage
 
-Use the navigation to dive deeper:
+```java
+List<Document> input = DocumentParser.getDocumentsFromJsonArray(jsonString);
+List<Stage> stages = DocumentParser.getStagesFromJsonArray(pipelineJson);
+PipelineExecutor executor = new PipelineExecutor();
+List<Document> output = executor.run(input, stages, Map.of());
+```
 
-- [Usage Guide](../usage.md) for an end-to-end walkthrough.
-- [Integration Developer Guide](integration-developer-guide.md) for API details and extension patterns.
-- [Stages](../stages/) and [Operators](../operators/) for reference material.
+---
+
+## 3. Extension points
+
+| Extension | How to | Notes |
+| --- | --- | --- |
+| Custom operator | Implement `Operator`, register via `OperatorContributor` (`META-INF/services`). | Used for domain-specific expressions. |
+| Custom stage | Implement `StageHandler`, register via `StageHandlerContributor`. | Great for bespoke aggregation stages. |
+| Custom pipeline action | Implement `PipelineAction` for reusable action logic. | Often used in rule engine integrations. |
+
+For detailed examples see
+[`core/integration-developer-guide.md`](integration-developer-guide.md).
+
+---
+
+## 4. Observability toolkit
+
+| Tool | Description |
+| --- | --- |
+| `StageMetrics` | Captures per-stage counters and timings. |
+| `StageMetricsOtelBridge` | Emits metrics to OpenTelemetry. |
+| Debug tracing | Enable via `PipelineDebugStageTrace` for stage-by-stage inspection. |
+| Test fixtures | Helpers in `ai.fluxion.core.util` generate documents and verify output. |
+
+Run core tests to validate your extensions:
+
+```bash
+mvn -pl fluxion-core test
+```
+
+---
+
+## 5. Reading guide
+
+| Section | Use it when |
+| --- | --- |
+| [Usage Guide](../usage.md) | End-to-end tutorial with parsing + executor samples. |
+| [Integration Developer Guide](integration-developer-guide.md) | Custom operators, stages, and SPI registration. |
+| [Stages Reference](../stages/index.md) | Detailed stage semantics. |
+| [Operators Reference](../operators/index.md) | Expression/operator catalogue. |
+| [Examples Gallery](../examples/exampleSet1.md) | Ready-made pipelines to copy/adapt. |
+| [Observability & Metrics](observability.md) | Stage metrics and OpenTelemetry bridge. |
+
+---
+
+## 6. Reference source files
+
+| Path | Description |
+| --- | --- |
+| `fluxion-core/src/main/java/.../PipelineExecutor.java` | Core executor implementation. |
+| `fluxion-core/src/main/java/.../DocumentParser.java` | JSON parsing utilities. |
+| `fluxion-core/src/main/java/.../StageRegistry.java` | Stage discovery and registration. |
+| `fluxion-core/src/main/java/.../OperatorRegistry.java` | Operator discovery and registration. |
+| `fluxion-core/src/test/java/...` | Regression tests covering pipeline behaviour. |
+
+Keep these references handy when extending Fluxion or integrating it into new services.

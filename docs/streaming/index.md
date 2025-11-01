@@ -1,114 +1,131 @@
 # Streaming Engine Overview
 
-The Fluxion Streaming Engine turns the core aggregation runtime into a managed,
-always-on pipeline orchestrator. It continuously ingests events from Connect
-sources, runs them through Fluxion Core stages (with optional Enrich operators),
-and delivers results to sinks with deterministic replay guarantees.
+The streaming runtime turns Fluxion’s aggregation engine into an always-on
+orchestrator. It reads from connectors, executes declarative pipelines, applies
+error policies, stores checkpoints, and exposes metrics so teams can operate
+deterministic data flows.
 
-## Key concepts
+---
 
-- **Streaming pipelines** – Declarative definitions that bind a source, one or
-  more Fluxion Core stages, and a sink. Pipelines can run forever or until a
-  completion signal arrives.
-- **Streaming pipeline orchestrator** – Coordinates execution loops, manages
-  batching, retries, and checkpointing, and exposes metrics hooks.
-- **Streaming context** – Holds runtime state such as cursor positions, failure
-  counts, or custom metadata that operators can consult.
-- **Error policies** – Determine how the orchestrator behaves when a stage,
-  source, or sink fails (retry, skip, dead-letter, or fail-fast).
+## 1. Prerequisites
 
-## How it relates to other modules
+| Requirement | Notes |
+| --- | --- |
+| Fluxion modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional), plus your pipeline definitions. |
+| Runtime host | JVM service/worker that runs streaming executors. |
+| Checkpoint store | JDBC/Redis/custom store for offsets and state. |
+| Observability | `StreamingMetricsListener` or Micrometer binding for metrics. |
+| Scaling plan | Strategy for partitions/shards to avoid contention. |
 
-| Module        | Role inside Streaming Engine                                                                    |
-| ------------- | ------------------------------------------------------------------------------------------------ |
-| Fluxion Core  | Executes each pipeline stage deterministically, ensuring results match batch/offline runs.      |
-| Fluxion Enrich| Adds optional network-aware operators invoked during streaming (HTTP lookups, SQL queries, …).  |
-| Fluxion Connect| Supplies the streaming sources and sinks; their SPI implementations plug directly into the orchestrator. |
+---
 
-## When to use the Streaming Engine
+## 2. Architecture components
 
-Choose the Streaming Engine when you need:
+| Component | Purpose |
+| --- | --- |
+| Streaming pipeline definition | Binds a `StreamingSource`, a list of Fluxion stages, and a `StreamingSink`. |
+| Streaming pipeline orchestrator | Drives fetch → transform → deliver cycles, enforces batching, checkpoints, retries, and invokes metrics hooks. |
+| Streaming context | Carries per-run metadata (cursor positions, retry counters, shared attributes). |
+| Error policies | Describe how the orchestrator reacts to failures (retry, skip, dead-letter, fail fast). |
 
-- Continuous ingestion or fan-out from Kafka, HTTP, Event Hubs, or custom sources.
-- Deterministic replay for governance or audit requirements.
-- Built-in observability for throughput, lag, and error rates.
-- Tight loops that can react to enrichment lookups or rule decisions in real time.
+### Module relationships
 
-If you only need ad-hoc or scheduled rule evaluation, the Rule Engine is the
-lighter-weight runtime. Many teams adopt both: Streaming Engine for event
-orchestration, Rule Engine for approval and governance workflows.
+| Module | Role in streaming |
+| --- | --- |
+| Fluxion Core | Executes stages deterministically. |
+| Fluxion Connect | Supplies ingress/egress connectors. |
+| Fluxion Enrich | Adds network-aware operators (`$httpCall`, `$sqlQuery`, …). |
 
-## Execution flow
+---
 
-Every streaming pipeline follows the same loop:
+## 3. Pipeline lifecycle
 
-1. **Fetch** – The orchestrator pulls a batch from the configured `StreamingSource`.
-2. **Transform** – Fluxion Core executes the declared stages. Enrich operators can
-   call out to external systems when required.
-3. **Deliver** – The transformed batch is handed to the `StreamingSink`.
-4. **Checkpoint** – Commit offsets/cursors so the next batch resumes from the
-   correct position.
-5. **Metrics & hooks** – The orchestrator invokes optional listeners so you can
-   emit telemetry or update dashboards.
+1. **Fetch** – Read a batch from the configured `StreamingSource`.
+2. **Transform** – Run Fluxion stages (and Enrich operators) on the batch.
+3. **Deliver** – Push results to the `StreamingSink`.
+4. **Checkpoint** – Persist offsets/state so restarts resume correctly.
+5. **Observe** – Emit metrics via `StreamingMetricsListener` for dashboards/alerts.
 
-Each step is pluggable, which is why the orchestrator leans so heavily on Core,
-Connect, and Enrich.
+Each step is pluggable; you can swap sources, sinks, error policies, and
+listeners without altering pipeline definitions.
 
-## Error handling strategies
+---
 
-`StreamingErrorPolicy` controls how the orchestrator responds when a source,
-stage, or sink throws an exception. The most common options are:
+## 4. Error-handling strategies
 
-| Policy                           | Behaviour                                                                              | Recommended use case                                    |
-| -------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `failFast()`                     | Abort the pipeline immediately.                                                        | CI/test environments, fail-open systems.                |
-| `retry(int maxAttempts)`        | Retry the failing batch with exponential backoff until the limit is reached.          | Transient network glitches or short-lived outages.      |
-| `skipAndContinue()`             | Drop the failing batch and move on.                                                    | Non-critical enrichment where gaps are acceptable.      |
-| `deadLetter(StreamingSink)`     | Forward the failing batch to a secondary sink (e.g., Kafka DLQ) and continue.         | Mission-critical pipelines with audit requirements.     |
-| Custom policy via builder       | Combine retries, circuit-breaker windows, or custom callbacks.                        | Complex workloads that blend alerting and back-pressure.|
+`StreamingErrorPolicy` dictates how an exception is handled. Common choices:
 
-You can swap policies at runtime by updating the `StreamingRuntimeConfig` and
-restarting the pipeline. For per-stage handling, wrap the stage in `$function`
-and implement localized recovery logic in the embedded script or service call.
+| Policy | Behaviour | Use when |
+| --- | --- | --- |
+| `failFast()` | Abort immediately. | CI/tests or fail-open systems. |
+| `retry(int maxAttempts)` | Exponential backoff until limit. | Transient network/service instability. |
+| `skipAndContinue()` | Drop the batch and keep going. | Non-critical enrichment where gaps are acceptable. |
+| `deadLetter(StreamingSink)` | Send the batch to a DLQ and continue. | Audit-heavy workloads needing post-mortems. |
+| Builder pattern | Compose custom retries, circuit breakers, alerts. | Complex pipelines with bespoke recovery. |
 
-## Observability & metrics
+Fine-grained handling can be embedded in individual stages (e.g., `$function`
+with custom try/catch logic).
 
-Implement `StreamingMetricsListener` (or use the Micrometer/Dropwizard adapters)
-to instrument pipelines. Typical counters and gauges include:
+---
 
-- `stream.batch.duration` – time spent processing a batch.
-- `stream.batch.size` – input vs output document counts.
-- `stream.lag` – source-specific lag (Kafka offsets, HTTP cursor age, etc.).
-- `stream.retries` / `stream.failures` – surfaced when error policies trigger.
+## 5. Observability
+
+Typical metrics captured via `StreamingMetricsListener` or Micrometer:
+
+- `stream.batch.duration` – processing time per batch.
+- `stream.batch.size` – documents in/out per cycle.
+- `stream.lag` – source lag (Kafka offsets, cursor age, etc.).
+- `stream.retries` / `stream.failures` – counts when error policies trigger.
 - `stream.backpressure` – queue depth or wait time between fetches.
 
-Expose metrics with dimensional tags such as pipeline name, connector ID, and
-environment so that dashboards can aggregate across tenants. Many teams also
-wire alerting directly off the listener, e.g., push to PagerDuty or Slack when
-lag breaches a threshold.
+Tag metrics with pipeline name, connector ID, environment, tenant, etc. Route
+critical alerts (lag spikes, sustained retries) to on-call channels.
 
-## Deployment considerations
+---
 
-- **Capacity planning** – Size batch counts and concurrency to stay within
-  connector quotas. Kafka sources often run best with batch sizes between 250
-  and 1,000 records.
-- **Horizontal scaling** – Parallelize by partition (Kafka) or sharding key.
-  Keep checkpoint stores isolated per instance to avoid cursor contention.
-- **Configuration & secrets** – Store connector credentials in your secret
-  manager. Inject them at runtime rather than hard-coding inside the pipeline
-  definition.
-- **Upgrade strategy** – For long-running pipelines, use rolling restarts so a
-  standby instance warms up before the active instance drains. Validate that
-  checkpoint stores are backward compatible before upgrading major versions.
-- **Verification** – Pair production pipelines with synthetic canaries that run
-  a subset of data. Compare derived metrics (totals, counts) against batch jobs
-  to confirm determinism.
-- **Failure drills** – Regularly exercise retries, dead-letter routing, and
-  resuming from checkpoints to ensure operational runbooks remain accurate.
+## 6. Deployment checklist
 
-## Choosing the right stages
+| Item | Why it matters |
+| --- | --- |
+| Batch sizing | Stay within connector quotas (Kafka often 250–1000 records). |
+| Scaling strategy | Partition-aware scaling prevents checkpoint contention. |
+| Secrets/config | Load connector credentials from a secret manager; avoid hard-coded values. |
+| Rolling upgrades | Warm standby instances, verify checkpoint compatibility before deploying. |
+| Canary/validation | Replay or synthetic runs to confirm deterministic outputs. |
+| Failure drills | Regularly test retries, DLQ routing, and checkpoint recovery. |
 
-Not every aggregation stage is equally valuable in streaming scenarios. Consult
-the [Stage Support Matrix](stage-compatibility.md) for guidance on which stages
-are stream-friendly today and which ones are better saved for the upcoming
-batch job engine.
+---
+
+## 7. When to choose streaming
+
+Use the Streaming Engine when you need:
+
+- Continuous ingestion/fan-out (Kafka, HTTP, Event Hubs, custom sources).
+- Deterministic replay with durable checkpoints for compliance and audit.
+- Real-time enrichment, windowing, or anomaly detection.
+- Built-in metrics for throughput, lag, and retries.
+
+Prefer the Rule Engine for single-document evaluation, request/response
+services, or approval workflows orchestrated via Temporal.
+
+---
+
+## 8. Stage selection
+
+Not every aggregation stage is stream-friendly. Refer to the
+[Stage Support Matrix](stage-compatibility.md) for accumulator guidance and
+stream-vs-batch recommendations.
+
+---
+
+## 9. Reference files
+
+| Path | Description |
+| --- | --- |
+| `fluxion-core/src/main/java/.../StreamingPipelineExecutor.java` | Core execution loop (fetch/transform/deliver/checkpoint). |
+| `fluxion-core/src/main/java/.../StreamingPipelineOrchestrator.java` | Builder/orchestrator API for configuring pipelines. |
+| `fluxion-core/src/main/java/.../StreamingRuntimeConfig.java` | Runtime options (batch size, listeners, error policy). |
+| `fluxion-core/src/main/java/.../StreamingErrorPolicy.java` | Error-handling strategies. |
+| `fluxion-docs/docs/streaming/quickstart.md` | Hands-on tutorial building a Kafka → HTTP pipeline. |
+
+Use these resources when implementing or reviewing streaming integrations.

@@ -1,23 +1,44 @@
-# Fluxion Deep Pipeline Test Suite (Full Descriptions + Pipelines)
+# Deep Pipeline Scenarios
 
-This document captures all five deep pipeline test cases from `test_deep_pipeline.py`, including detailed descriptions, pipeline logic, and input/output examples.
+Built from `fluxion-core/src/test/java/.../DeepPipelineTest.java`. Each scenario
+demonstrates multi-stage pipelines with nested arrays, reducers, windowing, and
+conditional logic.
 
 ---
 
-## ✅ test_deep_pipeline
+## How to run the scenarios
 
-### 📖 Description
+```bash
+mvn -pl fluxion-core test -Dtest=DeepPipelineTest
+```
 
-This test calculates:
-- The total payment from a transaction list using `$reduce`
-- The total item cost by multiplying each item's price and quantity using `$map` and `$reduce`
-It then filters out documents where the total payment is below 100 and projects only the necessary fields.
+Or run the entire module:
 
-### 📥 Input Document
+```bash
+mvn -pl fluxion-core -am test
+```
 
-Customer order containing multiple payment transactions and line items:
+---
+
+## Scenario summary
+
+| Test | Highlights |
+| --- | --- |
+| `test_deep_pipeline` | `$reduce`, `$map`, `$match`, `$project` – calculate total payment and total item cost. |
+| `test_deep_nested_pipeline` | `$filter`, `$map`, `$reduce`, `$dateAdd`, `$cond` – filter high-quantity items and compute order status. |
+| `test_deep_nested_pipeline_two` | `$map`, `$reduce`, `$switch`, `$project` – flatten nested orders and classify status. |
+| `test_degree_pipeline` (if present) | `$group`, `$unwind`, `$setWindowFields` – windowed aggregations across nested data. |
+| `test_deep_pipeline_with_variables` | Demonstrates `$$ROOT`, `$$CURRENT`, custom variables. |
+
+Below are the two most illustrative scenarios. Clone them when you need complex
+transformations or nested-array manipulations.
+
+---
+
+### 1. `test_deep_pipeline`
 
 ```json
+Input:
 [
   {
     "order_id": "A1001",
@@ -34,11 +55,8 @@ Customer order containing multiple payment transactions and line items:
     "created_at": "2023-04-15T10:00:00"
   }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   {
     "$addFields": {
@@ -46,7 +64,7 @@ Customer order containing multiple payment transactions and line items:
         "$reduce": {
           "input": "$payment.transactions",
           "initialValue": 0,
-          "in": {"$add": ["$$value", "$$this.amount"]}
+          "in": { "$add": ["$$value", "$$this.amount"] }
         }
       },
       "total_item_cost": {
@@ -55,23 +73,20 @@ Customer order containing multiple payment transactions and line items:
             "$map": {
               "input": "$items",
               "as": "item",
-              "in": {"$multiply": ["$$item.price", "$$item.quantity"]}
+              "in": { "$multiply": ["$$item.price", "$$item.quantity"] }
             }
           },
           "initialValue": 0,
-          "in": {"$add": ["$$value", "$$this"]}
+          "in": { "$add": ["$$value", "$$this"] }
         }
       }
     }
   },
   { "$match": { "total_payment": { "$gte": 100 } } },
-  { "$project": { "order_id": 1, "total_payment": 1, "total_item_cost": 1 } }
+  { "$project": { "order_id": 1, "total_payment": 1, "total_item_cost": 1, "_id": 0 } }
 ]
-```
 
-### 📤 Output
-
-```json
+Output:
 [
   {
     "order_id": "A1001",
@@ -81,19 +96,17 @@ Customer order containing multiple payment transactions and line items:
 ]
 ```
 
+**Key ideas**
+
+- `$reduce` is ideal when summing nested array values.
+- Compose `$map` inside `$reduce` to transform data before accumulation.
+
 ---
 
-## ✅ test_deep_nested_pipeline
-
-### 📖 Description
-
-This test filters items where `quantity > 1`, calculates the total value, and projects:
-- Expected delivery using `$dateAdd`
-- Order status based on the total value using `$cond`
-
-### 📥 Input Document
+### 2. `test_deep_nested_pipeline`
 
 ```json
+Input:
 [
   {
     "order_id": "ORD123",
@@ -105,11 +118,8 @@ This test filters items where `quantity > 1`, calculates the total value, and pr
     ]
   }
 ]
-```
 
-### 📌 Pipeline
-
-```json
+Pipeline:
 [
   {
     "$project": {
@@ -163,41 +173,38 @@ This test filters items where `quantity > 1`, calculates the total value, and pr
     }
   }
 ]
+
+Output:
+[
+  {
+    "order_id": "ORD123",
+    "filtered_items": [
+      { "item": "Notebook", "quantity": 10, "unit_price": 5.0 },
+      { "item": "Bag", "quantity": 3, "unit_price": 20.0 }
+    ],
+    "total_amount": 170,
+    "expected_delivery": "2024-04-08T00:00:00",
+    "order_status": "approved"
+  }
+]
 ```
 
-### 📤 Output
+**Key ideas**
 
-- `filtered_items` contains "Notebook" and "Bag"
-- `order_status`: `"approved"`
-- `expected_delivery`: `"2024-04-08..."`
+- Chain `$filter` → `$map` → `$reduce` to process nested arrays.
+- `$dateAdd` and `$cond` are handy for scheduling and approval flows.
 
 ---
 
-## ✅ test_deep_nested_pipeline_two
+## Extending the suite
 
-### 📖 Description
+- Add tests covering system variables (`$$ROOT`, `$$CURRENT`, `$$REMOVE`).
+- Include `$setWindowFields` for moving averages or rank calculations.
+- Test negative paths (no matching items, zero transactions) to validate
+  default behaviour.
 
-Maps each user order to a flattened structure with:
-- `order_total` from sum of all product prices and quantities
-- `order_status` via `$switch` based on quantity or value
-
-### 📥 Input Document
-
-```json
-[
-  {
-    "user_id": "U123",
-    "orders": [
-      {
-        "order_id": "O100",
-        "products": [
-          {"name": "Laptop", "price": 1000, "qty": 1},
-          {"name": "Mouse", "price": 50, "qty": 2}
-        ]
-      },
-      {
-        "order_id": "O101",
-        "products": [
+These scenarios are ready-made templates for complex analytical pipelines—drop
+them into your services or expand them into broader regression suites.
           {"name": "Phone", "price": 500, "qty": 1},
           {"name": "Charger", "qty": 1}
         ]

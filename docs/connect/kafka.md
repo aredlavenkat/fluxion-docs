@@ -1,12 +1,25 @@
 # Kafka Connectors
 
-Fluxion exposes Kafka as both a streaming **source** and **sink**. The connectors reuse the SPI we use for every transport, so the configuration is intentionally symmetrical: serializers, security settings, batching behaviour, and any additional Kafka property can be injected directly.
+Fluxion Connect exposes Kafka as both a streaming **source** and **sink**. The
+connectors share the same SPI used across the platform, so the configuration
+maps cleanly onto streaming pipelines, error policies, and metrics.
 
 ---
 
-## Source (`type: kafka`)
+## 1. Prerequisites
 
-Use the source connector to subscribe to a topic and push records into a pipeline. Each record is converted to a Fluxion document (`_meta` carries Kafka metadata such as topic, partition, offset, timestamp, and key).
+| Requirement | Notes |
+| --- | --- |
+| Dependency | Add `ai.fluxion:fluxion-connect` plus Kafka client (`org.apache.kafka:kafka-clients`). |
+| Kafka cluster | Brokers reachable from the Fluxion service. Tested on Kafka 2.8+. |
+| Credentials (optional) | SASL/TLS material if connecting to secure clusters. |
+| Checkpoint store | JDBC/Redis/custom store for offsets when streaming. |
+
+---
+
+## 2. Source configuration (`type: kafka`)
+
+### YAML snippet
 
 ```yaml
 source:
@@ -14,8 +27,8 @@ source:
   options:
     topic: orders
     bootstrapServers: localhost:9092
-    pollTimeout: PT0.5S        # optional ISO-8601 duration
-    queueCapacity: 64          # internal queue between consumer and stages
+    pollTimeout: PT0.5S
+    queueCapacity: 64
     keyDeserializer: org.apache.kafka.common.serialization.StringDeserializer
     valueDeserializer: org.apache.kafka.common.serialization.StringDeserializer
     securityProtocol: SASL_SSL
@@ -23,29 +36,33 @@ source:
     saslJaasConfig: >
       org.apache.kafka.common.security.plain.PlainLoginModule required
       username="user" password="pass";
-    enable.auto.commit: false  # additional Kafka option is passed through
+    enable.auto.commit: false   # passes through to Kafka consumer properties
 ```
+
+### Options
 
 | Option | Description | Default |
 | --- | --- | --- |
 | `topic` | Kafka topic to subscribe to. | **Required** |
-| `bootstrapServers` | Comma-separated broker list. | **Required** |
-| `pollTimeout` | Wait time when no records are returned. | `PT0.5S` |
-| `queueCapacity` | Size of the internal queue feeding the next stage. | `16` |
+| `bootstrapServers` | Comma-separated list of brokers. | **Required** |
+| `pollTimeout` | Consumer poll wait (ISO-8601 duration). | `PT0.5S` |
+| `queueCapacity` | Internal queue size feeding the pipeline. | `16` |
 | `keyDeserializer` | Kafka key deserializer class. | `StringDeserializer` |
 | `valueDeserializer` | Kafka value deserializer class. | `StringDeserializer` |
-| `securityProtocol` | Optional `security.protocol` override (e.g. `SSL`, `SASL_SSL`). | `null` |
-| `saslMechanism` | Optional `sasl.mechanism` (e.g. `SCRAM-SHA-512`). | `null` |
-| `saslJaasConfig` | JAAS config string when SASL is enabled. | `null` |
-| `groupId` | Overrides consumer group id. | `fluxion-<topic>` |
+| `groupId` | Consumer group id override. | `fluxion-<topic>` |
+| `securityProtocol` | Kafka `security.protocol` (e.g., `SSL`, `SASL_SSL`). | `null` |
+| `saslMechanism` | Kafka `sasl.mechanism` (e.g., `SCRAM-SHA-512`). | `null` |
+| `saslJaasConfig` | JAAS config string for SASL. | `null` |
 
-All other keys under `options` are copied straight into the consumer `Properties`, so you can configure commits, partition assignment, etc.
+All additional keys under `options` are copied into the consumer `Properties`
+object, so you can enable idempotent consumers, partition assignment strategies,
+or custom timeouts.
 
 ---
 
-## Sink (`type: kafka`)
+## 3. Sink configuration (`type: kafka`)
 
-The sink batches JSON-encoded documents, tracks success/failure statistics, and flushes once every batch or when the timeout expires. If an exception occurs we bubble it up so the streaming error-policy can react (retry, dead-letter, skip).
+### YAML snippet
 
 ```yaml
 sink:
@@ -58,33 +75,69 @@ sink:
     acks: all
     keySerializer: org.apache.kafka.common.serialization.StringSerializer
     valueSerializer: org.apache.kafka.common.serialization.StringSerializer
-    securityProtocol: SASL_SSL
-    saslMechanism: PLAIN
-    saslJaasConfig: >
-      org.apache.kafka.common.security.plain.PlainLoginModule required
-      username="user" password="pass";
     compression.type: gzip
 ```
+
+### Options
 
 | Option | Description | Default |
 | --- | --- | --- |
 | `topic` | Kafka topic to publish to. | **Required** |
 | `bootstrapServers` | Comma-separated broker list. | **Required** |
-| `batchSize` | Number of documents per send batch. | `100` |
-| `flushTimeout` | ISO-8601 duration to wait for all acknowledgements. | `PT10S` |
+| `batchSize` | Records per send batch. | `100` |
+| `flushTimeout` | Wait for acknowledgements (ISO-8601). | `PT10S` |
 | `acks` | Producer acknowledgement level (`acks`). | `1` |
 | `keySerializer` | Kafka key serializer class. | `StringSerializer` |
 | `valueSerializer` | Kafka value serializer class. | `StringSerializer` |
-| `securityProtocol` | Optional `security.protocol`. | `null` |
-| `saslMechanism` | Optional `sasl.mechanism`. | `null` |
-| `saslJaasConfig` | JAAS config string when SASL is enabled. | `null` |
+| `securityProtocol` / `saslMechanism` / `saslJaasConfig` | Same as source. | `null` |
 
-Additional producer properties (idempotence, linger.ms, compression, etc.) are copied straight onto the Kafka producer configuration.
+Additional producer options (linger, retries, idempotence, compression) are
+passed through untouched.
 
 ---
 
-## Operational Notes
+## 4. Security options
 
-- **Metrics:** the sink tracks successful and failed records plus batch counts; wire these into your monitoring layer using the streaming metrics APIs.
-- **Retry / error policies:** combine the sink with `StreamingErrorPolicy` to control retries, dead-letter routing, or batch skipping if Kafka becomes unavailable.
-- **Testing:** the codebase uses Kafka Testcontainers for integration tests. If you need a local broker, run `docker run --rm -p 9092:9092 confluentinc/cp-kafka` (or reuse the compose file in your project).
+| Scenario | Required settings |
+| --- | --- |
+| TLS without auth | `securityProtocol: SSL` plus truststore configuration (system properties or Kafka props). |
+| SASL/PLAIN | `securityProtocol: SASL_SSL`, `saslMechanism: PLAIN`, `saslJaasConfig: ...`. |
+| SCRAM | `securityProtocol: SASL_SSL`, `saslMechanism: SCRAM-SHA-512`, JAAS string with username/password. |
+| Kerberos | `securityProtocol: SASL_PLAINTEXT`, `saslMechanism: GSSAPI`, JAAS config referencing keytab/krb5. |
+
+Consult Kafka’s security docs for the exact property names; any additional keys
+(e.g., `ssl.truststore.location`) can be added directly to `options`.
+
+---
+
+## 5. Troubleshooting
+
+| Symptom | Possible cause | Remedy |
+| --- | --- | --- |
+| `NoSuchMethodError` on Kafka classes | Version mismatch between `fluxion-connect` and your Kafka client. | Align Kafka client version with the cluster (2.8+ recommended). |
+| Consumer stuck at oldest offset | `groupId` shared across environments. | Set a unique group id per environment or use `auto.offset.reset`. |
+| `TopicAuthorizationFailed` | Missing ACLs or credentials. | Verify SASL/TLS settings and broker ACLs. |
+| Sink retries endlessly | Downstream brokers unavailable. | Adjust `StreamingErrorPolicy` (dead-letter/skip) or configure Kafka producer retries. |
+
+---
+
+## 6. Testing
+
+- Run connector tests alongside streaming tests:
+  ```bash
+  mvn -pl fluxion-core -am test -Dtest=*Kafka*
+  ```
+- Local broker for manual testing: `docker run --rm -p 9092:9092 confluentinc/cp-kafka`.
+
+---
+
+## 7. References
+
+| Path | Description |
+| --- | --- |
+| `fluxion-core/src/main/java/.../KafkaSourceConnectorProvider.java` | Source provider implementation. |
+| `fluxion-core/src/main/java/.../KafkaSinkConnectorProvider.java` | Sink provider implementation. |
+| `fluxion-docs/docs/streaming/quickstart.md` | Kafka → HTTP streaming tutorial. |
+
+Use these snippets as templates for your own pipeline definitions and adjust
+properties according to your cluster’s configuration.

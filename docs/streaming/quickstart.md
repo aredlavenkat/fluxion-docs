@@ -6,9 +6,12 @@ results to an HTTP endpoint.
 
 ## Prerequisites
 
-- Fluxion Core modules available on the classpath (`fluxion-core`, `fluxion-connect`, `fluxion-enrich` if enrichment is needed).
-- Access to a Kafka cluster and topic that will act as the source.
-- Java 17+ (the samples use records, builder APIs, and switch expressions).
+| Requirement | Notes |
+| --- | --- |
+| Fluxion modules | `fluxion-core`, `fluxion-connect`, optionally `fluxion-enrich`. |
+| Kafka cluster | Bootstrap servers + topic for ingest. |
+| Runtime | Java 21+ (examples use records, builders, switch expressions). |
+| Checkpoint store | JDBC or in-memory store for offsets (shown with `JdbcCheckpointStore`). |
 
 ## 1. Define the aggregation stages
 
@@ -107,3 +110,5 @@ or a fatal error policy triggers a shutdown.
    in the [Streaming Engine overview](index.md#error-handling-strategies).
 5. Review which aggregation stages fit streaming versus batch workloads in the
    [Stage Support Matrix](stage-compatibility.md).
+6. Run the streaming module tests with `mvn -pl fluxion-core -am test` to
+   validate connectors and executors before deploying.

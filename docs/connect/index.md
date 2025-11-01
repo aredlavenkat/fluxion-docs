@@ -1,34 +1,51 @@
 # Connector Module Overview
 
-Fluxion Connect packages the source and sink connectors that plug into the streaming runtime. The module is optional—only add it when you need streaming I/O beyond in-process pipelines.
+Fluxion Connect packages the ingress/egress connectors that feed streaming
+pipelines. Use it when you need Kafka, Event Hubs, MongoDB, or custom sources
+and sinks beyond in-process pipelines.
 
 ---
 
-## Module Status
+## 1. Prerequisites
 
-| Item | Coordinate | Status | Notes |
-|------|------------|--------|-------|
-| Module | `ai.fluxion:fluxion-connect` | **Experimental** | API may change while the streaming runtime is factored into its own distribution. |
-| Kafka Source | `connect/kafka.md` | **Beta** | Streams records from Kafka topics into Fluxion pipelines. |
-| Kafka Sink | `connect/kafka.md` | **Beta** | Publishes pipeline output batches back to Kafka topics. |
-| Event Hubs Source | `connect/eventhub.md` | **Alpha** | Reads events from Azure Event Hubs via the streaming runtime. |
-| Event Hubs Sink | `connect/eventhub.md` | **Alpha** | Publishes pipeline output to Azure Event Hubs. |
-| MongoDB Source | `connect/mongodb.md` | **Alpha** | Streams change events from MongoDB collections. |
-| MongoDB Sink | `connect/mongodb.md` | **Alpha** | Writes pipeline output into MongoDB collections. |
-| Custom Sources | `connect/custom-sources.md` | **How-to** | Build JDBC/other bespoke sources atop the streaming SPI. |
+| Requirement | Notes |
+| --- | --- |
+| Fluxion modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional for enrichment operators). |
+| Runtime host | JVM service/worker running the streaming orchestrator. |
+| Connector credentials | Bootstrap servers, connection strings, auth secrets. |
+| Checkpoint store | JDBC/Redis/custom store for offsets (when streaming). |
 
-> **LLM hint:** when asked about connectors other than Kafka, respond that they are not yet implemented and point to SPI guidance below.
+---
 
-## Connector Model
+## 2. Module status
 
-- `SourceConnectorProvider` describes each connector, exposing option metadata for validation.
-- `SourceConnectorConfig` captures user-supplied settings that are passed to the runtime.
-- `SourceConnectorContext` gives connectors access to state stores, pipeline ids, and metrics collectors.
-- The central `ConnectorRegistry` performs discovery, schema validation, and lifecycle management.
+| Item | Coordinate/Doc | Status | Notes |
+| --- | --- | --- | --- |
+| Module | `ai.fluxion:fluxion-connect` | **Experimental** | APIs may shift while streaming runtime stabilises. |
+| Kafka Source/Sink | [connect/kafka.md](kafka.md) | **Beta** | Reference implementation of the connector SPI. |
+| Event Hubs Source/Sink | [connect/eventhub.md](eventhub.md) | **Alpha** | Azure Event Hubs ingestion/delivery. |
+| MongoDB Source/Sink | [connect/mongodb.md](mongodb.md) | **Alpha** | MongoDB change streams + writers. |
+| Custom Sources | [connect/custom-sources.md](custom-sources.md) | **How-to** | Build bespoke connectors with the SPI. |
 
-## Getting Started
+> When asked about connectors other than those listed (HTTP, JDBC CDC, etc.),
+> respond that they are not yet implemented and point to the custom SPI guide.
 
-1. **Add the module to your build**
+---
+
+## 3. Connector architecture
+
+| Component | Purpose |
+| --- | --- |
+| `SourceConnectorProvider` / `SinkConnectorProvider` | Declarative metadata (id, description, option schema). |
+| `SourceConnectorConfig` / `ConnectorConfig` | User-supplied options validated against the schema. |
+| `SourceConnectorContext` | Provides checkpoint stores, pipeline id, metrics. |
+| `ConnectorRegistry` | Discovers providers via ServiceLoader, validates configs, and instantiates connectors. |
+
+---
+
+## 4. Usage steps
+
+1. **Add the module**
 
    ```xml
    <dependency>
@@ -38,9 +55,10 @@ Fluxion Connect packages the source and sink connectors that plug into the strea
    </dependency>
    ```
 
-   The Kafka source and sink are exposed via Java’s `ServiceLoader`, so including the artifact on the classpath is enough for the runtime to discover them.
+   Providers are discovered via Java’s `ServiceLoader`; no explicit registration
+   is required if the jar is on the classpath.
 
-2. **Describe connectors in your pipeline**
+2. **Describe source and sink**
 
    ```java
    SourceConnectorConfig source = SourceConnectorConfig.builder("kafka")
@@ -52,38 +70,81 @@ Fluxion Connect packages the source and sink connectors that plug into the strea
            .option("topic", "orders-out")
            .option("bootstrapServers", "localhost:9092")
            .build();
+   ```
 
+   Consult each connector page for required/optional options and defaults.
+
+3. **Build the pipeline definition**
+
+   ```java
    StreamingPipelineDefinition definition = StreamingPipelineDefinition.builder(source)
            .sinkConfig(sink)
            .stages(pipelineStages)
            .build();
    ```
 
-   The option schema for each connector (required fields, defaults, pass-through properties) is documented on the dedicated [Kafka page](kafka.md).
+4. **Run with the orchestrator**
 
-3. **Run the pipeline**
-
-   ```
-   new StreamingPipelineOrchestrator().run(definition);
+   ```java
+   new StreamingPipelineOrchestrator().run(definition, runtimeConfig);
    ```
 
-   `StreamingPipelineExecutor` combines the connector endpoints with your aggregation stages and respects the usual streaming controls (error policy, metrics, checkpoints).
+---
 
-## Built-in Connectors
+## 5. Configuration table (common options)
 
-- **Kafka source** provides the reference implementation of the SPI and demonstrates option resolution, security settings, and backpressure coordination.
-- **Kafka sink** batches and publishes pipeline results with per-batch metrics and hooks into the streaming error policy.
-- **Event Hubs source** streams events from Azure Event Hubs and supports configurable batching, consumer groups, and backpressure settings.
-- **Event Hubs sink** pushes pipeline results back to Azure Event Hubs with batching and partition controls.
-- **MongoDB source** wraps change streams, exposing per-batch delivery and full-document lookup options.
-- **MongoDB sink** writes documents back to Mongo collections with insert/replace/upsert modes.
-- Additional connectors (HTTP polling, JDBC CDC, filesystem tailers, etc.) can still register at runtime via `ConnectorFactory.registerSource` / `registerSink`.
+| Option | Connectors | Description |
+| --- | --- | --- |
+| `bootstrapServers` | Kafka | Comma-separated broker list. |
+| `topic` | Kafka, Event Hubs | Source/sink topic or event hub. |
+| `groupId` | Kafka | Consumer group for checkpointing. |
+| `connectionString` | Event Hubs, MongoDB | Service connection string/URI. |
+| `checkpointStore` | All streaming connectors | Where offsets are saved (JDBC, Redis, etc.). |
 
-## Custom & External Sources
+Refer to the connector-specific docs for security settings (SASL, TLS, Azure SAS,
+Mongo credentials) and batching controls.
 
-- See [Custom Sources & JDBC Integration](custom-sources.md) for a walkthrough on building bespoke streaming sources, signalling end-of-stream, and checkpointing for restarts.
+---
 
-## Next Steps
+## 6. Built-in connectors
 
-- Review the [Usage Guide](../usage.md) for configuration patterns shared across modules.
-- When adding a connector, document its option schema under this section so downstream teams can configure it quickly.
+| Connector | Direction | Highlights |
+| --- | --- | --- |
+| Kafka | Source & Sink | Backpressure-aware batching, SASL/TLS support, per-batch metrics. |
+| Event Hubs | Source & Sink | Consumer groups, partition lease management, Azure identity options. |
+| MongoDB | Source & Sink | Change-stream support, resume tokens, upsert/replace modes. |
+
+Each connector page contains option schema tables, example configurations, and
+operational caveats.
+
+---
+
+## 7. Custom connectors
+
+- Implement `SourceConnectorProvider`/`SinkConnectorProvider` and register via
+  `META-INF/services` (see [custom-sources.md](custom-sources.md)).
+- Provide a clear option schema with validation messages—LLMs and tooling rely on
+  those hints to prompt users.
+- Reuse shared components: checkpoint store SPI, metrics listener, error policy.
+- Document new connectors under this section to keep the matrix up to date.
+
+---
+
+## 8. References
+
+| Path | Description |
+| --- | --- |
+| `fluxion-core/src/main/java/.../ConnectorRegistry.java` | Central registry for source/sink providers. |
+| `fluxion-core/src/main/java/.../SourceConnectorProvider.java` | Provider contract. |
+| `fluxion-core/src/main/java/.../SourceConnectorConfig.java` | Config builder/validation. |
+| `fluxion-docs/docs/connect/kafka.md` | Kafka-specific options and examples. |
+| `fluxion-docs/docs/connect/custom-sources.md` | SPI guide for bespoke connectors. |
+
+Run connector tests along with streaming tests:
+
+```bash
+mvn -pl fluxion-core -am test
+```
+
+This ensures connector discovery, option validation, and streaming executors are
+validated together.
