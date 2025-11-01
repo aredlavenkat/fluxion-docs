@@ -132,6 +132,8 @@ nav:
       - Overview: streaming/index.md
       - Quick Start: streaming/quickstart.md
       - Stage Compatibility: streaming/stage-compatibility.md
+    - Workflow Integration:
+      - Temporal Workflow Bridge: workflow/temporal.md
   - Operational Guides:
     - Resilience Patterns: shared/resilience.md
     - Notes for LLM Assistants: shared/llm-assistant-notes.md
