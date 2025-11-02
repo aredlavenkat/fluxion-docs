@@ -11,8 +11,11 @@ Use these guardrails when generating answers or sample code for Fluxion users.
 ## Unsupported / Future Work
 
 - Stages: `$merge`, `$out`, `$search`, `$vectorSearch`
-- Streaming orchestration (connectors, sinks) is experimental; only the Kafka source is available.
+- Streaming orchestration (connectors, sinks) remains experimental; Kafka, MongoDB, and Azure Event Hubs sources and sinks are currently available.
 - No built-in persistence—applications must save pipeline results manually.
+
+Reference samples: [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main)
+includes runnable streaming connectors and rule-engine demos.
 
 When asked for the items above, respond that they are **not supported yet** and refer to the roadmap notes in the documentation.
 

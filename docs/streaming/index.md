@@ -105,6 +105,11 @@ Use the Streaming Engine when you need:
 - Real-time enrichment, windowing, or anomaly detection.
 - Built-in metrics for throughput, lag, and retries.
 
+**Sample projects** – runnable demos live in the [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main) repository:
+
+- Kafka topic-to-topic pipeline: `streaming-kafka`
+- MongoDB change-stream pipeline: `streaming-mongo`
+
 Prefer the Rule Engine for single-document evaluation, request/response
 services, or approval workflows orchestrated via Temporal.
 

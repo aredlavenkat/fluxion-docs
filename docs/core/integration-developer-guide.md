@@ -127,23 +127,27 @@ Key points:
 ## Managing Pipeline Definitions
 
 - **Storage options**: keep pipeline JSON in source control, a config server (Spring Cloud Config, Consul), or a database table keyed by tenant. The executor is agnostic as long as you can load the JSON string.
-- **Cache parsed stages**: parsing on every request is wasteful. Cache the `List<Stage>` per pipeline identifier and invalidate the cache when your configuration changes.
+- **Cache parsed stages**: converting JSON DSL into `List<Stage>` objects allocates heavily. Cache by pipeline id + version (etag, checksum, `lastModified`) and evict when your configuration changes.
 
   ```java
-  record PipelineHandle(List<Stage> stages, Instant lastModified) {}
+  record CachedPipeline(List<Stage> stages, String version, Instant loadedAt) {}
 
-  class PipelineRepository {
-      private final ConcurrentMap<String, PipelineHandle> cache = new ConcurrentHashMap<>();
+  final class PipelineRepository {
+      private final ConcurrentMap<String, CachedPipeline> cache = new ConcurrentHashMap<>();
 
-      PipelineHandle resolve(String name) {
+      CachedPipeline resolve(String name) {
           return cache.compute(name, (key, existing) -> {
               LoadedPipeline loaded = configService.fetch(name);
-              if (existing != null && !loaded.changedSince(existing.lastModified())) {
+              if (existing != null && existing.version().equals(loaded.version())) {
                   return existing;
               }
               List<Stage> stages = DocumentParser.getStagesFromJsonArray(loaded.json());
-              return new PipelineHandle(stages, loaded.lastModified());
+              return new CachedPipeline(stages, loaded.version(), Instant.now());
           });
+      }
+
+      void invalidate(String name) {
+          cache.remove(name);
       }
   }
   ```

@@ -11,7 +11,7 @@ results to an HTTP endpoint.
 | Fluxion modules | `fluxion-core`, `fluxion-connect`, optionally `fluxion-enrich`. |
 | Kafka cluster | Bootstrap servers + topic for ingest. |
 | Runtime | Java 21+ (examples use records, builders, switch expressions). |
-| Checkpoint store | JDBC or in-memory store for offsets (shown with `JdbcCheckpointStore`). |
+| State store | Implementation of `StateStore` for offsets (examples use the in-memory store). |
 
 ## 1. Define the aggregation stages
 
@@ -36,66 +36,66 @@ stage.
 ## 2. Wire up source and sink connectors
 
 ```java
-KafkaStreamingSource source =
-    KafkaStreamingSource.builder()
-        .bootstrapServers(System.getenv("KAFKA_BOOTSTRAP"))
-        .topic("orders.v1")
-        .groupId("fluxion-ltv")
+SourceConnectorConfig sourceConfig =
+    SourceConnectorConfig.builder("kafka")
+        .option("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP"))
+        .option("topic", "orders.v1")
+        .option("groupId", "fluxion-ltv")
         .build();
 
-HttpStreamingSink sink =
-    HttpStreamingSink.builder()
-        .endpoint("https://api.example.com/ltv")
-        .method("POST")
-        .retryPolicy(RetryPolicy.exponentialBackoff())
-        .transformer(documents -> documents.stream()
-            .map(document -> Map.of(
-                "customerId", document.getString("_id"),
-                "orderCount", document.getInteger("orderCount"),
-                "lifetimeValue", document.getDouble("lifetimeValue")))
-            .toList())
+ConnectorConfig sinkConfig =
+    ConnectorConfig.builder("http", ConnectorConfig.Kind.SINK)
+        .option("endpoint", "https://api.example.com/ltv")
+        .option("allowEmpty", false)
         .build();
 ```
 
-Both connectors implement `StreamingSource` / `StreamingSink` and can be swapped
-for custom implementations as needed.
+Connector providers in `fluxion-connect` resolve these configs into runtime
+`StreamingSource` and `StreamingSink` instances, so swapping connectors only
+requires changing the config payload.
 
 ## 3. Configure the orchestrator
 
 ```java
-StreamingRuntimeConfig config =
+StageMetrics metrics = new StageMetrics();
+
+StreamingRuntimeConfig runtimeConfig =
     StreamingRuntimeConfig.builder()
-        .pipelineName("orders-ltv")
-        .batchSize(500)
-        .metricsListener(new MicrometerStreamingMetrics())
-        .checkpointStore(new JdbcCheckpointStore(dataSource))
-        .errorPolicy(StreamingErrorPolicy.retry(3))
+        .microBatchSize(500)
+        .queueCapacity(2_048)
+        .sourceQueueCapacity(32)
+        .workerThreadPoolSize(8)
         .build();
 ```
 
-The configuration captures operational concerns: batching, metrics, checkpoint
-storage, and error handling.
+`StageMetrics` captures per-stage timings and counters. The runtime config tunes
+batching, threading, and queue capacities.
 
 ## 4. Run the pipeline
 
 ```java
 StreamingPipelineDefinition definition =
-    StreamingPipelineDefinition.builder(source)
+    StreamingPipelineDefinition.builder(sourceConfig)
         .stages(JsonStageLoader.load("rules/orders-ltv.json"))
-        .sink(sink)
+        .sinkConfig(sinkConfig)
+        .pipelineId("orders-ltv")
+        .runtimeConfig(runtimeConfig)
+        .metrics(metrics)
+        .stateStore(new InMemoryStateStore())
         .build();
 
-new StreamingPipelineOrchestrator().run(definition, config);
+StreamingPipelineHandle handle = new StreamingPipelineOrchestrator().run(definition);
 ```
 
 The orchestrator handles the execution loop until the source signals completion
-or a fatal error policy triggers a shutdown.
+or a fatal error policy triggers a shutdown. `handle.metrics()` returns the same
+`StageMetrics` instance registered in `MetricsRegistry`.
 
 ## 5. Observe and iterate
 
-- Use the built-in metrics hooks (`StreamingMetricsListener`) to track lag,
+- Use the built-in stage metrics (`StageMetrics` + `MetricsRegistry`) to track lag,
   throughput, and error rates.
-- Checkpoint stores allow controlled restarts by persisting offsets/cursors.
+- State stores allow controlled restarts by persisting offsets/cursors.
 - Adjust error policies to determine whether a failure retries, skips, or routes
   events to a dead-letter queue.
 
@@ -112,3 +112,5 @@ or a fatal error policy triggers a shutdown.
    [Stage Support Matrix](stage-compatibility.md).
 6. Run the streaming module tests with `mvn -pl fluxion-core -am test` to
    validate connectors and executors before deploying.
+7. Try the runnable demos in [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main)
+   (`streaming-kafka` for Kafka, `streaming-mongo` for MongoDB).

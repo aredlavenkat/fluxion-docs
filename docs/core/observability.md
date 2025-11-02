@@ -63,16 +63,27 @@ environment variables (e.g., `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_RESOURCE_ATTRI
 
 ## 3. Custom listeners & logging
 
-For bespoke observability (logging, proprietary metrics), register your own
-listeners:
+For bespoke observability (logging, proprietary metrics), attach custom
+`StageMetrics` instances:
 
 - **Rules:** consume `RuleExecutionResult` and inspect `RuleExecutionContext.stageMetrics()`.
-- **Streaming:** implement `StreamingMetricsListener` to receive batch/lag/queue
-  metrics alongside stage updates.
+- **Streaming:** supply a custom `StageMetrics` via `StreamingPipelineDefinition.Builder#metrics(...)`
+  and read snapshots from `StreamingPipelineHandle.metrics()` or `MetricsRegistry.getInstance()`.
 
 ```java
-StreamingRuntimeConfig config = StreamingRuntimeConfig.builder()
-        .metricsListener(new MicrometerStreamingMetrics(registry))
+class LoggingStageMetrics extends StageMetrics {
+    @Override
+    public void record(String stageId, int in, int out, long nanos) {
+        super.record(stageId, in, out, nanos);
+        log.info("stage={} in={} out={} duration={}µs",
+                 stageId, in, out, nanos / 1_000);
+    }
+}
+
+StageMetrics metrics = new LoggingStageMetrics();
+StreamingPipelineDefinition definition = StreamingPipelineDefinition.builder(sourceConfig)
+        .metrics(metrics)
+        // ...
         .build();
 ```
 
@@ -108,10 +119,11 @@ mvn -pl fluxion-core test -Dtest=*StageMetrics*
 
 | Path | Description |
 | --- | --- |
-| `fluxion-core/src/main/java/.../StageMetrics.java` | Captures stage-level metrics. |
-| `fluxion-core/src/main/java/.../StageMetricsOtelBridge.java` | OpenTelemetry bridge implementation. |
-| `fluxion-core/src/main/java/.../StreamingMetricsListener.java` | Streaming metrics hook. |
-| `fluxion-core/src/main/java/.../engine/telemetry/OpenTelemetryManager.java` | Helper for OTel SDK integration. |
+| `fluxion-core/src/main/java/ai/fluxion/core/aggregation/stages/StageMetrics.java` | Captures stage-level metrics. |
+| `fluxion-core/src/main/java/ai/fluxion/core/engine/metrics/MetricsRegistry.java` | Registry exposing pipeline snapshots. |
+| `fluxion-core/src/main/java/ai/fluxion/core/engine/streaming/orchestrator/StreamingPipelineHandle.java` | Accesses streaming metrics at runtime. |
+| `fluxion-core/src/main/java/ai/fluxion/core/engine/observability/StageMetricsOtelBridge.java` | OpenTelemetry bridge implementation. |
+| `fluxion-core/src/main/java/ai/fluxion/core/engine/telemetry/OpenTelemetryManager.java` | Helper for OTel SDK integration. |
 | OpenTelemetry | [Metrics overview](https://opentelemetry.io/docs/specs/otel/metrics/). |
 
 For rule-engine specific metrics, see [`docs/rules/glossary.md`](../rules/glossary.md).
