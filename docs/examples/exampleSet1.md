@@ -105,6 +105,97 @@ when building tutorials.
 
 ---
 
+## Scenario 4 – Nested sub-pipelines (sequential + parallel)
+
+| Goal | Reuse existing cleanse/enrichment pipelines and merge their outputs. |
+| --- | --- |
+| Features | `$subPipeline` (sequential + parallel), `$project` |
+| Where used | Studio prototype for orchestrated enrichments |
+
+```json
+[
+  {
+    "$subPipeline": [
+      "cleanse@2",
+      {
+        "parallel": [
+          "enrich-geo",
+          { "ref": "enrich-fraud", "globals": { "$$TENANT": "$tenantId" }, "onError": "skip" }
+        ],
+        "merge": "concat"
+      },
+      { "pipeline": [ { "$project": { "value": 1, "geo": 1, "fraudScore": 1 } } ] }
+    ]
+  }
+]
+```
+
+**Tips**
+
+- Registered pipelines (`cleanse@2`, `enrich-*`) stay reusable across flows.
+- Use `onError: "skip"` on non-critical branches so the parent pipeline keeps flowing even if a child fails.
+- Switch `merge` to `facet` when you want downstream stages to inspect branch outputs separately.
+
+---
+
+## Scenario 5 – Sub-pipeline with upstream filter and downstream group
+
+| Goal | Filter recent events, run a reusable enrichment subflow, then group results. |
+| --- | --- |
+| Features | `$match`, `$set`, `$subPipeline`, `$group` |
+| Where used | Analytics service aggregations |
+
+```json
+[
+  { "$match": { "eventDate": { "$gte": "2025-01-01" } } },
+  { "$set": { "tenantId": { "$ifNull": ["$tenantId", "default"] } } },
+  {
+    "$subPipeline": [
+      "normalize@3",
+      {
+        "parallel": [
+          "enrich-geo",
+          { "ref": "enrich-fraud", "onError": "bubble" }
+        ],
+        "merge": "concat"
+      }
+    ]
+  },
+  {
+    "$group": {
+      "_id": "$tenantId",
+      "eventCount": { "$sum": 1 },
+      "avgScore": { "$avg": "$fraudScore" }
+    }
+  }
+]
+```
+
+**Input sample**
+
+```json
+[
+  { "eventDate": "2025-03-01", "tenantId": "acme", "fraudScore": 0.5 },
+  { "eventDate": "2024-12-15", "tenantId": "beta", "fraudScore": 0.2 }
+]
+```
+
+**Output sample**
+
+```json
+[
+  { "_id": "acme", "eventCount": 1, "avgScore": 0.5 }
+]
+```
+
+**Tips**
+
+- Reuse existing pipelines (`normalize`, `enrich-*`) without duplicating their stages.
+- Keep `$match` and `$set` outside the sub-pipeline to share the same filters/globals across all branches.
+- Group results after the subflow to report per-tenant aggregates.
+
+---
+
 ## Running the gallery locally
 
 Use the standard executor to run any of the pipelines above:

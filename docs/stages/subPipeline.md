@@ -41,6 +41,24 @@ Invoke one or more child pipelines (registered or inline) from within the curren
 }
 ```
 
+**Input**
+
+```json
+[
+  { "value": 10, "tenantId": "acme" },
+  { "value": 5, "tenantId": "globex" }
+]
+```
+
+**Output**
+
+```json
+[
+  { "value": 11, "tenantId": "acme" },
+  { "value": 5.5, "tenantId": "globex" }
+]
+```
+
 ### Parallel enrichment with facet merge
 
 ```json
@@ -64,3 +82,29 @@ Result shape:
 ```
 
 Use `$project`, `$unwind`, or downstream stages to pick the facet you need or reshape the output.
+
+### Nested mix of sequential + parallel
+
+```json
+{
+  "$subPipeline": [
+    "cleanse@v2",
+    {
+      "parallel": [
+        "enrich-geo",
+        {
+          "ref": "enrich-fraud",
+          "globals": { "$$TENANT": "$tenantId" },
+          "onError": "skip"
+        }
+      ],
+      "merge": "concat"
+    },
+    {
+      "pipeline": [ { "$project": { "value": 1, "geo": 1, "fraudScore": 1 } } ]
+    }
+  ]
+}
+```
+
+This example cleanses input documents, runs two enrichments in parallel (skipping the fraud branch if it fails), concatenates their outputs, and finally projects the merged fields before returning to the parent pipeline.

@@ -27,6 +27,7 @@ nav:
         - $replaceWith: stages/replaceWith.md
         - $set: stages/set.md
         - $fill: stages/fill.md
+        - $subPipeline: stages/subPipeline.md
         - $skip: stages/skip.md
         - $sort: stages/sort.md
         - $sortByCount: stages/sortByCount.md
