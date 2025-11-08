@@ -37,6 +37,38 @@ PipelineExecutor executor = new PipelineExecutor();
 List<Document> output = executor.run(input, stages, Map.of());
 ```
 
+### Nested pipelines with `$subPipeline`
+
+Use `$subPipeline` when you need to invoke child pipelines (registered or inline) from within a parent pipeline.
+
+Sequential example:
+
+```json
+{
+  "$subPipeline": [
+    "cleanse@1",
+    { "pipeline": [ { "$addFields": { "processed": true } } ] },
+    "post-process"
+  ]
+}
+```
+
+Parallel example:
+
+```json
+{
+  "$subPipeline": [
+    {
+      "parallel": [ "enrich-geo", "enrich-fraud" ],
+      "merge": "facet"
+    }
+  ]
+}
+```
+
+- Each entry in the array executes in order. A string references a registered pipeline (`name@version`), while `{ "pipeline": [ ... ] }` inlines stages.
+- `parallel` lets you run multiple child pipelines concurrently; set `merge` to `concat`, `zip`, or `facet` to control how the branch outputs are combined.
+
 ---
 
 ## 3. Extension points
