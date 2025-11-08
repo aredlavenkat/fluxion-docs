@@ -108,3 +108,29 @@ Use `$project`, `$unwind`, or downstream stages to pick the facet you need or re
 ```
 
 This example cleanses input documents, runs two enrichments in parallel (skipping the fraud branch if it fails), concatenates their outputs, and finally projects the merged fields before returning to the parent pipeline.
+
+### Registering child pipelines
+
+Named references (e.g., `"cleanse@v2"`, `"enrich-geo"`) resolve through `PipelineRegistry`. Register reusable pipelines during bootstrap:
+
+```json
+{
+  "pipelines": [
+    {
+      "name": "cleanse",
+      "version": "2",
+      "stages": [
+        { "$project": { "value": "$value" } }
+      ]
+    },
+    {
+      "name": "enrich-geo",
+      "stages": [
+        { "$addFields": { "geo": "US" } }
+      ]
+    }
+  ]
+}
+```
+
+Load this DSL at startup, register each entry with `PipelineRegistry`, or embed the stages inline via `{ "pipeline": [ ... ] }` if you don’t need reuse.
