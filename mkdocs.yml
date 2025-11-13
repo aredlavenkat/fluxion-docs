@@ -80,6 +80,7 @@ nav:
         - $reverseArray: operators/reverseArray.md
         - $round: operators/round.md
         - $setField: operators/setField.md
+        - $agentCall: operators/agentCall.md
         - $size: operators/size.md
         - $slice: operators/slice.md
         - $split: operators/split.md

@@ -3,6 +3,8 @@
 High-level map of Fluxion modules, runtimes, and extension points. Use this to
 select the right entry point and understand how pieces compose.
 
+![Fluxion platform architecture](../assets/platform-architecture.png)
+
 ---
 
 ## 1. Layered architecture
