@@ -11,6 +11,8 @@ nav:
     - Fluxion Core:
       - Overview: core/index.md
       - Integration Guide: core/integration-developer-guide.md
+      - Developer Guide: core/developer-guide.md
+      - Observability: core/observability.md
       - Stages:
         - Overview: stages/index.md
         - $addFields: stages/addFields.md
