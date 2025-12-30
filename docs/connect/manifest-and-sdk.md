@@ -35,6 +35,132 @@ Every operation declares an `execution.type` (do not invent new types):
    - Register Spring beans for `javaBean`/`httpServer`/`pipelineCall` executions.
 5. Enforce secrets/multi-tenancy via `ConnectorContext.resolveSecret`, keep handlers stateless, use discovery endpoints for catalogs.
 
+## Sample manifests by execution.type
+
+**http (action)**
+```json
+{
+  "operations": { "echo": "echo" },
+  "operationDefs": {
+    "echo": {
+      "operationId": "echo",
+      "kind": "action",
+      "execution": {
+        "type": "http",
+        "method": "POST",
+        "urlTemplate": "https://api.example.com/echo",
+        "timeoutMs": 5000
+      }
+    }
+  }
+}
+```
+
+**javaBean (action)**
+```json
+{
+  "operations": { "add": "add" },
+  "operationDefs": {
+    "add": {
+      "operationId": "add",
+      "kind": "action",
+      "execution": {
+        "type": "javaBean",
+        "beanName": "addHandler"
+      }
+    }
+  }
+}
+```
+
+**pipelineCall (action)**
+```json
+{
+  "operations": { "invoke": "invoke" },
+  "operationDefs": {
+    "invoke": {
+      "operationId": "invoke",
+      "kind": "action",
+      "execution": {
+        "type": "pipelineCall",
+        "targetPipeline": "downstream.orders",
+        "version": "1.0.0"
+      }
+    }
+  }
+}
+```
+
+**httpServer (trigger/webhook)**
+```json
+{
+  "operations": { "ingest": "ingest" },
+  "operationDefs": {
+    "ingest": {
+      "operationId": "ingest",
+      "kind": "trigger",
+      "execution": {
+        "type": "httpServer",
+        "path": "/webhook",
+        "method": "POST"
+      }
+    }
+  }
+}
+```
+
+**polling (trigger)**
+```json
+{
+  "operations": { "poll": "poll" },
+  "operationDefs": {
+    "poll": {
+      "operationId": "poll",
+      "kind": "trigger",
+      "execution": {
+        "type": "polling",
+        "intervalMillis": 30000
+      }
+    }
+  }
+}
+```
+
+**reactiveStream (trigger)**
+```json
+{
+  "operations": { "stream": "stream" },
+  "operationDefs": {
+    "stream": {
+      "operationId": "stream",
+      "kind": "trigger",
+      "execution": {
+        "type": "reactiveStream",
+        "stream": "orders",
+        "group": "connectors"
+      }
+    }
+  }
+}
+```
+
+**timer (trigger)**
+```json
+{
+  "operations": { "tick": "tick" },
+  "operationDefs": {
+    "tick": {
+      "operationId": "tick",
+      "kind": "trigger",
+      "execution": {
+        "type": "timer",
+        "cron": "PT1M"
+      }
+    }
+  }
+}
+```
+
 ---
 
 ## Manifest shape (JSON/YAML)
