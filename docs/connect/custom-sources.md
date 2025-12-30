@@ -179,13 +179,34 @@ You can still enable parallelism by adjusting `StreamingRuntimeConfig` (e.g.,
 
 ---
 
-## 9. References
+## 9. Discover/catalog (optional)
+
+If your source exposes a catalog (for UI/CLI use), implement `discoverStreams` on
+your `SourceConnectorProvider` and return `ConnectorStreamDescriptor` entries:
+
+- `name`, `namespace` — identify the stream.
+- `jsonSchema` — optional schema hints for tooling.
+- `cursorFields` / `sourceDefinedCursor` — set `sourceDefinedCursor=true` if the
+  connector owns resume tokens (Kafka offsets, EventHub sequence numbers, Mongo
+  resume tokens). Otherwise list candidate cursor fields.
+- `primaryKeys` — optional PK hints for sinks that upsert/replace.
+- `supportedSyncModes` — `FULL_REFRESH` and/or `INCREMENTAL`.
+
+Pipeline definitions stay connector-agnostic; discovery is served via the
+pipeline-service discovery endpoints.
+
+---
+
+## 10. References
 
 | Path | Description |
 | --- | --- |
 | `fluxion-core/src/main/java/.../StreamingSource.java` | Core source interface. |
 | `fluxion-core/src/main/java/.../AbstractAsyncStreamingSource.java` | Base class with polling thread + queue. |
 | `fluxion-core/src/main/java/.../StreamingPipelineExecutor.java` | Orchestrator entry point. |
+| `fluxion-core/src/main/java/.../ConnectorStreamDescriptor.java` | Catalog metadata for streams (name/namespace/schema/cursor hints). |
+| `fluxion-core/src/main/java/.../SourceConnectorProvider.java` | Override `discoverStreams` to expose catalogs. |
 | `fluxion-docs/docs/streaming/quickstart.md` | Pipeline example (Kafka → HTTP). |
+| `fluxion-docs/docs/connect/index.md` | Connector overview and discovery usage. |
 
 Use this template to add JDBC or other bespoke sources to the Fluxion streaming runtime.

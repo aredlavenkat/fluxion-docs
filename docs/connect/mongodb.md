@@ -79,7 +79,16 @@ sink:
 
 ---
 
-## 4. Troubleshooting
+## 4. Stream catalogs (for UIs/CLIs)
+
+- **Source** (`discoverStreams`): `name=collection`, `namespace=database`, `supportedSyncModes=[FULL_REFRESH, INCREMENTAL]`, `primaryKeys=[["_id"]]`, `cursorFields=["resumeToken"]`, `sourceDefinedCursor=true` (connector-owned).
+- **Sink** (`destinationStreams`): `name=collection`, `namespace=database`, `primaryKeys=[keyField]`, `supportedSyncModes=[FULL_REFRESH]`.
+
+Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs connector-agnostic.
+
+---
+
+## 5. Troubleshooting
 
 | Symptom | Possible cause | Remedy |
 | --- | --- | --- |
@@ -90,7 +99,7 @@ sink:
 
 ---
 
-## 5. Testing
+## 6. Testing
 
 - Run MongoDB connector tests:
   ```bash
@@ -101,7 +110,7 @@ sink:
 
 ---
 
-## 6. References
+## 7. References
 
 | Path | Description |
 | --- | --- |

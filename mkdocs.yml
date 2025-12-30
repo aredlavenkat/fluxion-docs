@@ -104,6 +104,8 @@ nav:
         - $zip: operators/zip.md
     - Fluxion Connect:
       - Overview: connect/index.md
+      - Manifest & SDK: connect/manifest-and-sdk.md
+      - Developer Guide: connect/developer-guide.md
       - Kafka Source: connect/kafka.md
       - Event Hubs: connect/eventhub.md
       - MongoDB: connect/mongodb.md

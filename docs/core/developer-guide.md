@@ -28,9 +28,9 @@ Run the suite after any API, operator, or stage change to keep regressions out o
 
 ## Documentation ecosystem
 
-- **Core overview**: [fluxion-docs/docs/core/index.md](https://aredlavenkat.github.io/fluxion-docs/core/index.html)
-- **This developer guide**: [fluxion-docs/docs/core/developer-guide.md](https://aredlavenkat.github.io/fluxion-docs/core/developer-guide.html)
-- **Stage reference**: [fluxion-docs/docs/stages/index.md](https://aredlavenkat.github.io/fluxion-docs/stages/index.html)
+- **Core overview**: [fluxion-docs/docs/core/index.md](https://aredlavenkat.github.io/fluxion-docs/core/)
+- **This developer guide**: [fluxion-docs/docs/core/developer-guide.md](https://aredlavenkat.github.io/fluxion-docs/core/developer-guide/)
+- **Stage reference**: [fluxion-docs/docs/stages/index.md](https://aredlavenkat.github.io/fluxion-docs/stages/)
 - **Operator reference**: [fluxion-docs/docs/operators/index.md](https://aredlavenkat.github.io/fluxion-docs/operators/)
 - **Streaming reference**: [fluxion-docs/docs/streaming/index.md](https://aredlavenkat.github.io/fluxion-docs/streaming/)
 

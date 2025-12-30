@@ -25,6 +25,7 @@ and sinks beyond in-process pipelines.
 | Kafka Source/Sink | [connect/kafka.md](kafka.md) | **Beta** | Reference implementation of the connector SPI. |
 | Event Hubs Source/Sink | [connect/eventhub.md](eventhub.md) | **Alpha** | Azure Event Hubs ingestion/delivery. |
 | MongoDB Source/Sink | [connect/mongodb.md](mongodb.md) | **Alpha** | MongoDB change streams + writers. |
+| Developer Guide | [connect/developer-guide.md](developer-guide.md) | **How-to** | Build and package connectors (manifest + SDK + SPI). |
 | Custom Sources | [connect/custom-sources.md](custom-sources.md) | **How-to** | Build bespoke connectors with the SPI. |
 
 > When asked about connectors other than those listed (HTTP, JDBC CDC, etc.),
@@ -39,7 +40,9 @@ and sinks beyond in-process pipelines.
 | `SourceConnectorProvider` / `SinkConnectorProvider` | Declarative metadata (id, description, option schema). |
 | `SourceConnectorConfig` / `ConnectorConfig` | User-supplied options validated against the schema. |
 | `SourceConnectorContext` | Provides checkpoint stores, pipeline id, metrics. |
-| `ConnectorRegistry` | Discovers providers via ServiceLoader, validates configs, and instantiates connectors. |
+| `ConnectorRegistry` | Discovers providers via ServiceLoader, validates configs, exposes catalog discovery, and instantiates connectors. |
+| `ConnectorStreamDescriptor` | Catalog metadata for streams/sinks (name, namespace, schema, sync modes, cursor fields). |
+| `ConnectorFactory` | Helper to create sources/sinks and to discover source/sink catalogs. |
 
 ---
 
@@ -89,6 +92,20 @@ and sinks beyond in-process pipelines.
    new StreamingPipelineOrchestrator().run(definition, runtimeConfig);
    ```
 
+5. **(Optional) Discover stream catalogs**
+
+   ```java
+   // Source streams (e.g., Kafka topic catalog)
+   List<ConnectorStreamDescriptor> sources =
+           ConnectorFactory.discoverSourceStreams(source);
+
+   // Sink streams (e.g., Mongo collection schema + PK)
+   List<ConnectorStreamDescriptor> sinks =
+           ConnectorFactory.destinationStreams(sink);
+   ```
+
+   Use these catalogs to display metadata in UIs/CLIs and to drive cursor/PK choices without baking connector details into pipeline definitions.
+
 ---
 
 ## 5. Configuration table (common options)
@@ -96,10 +113,12 @@ and sinks beyond in-process pipelines.
 | Option | Connectors | Description |
 | --- | --- | --- |
 | `bootstrapServers` | Kafka | Comma-separated broker list. |
-| `topic` | Kafka, Event Hubs | Source/sink topic or event hub. |
+| `topic` | Kafka, Event Hubs | Source/sink topic or event hub. Also appears in stream descriptors. |
 | `groupId` | Kafka | Consumer group for checkpointing. |
 | `connectionString` | Event Hubs, MongoDB | Service connection string/URI. |
 | `checkpointStore` | All streaming connectors | Where offsets are saved (JDBC, Redis, etc.). |
+| `queueCapacity` | Kafka, Event Hubs, Mongo source | Internal handoff queue size (source to pipeline). |
+| `cursorField` (implicit) | Source-defined for Kafka/EventHub/Mongo | Cursor is connector-owned; pipeline stays cursor-agnostic. |
 
 Refer to the connector-specific docs for security settings (SASL, TLS, Azure SAS,
 Mongo credentials) and batching controls.
@@ -110,9 +129,9 @@ Mongo credentials) and batching controls.
 
 | Connector | Direction | Highlights |
 | --- | --- | --- |
-| Kafka | Source & Sink | Backpressure-aware batching, SASL/TLS support, per-batch metrics. |
-| Event Hubs | Source & Sink | Consumer groups, partition lease management, Azure identity options. |
-| MongoDB | Source & Sink | Change-stream support, resume tokens, upsert/replace modes. |
+| Kafka | Source & Sink | Backpressure-aware batching, SASL/TLS support, per-batch metrics; source-defined cursor (offset). |
+| Event Hubs | Source & Sink | Consumer groups, partition lease management; source-defined cursor (sequence number). |
+| MongoDB | Source & Sink | Change-stream support, resume tokens; upsert/replace modes; source-defined cursor (resume token). |
 
 Each connector page contains option schema tables, example configurations, and
 operational caveats.

@@ -96,7 +96,18 @@ passed through untouched.
 
 ---
 
-## 4. Security options
+## 4. Stream catalogs (for UIs/CLIs)
+
+Kafka connectors expose catalogs for discovery endpoints:
+
+- **Source** (`discoverStreams`): `name=topic`, `namespace=groupId or "kafka"`, `supportedSyncModes=[FULL_REFRESH, INCREMENTAL]`, `cursorFields=["offset"]`, `sourceDefinedCursor=true` (offsets are connector-owned).
+- **Sink** (`destinationStreams`): `name=topic`, `namespace=bootstrapServers`, `supportedSyncModes=[FULL_REFRESH]`.
+
+Fetch these via `/api/connectors/discovery/sources|sinks` so pipeline specs stay connector-agnostic.
+
+---
+
+## 5. Security options
 
 | Scenario | Required settings |
 | --- | --- |
@@ -110,7 +121,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ---
 
-## 5. Troubleshooting
+## 6. Troubleshooting
 
 | Symptom | Possible cause | Remedy |
 | --- | --- | --- |
@@ -121,7 +132,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ---
 
-## 6. Testing
+## 7. Testing
 
 - Run connector tests alongside streaming tests:
   ```bash
@@ -131,7 +142,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ---
 
-## 7. References
+## 8. References
 
 | Path | Description |
 | --- | --- |

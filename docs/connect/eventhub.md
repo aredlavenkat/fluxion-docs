@@ -78,7 +78,16 @@ sink:
 
 ---
 
-## 4. Troubleshooting
+## 4. Stream catalogs (for UIs/CLIs)
+
+- **Source** (`discoverStreams`): `name=eventHubName`, `namespace=eventhub`, `supportedSyncModes=[FULL_REFRESH, INCREMENTAL]`, `cursorFields=["sequenceNumber"]`, `sourceDefinedCursor=true` (connector-owned).
+- **Sink** (`destinationStreams`): `name=eventHubName`, `namespace=eventhub`, `supportedSyncModes=[FULL_REFRESH]`.
+
+Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs connector-agnostic.
+
+---
+
+## 5. Troubleshooting
 
 | Symptom | Possible cause | Remedy |
 | --- | --- | --- |
@@ -89,7 +98,7 @@ sink:
 
 ---
 
-## 5. Testing
+## 6. Testing
 
 - Run Event Hubs connector tests:
   ```bash
@@ -99,7 +108,7 @@ sink:
 
 ---
 
-## 6. References
+## 7. References
 
 | Path | Description |
 | --- | --- |
