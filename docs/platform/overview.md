@@ -1,9 +1,9 @@
 # Platform Architecture Overview
 
-High-level map of Fluxion modules, runtimes, and extension points. Use this to
+High-level map of SrotaX modules, runtimes, and extension points. Use this to
 select the right entry point and understand how pieces compose.
 
-![Fluxion platform architecture](../assets/platform-architecture.png)
+![SrotaX platform architecture](../assets/platform-architecture.png)
 
 ---
 
@@ -14,16 +14,16 @@ Connect  →  Streaming Engine  →  Rule Engine
                   │                │
           └──────►│                │
                   ▼                │
-              Fluxion Core  ◄──────┘
+              SrotaX Core  ◄──────┘
                     │
                   Enrich
 ```
 
 | Layer | Purpose |
 | --- | --- |
-| Fluxion Core | Deterministic aggregation engine (stages/operators), expression evaluator, metrics, registries. |
-| Fluxion Connect | Source/sink connectors (Kafka, Event Hubs, MongoDB, custom SPI). |
-| Fluxion Enrich | Operators that call external systems (`$httpCall`, `$sqlQuery`). |
+| SrotaX Core | Deterministic aggregation engine (stages/operators), expression evaluator, metrics, registries. |
+| SrotaX Connect | Source/sink connectors (Kafka, Event Hubs, MongoDB, custom SPI). |
+| SrotaX Enrich | Operators that call external systems (`$httpCall`, `$sqlQuery`). |
 | Streaming Engine | Always-on pipelines (fetch → transform → deliver → checkpoint). |
 | Rule Engine | JSON/DSL-defined rule sets for decisioning and governance workflows. |
 
@@ -53,12 +53,12 @@ Connect  →  Streaming Engine  →  Rule Engine
 
 ---
 
-## 4. Extending Fluxion
+## 4. Extending SrotaX
 
 1. **Add capabilities at the lowest layer.**
-   - New operator/stage → contribute to Fluxion Core.
-   - New connector → implement SPI in Fluxion Connect.
-   - New enrichment behaviour → extend Fluxion Enrich.
+   - New operator/stage → contribute to SrotaX Core.
+   - New connector → implement SPI in SrotaX Connect.
+   - New enrichment behaviour → extend SrotaX Enrich.
 2. **Expose through runtimes.** Surface new operators/connectors to rule/streaming
    engines so users can adopt them immediately.
 3. **Document + test.** Update docs/tests alongside the new contribution to keep

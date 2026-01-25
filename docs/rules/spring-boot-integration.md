@@ -1,8 +1,8 @@
 # Spring Boot Starter Integration
 
-This guide shows how to embed the Fluxion rule engine inside a Spring Boot application using the `fluxion-rules-spring-boot-starter`. It covers dependency wiring, rule-set discovery, REST evaluation, and operational telemetry through Micrometer and Actuator.
+This guide shows how to embed the SrotaX rule engine inside a Spring Boot application using the `fluxion-rules-spring-boot-starter`. It covers dependency wiring, rule-set discovery, REST evaluation, and operational telemetry through Micrometer and Actuator.
 
-> **Requirements**: Spring Boot 3.2+, Java 21, Fluxion `0.0.1-SNAPSHOT` (or later).
+> **Requirements**: Spring Boot 3.2+, Java 21, SrotaX `0.0.1-SNAPSHOT` (or later).
 
 ## 1. Add the starter dependency
 
@@ -22,7 +22,7 @@ This guide shows how to embed the Fluxion rule engine inside a Spring Boot appli
     implementation("ai.fluxion:fluxion-rules-spring-boot-starter:$fluxionVersion")
     ```
 
-The starter pulls in Spring Boot autoconfiguration, the Fluxion rule engine, and optional Actuator/Micrometer integrations.
+The starter pulls in Spring Boot autoconfiguration, the SrotaX rule engine, and optional Actuator/Micrometer integrations.
 
 ## 2. Provide rule-set JSON
 
@@ -68,7 +68,7 @@ spring:
   application:
     name: fluxion-rules-service
 
-fluxion:
+SrotaX:
   rules:
     locations:
       - classpath:rules/*.json
@@ -81,12 +81,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,fluxionRules
+        include: health,info,SrotaXRules
 ```
 
 Key points:
 
-- `locations` accepts any Spring `Resource` pattern (`classpath*:rules/*.json`, `file:/etc/fluxion/*.json`, etc.).
+- `locations` accepts any Spring `Resource` pattern (`classpath*:rules/*.json`, `file:/etc/SrotaX/*.json`, etc.).
 - `fail-on-error=false` lets the app boot even when some JSON is invalid; errors are reported via Actuator.
 - `registry-enabled=false` skips the in-memory `RuleSetRegistry` if you provide your own.
 - `evaluation-service-enabled=false` disables the convenience `RuleEvaluationService` bean.
@@ -98,7 +98,7 @@ All starter settings share the `fluxion.rules.` prefix:
 | Property | Description | Default |
 | --- | --- | --- |
 | `directory` | Legacy filesystem directory scanned when `locations` is empty. Relative paths resolve against the application working directory. | `rules` |
-| `locations` | List of Spring `Resource` patterns (e.g. `classpath*:rules/*.json`, `file:/etc/fluxion/*.json`). When empty the starter falls back to `directory`. | `[]` |
+| `locations` | List of Spring `Resource` patterns (e.g. `classpath*:rules/*.json`, `file:/etc/SrotaX/*.json`). When empty the starter falls back to `directory`. | `[]` |
 | `fail-on-error` | Fail startup if discovery fails or JSON cannot be parsed. When `false`, errors are logged and surfaced via Actuator. | `true` |
 | `require-explicit-id` | Enforce rule-set `id` values in JSON. When `false`, ids fall back to the file name. | `true` |
 | `registry-enabled` | Publish the auto-configured `RuleSetRegistry` bean. Disable when you provide your own registry implementation. | `true` |
@@ -168,14 +168,14 @@ RuleEvaluationResult evaluateManual(String ruleSetId, Map<String, Object> payloa
 
 With `spring-boot-starter-actuator` on the classpath:
 
-- `/actuator/health/fluxionRules` includes `ruleSetCount`, `lastLoaded`, and a list of non-fatal discovery errors.
-- `/actuator/fluxionRules` returns rule-set descriptors (`id`, `name`, `version`, `ruleCount`, `metadata`, `source`) and the same error payload.
+- `/actuator/health/SrotaXRules` includes `ruleSetCount`, `lastLoaded`, and a list of non-fatal discovery errors.
+- `/actuator/SrotaXRules` returns rule-set descriptors (`id`, `name`, `version`, `ruleCount`, `metadata`, `source`) and the same error payload.
 - Micrometer gauges are auto-bound: 
   - `fluxion.rules.rule_sets` – number of loaded rule sets
   - `fluxion.rules.load_errors` – non-fatal error count (only increments when `fail-on-error=false`)
   - `fluxion.rules.last_loaded_epoch_millis` – epoch timestamp of the last successful load
 
-Example `/actuator/fluxionRules` response:
+Example `/actuator/SrotaXRules` response:
 
 ```json
 {
@@ -206,7 +206,7 @@ Use `ApplicationContextRunner` to verify autoconfiguration:
 
 ```java
 new ApplicationContextRunner()
-        .withConfiguration(AutoConfigurations.of(FluxionRulesAutoConfiguration.class))
+        .withConfiguration(AutoConfigurations.of(SrotaXRulesAutoConfiguration.class))
         .withPropertyValues("fluxion.rules.locations=classpath:rules/*.json")
         .run(context -> {
             assertThat(context).hasSingleBean(RuleSetRegistry.class);
@@ -235,7 +235,7 @@ The starter honours the rule-engine Service Provider Interfaces (SPIs), so any c
 1. **Create a contributor class.**
    - Actions: implement `ai.fluxion.rules.spi.RuleActionContributor` and return a `Map<String, RuleAction>`.
    - Hooks: implement `ai.fluxion.rules.spi.RuleHookContributor` and return maps for `RuleHook` and/or `RuleSetHook`.
-   - Both delegate to the shared `ai.fluxion.core.pipeline` infrastructure, so any action/hook you publish can be reused by other Fluxion engines (e.g., streaming) without additional wiring.
+   - Both delegate to the shared `ai.fluxion.core.pipeline` infrastructure, so any action/hook you publish can be reused by other SrotaX engines (e.g., streaming) without additional wiring.
 2. **Register with ServiceLoader.** Add a descriptor file under `META-INF/services/` containing the fully-qualified class name.
 3. **Package on the classpath.** Include the contributor jar in your application; the starter’s registries load it via `ServiceLoader`.
 4. **Reference by name in DSL/Java.** Use the action/hook names in rule JSON or builder APIs (`builder.addHookByName("audit-before")`).

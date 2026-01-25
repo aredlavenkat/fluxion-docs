@@ -1,8 +1,8 @@
 # Core Platform Overview
 
-Fluxion Core is the foundation for every module. It houses the pipeline executor,
+SrotaX Core is the foundation for every module. It houses the pipeline executor,
 JSON parsers, stage/operator registries, and extension points you use to embed
-Fluxion in applications or build custom stages.
+SrotaX in applications or build custom stages.
 
 ---
 
@@ -10,7 +10,7 @@ Fluxion in applications or build custom stages.
 
 | Requirement | Notes |
 | --- | --- |
-| Fluxion dependency | Add `ai.fluxion:fluxion-core` to your build. |
+| SrotaX dependency | Add `ai.fluxion:fluxion-core` to your build. |
 | Runtime | Java 21+ (same baseline as the rest of the platform). |
 | JSON pipelines | Store pipeline definitions as JSON or build them programmatically. |
 | Optional | `fluxion-enrich`, `fluxion-connect`, `fluxion-rules` when needed. |
@@ -124,4 +124,4 @@ mvn -pl fluxion-core test
 | `fluxion-core/src/main/java/.../OperatorRegistry.java` | Operator discovery and registration. |
 | `fluxion-core/src/test/java/...` | Regression tests covering pipeline behaviour. |
 
-Keep these references handy when extending Fluxion or integrating it into new services.
+Keep these references handy when extending SrotaX or integrating it into new services.

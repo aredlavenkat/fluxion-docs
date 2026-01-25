@@ -139,6 +139,6 @@ It evaluates a condition and returns one of two expressions depending on whether
 ## 🧠 Notes
 
 - Flexible control structure in aggregation pipelines
-- Both array and object syntax are supported by MongoDB (and Fluxion)
+- Both array and object syntax are supported by MongoDB (and SrotaX)
 
 ---

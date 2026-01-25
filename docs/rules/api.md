@@ -1,6 +1,6 @@
 # API Reference
 
-This page summarises the primary Java types involved in Fluxion's rule engine. It is not a replacement for Javadoc, but it captures the relationships and most frequently used methods so tooling and documentation generators can cross-link them.
+This page summarises the primary Java types involved in SrotaX's rule engine. It is not a replacement for Javadoc, but it captures the relationships and most frequently used methods so tooling and documentation generators can cross-link them.
 
 ## Domain model
 

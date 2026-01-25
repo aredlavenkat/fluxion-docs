@@ -1,6 +1,6 @@
 # Extending the Rule Engine
 
-Fluxion exposes ServiceLoader-based service provider interfaces (SPIs) for adding behaviours without modifying core modules.
+SrotaX exposes ServiceLoader-based service provider interfaces (SPIs) for adding behaviours without modifying core modules.
 
 ## Custom aggregation stages
 

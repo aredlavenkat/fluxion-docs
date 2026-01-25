@@ -164,7 +164,7 @@ You can specify multiple fields in a single `$addFields` stage.
 
 ## ⚠️ Special Support – `$$REMOVE`
 
-In Fluxion, you can use `$$REMOVE` to dynamically remove a field:
+In SrotaX, you can use `$$REMOVE` to dynamically remove a field:
 
 ```json
 {

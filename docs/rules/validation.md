@@ -1,6 +1,6 @@
 # Validation & Linting
 
-Robust validation prevents broken rules from reaching production. Fluxion provides two complementary mechanisms:
+Robust validation prevents broken rules from reaching production. SrotaX provides two complementary mechanisms:
 
 ## Builder-time validation
 

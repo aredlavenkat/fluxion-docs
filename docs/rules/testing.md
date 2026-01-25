@@ -1,6 +1,6 @@
 # Testing & Debugging Rules
 
-Reliable rules need automated tests and diagnostics. Fluxion offers several tools to make this straightforward.
+Reliable rules need automated tests and diagnostics. SrotaX offers several tools to make this straightforward.
 
 ## Unit testing with RuleEngine
 

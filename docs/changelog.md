@@ -8,7 +8,7 @@ This lightweight changelog tracks notable documentation and API updates that aff
 - Documented unsupported stages (`$merge`, `$out`, `$search`, `$vectorSearch`) so assistants respond with the correct guidance.
 - Expanded the usage and integration guides to cover caching parsed pipelines, error handling, and registry patterns.
 - Added enrichment and connector status tables to flag beta/experimental APIs, plus concrete HTTP/SQL examples.
-- Introduced LLM assistant notes and glossary clarifications to emphasise Fluxion's single-document focus.
+- Introduced LLM assistant notes and glossary clarifications to emphasise SrotaX's single-document focus.
 
 ---
 

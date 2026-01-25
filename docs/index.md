@@ -1,6 +1,6 @@
-# Fluxion Pipeline Engine
+# SrotaX Pipeline Engine
 
-Fluxion lets you execute Mongo-style pipelines directly in your JVM services. It preserves the familiar stage and operator vocabulary while focusing on single-document and request/response scenarios today (bulk aggregation support will arrive later).
+SrotaX lets you execute Mongo-style pipelines directly in your JVM services. It preserves the familiar stage and operator vocabulary while focusing on single-document and request/response scenarios today (bulk aggregation support will arrive later).
 
 ## Key Capabilities
 
@@ -42,4 +42,4 @@ Check the [Usage Guide](usage.md) for a step-by-step walkthrough and additional 
 - 🧠 [Glossary](glossary.md) – terminology used across the project
 - 🗺️ [Roadmap](roadmap.md) – upcoming features and milestones
 
-Fluxion is designed to embed cleanly into your applications. Start experimenting with the quick start above, then dive into the references when you need exact syntax. Continuous feedback is welcome!
+SrotaX is designed to embed cleanly into your applications. Start experimenting with the quick start above, then dive into the references when you need exact syntax. Continuous feedback is welcome!

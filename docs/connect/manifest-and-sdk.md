@@ -16,7 +16,7 @@ Every operation declares an `execution.type` (do not invent new types):
 
 - `http` — generic HTTP/REST calls
 - `javaBean` — call a Spring bean implementing connector logic (SDKs, DB drivers, etc.)
-- `pipelineCall` — invoke another Fluxion pipeline or ruleset
+- `pipelineCall` — invoke another SrotaX pipeline or ruleset
 - `httpServer` — inbound HTTP/webhook triggers
 - `polling` — periodic polling of external systems
 - `reactiveStream` — streaming sources (Kafka, Pub/Sub, CDC, etc.)

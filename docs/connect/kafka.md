@@ -1,6 +1,6 @@
 # Kafka Connectors
 
-Fluxion Connect exposes Kafka as both a streaming **source** and **sink**. The
+SrotaX Connect exposes Kafka as both a streaming **source** and **sink**. The
 connectors share the same SPI used across the platform, so the configuration
 maps cleanly onto streaming pipelines, error policies, and metrics.
 
@@ -11,7 +11,7 @@ maps cleanly onto streaming pipelines, error policies, and metrics.
 | Requirement | Notes |
 | --- | --- |
 | Dependency | Add `ai.fluxion:fluxion-connect` plus Kafka client (`org.apache.kafka:kafka-clients`). |
-| Kafka cluster | Brokers reachable from the Fluxion service. Tested on Kafka 2.8+. |
+| Kafka cluster | Brokers reachable from the SrotaX service. Tested on Kafka 2.8+. |
 | Credentials (optional) | SASL/TLS material if connecting to secure clusters. |
 | Checkpoint store | JDBC/Redis/custom store for offsets when streaming. |
 
@@ -148,7 +148,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 | --- | --- |
 | `fluxion-core/src/main/java/.../KafkaSourceConnectorProvider.java` | Source provider implementation. |
 | `fluxion-core/src/main/java/.../KafkaSinkConnectorProvider.java` | Sink provider implementation. |
-| `fluxion-docs/docs/streaming/quickstart.md` | Kafka → HTTP streaming tutorial. |
+| `http://docs.srotax.com/streaming/quickstart/` | Kafka → HTTP streaming tutorial. |
 
 Use these snippets as templates for your own pipeline definitions and adjust
 properties according to your cluster’s configuration.

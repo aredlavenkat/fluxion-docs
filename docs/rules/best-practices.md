@@ -18,7 +18,7 @@ These guidelines reflect lessons learned from running the rule engine in product
 ### 3. Keep pipelines short and testable
 
 - Prefer multiple small stages over one complex `$expr`. It improves readability and aids debug traces.
-- If you need complex transformations, perform them upstream using Fluxion Enrich or dedicated services.
+- If you need complex transformations, perform them upstream using SrotaX Enrich or dedicated services.
 
 ### 4. Treat actions as idempotent
 

@@ -18,7 +18,7 @@ The `$function` operator lets you define and execute **custom logic** using Java
 
 - `body`: JavaScript function code as a string
 - `args`: Array of arguments passed to the function
-- `lang`: Must be `"js"` (Fluxion-safe context)
+- `lang`: Must be `"js"` (SrotaX-safe context)
 
 ---
 
@@ -110,7 +110,7 @@ The `$function` operator lets you define and execute **custom logic** using Java
 
 ## 🧠 Notes
 
-- Fluxion executes `$function` securely and deterministically.
+- SrotaX executes `$function` securely and deterministically.
 - Avoid side effects; treat as pure functions.
 
 ---

@@ -147,7 +147,7 @@ Also restore sink state if downstream systems require idempotence.
 
 | Step | Ensure |
 | --- | --- |
-| Source implementation | Converts each record to a Fluxion `Document`. |
+| Source implementation | Converts each record to a SrotaX `Document`. |
 | Queue/backpressure | Tune `queueCapacity` to balance latency vs. memory. |
 | Checkpoints | Persist offsets/resume tokens via `StreamingContext`. |
 | Completion signal | Return `null` or empty batch when no records remain. |
@@ -160,7 +160,7 @@ Also restore sink state if downstream systems require idempotence.
 Treat finite sources (JDBC, CSV) like batch jobs:
 
 - Iterate rows sequentially.
-- Run decision logic inside Fluxion stages.
+- Run decision logic inside SrotaX stages.
 - Use sinks to update downstream systems.
 - Once the source is exhausted and signals completion, the executor terminates.
 
@@ -206,7 +206,7 @@ pipeline-service discovery endpoints.
 | `fluxion-core/src/main/java/.../StreamingPipelineExecutor.java` | Orchestrator entry point. |
 | `fluxion-core/src/main/java/.../ConnectorStreamDescriptor.java` | Catalog metadata for streams (name/namespace/schema/cursor hints). |
 | `fluxion-core/src/main/java/.../SourceConnectorProvider.java` | Override `discoverStreams` to expose catalogs. |
-| `fluxion-docs/docs/streaming/quickstart.md` | Pipeline example (Kafka → HTTP). |
-| `fluxion-docs/docs/connect/index.md` | Connector overview and discovery usage. |
+| `http://docs.srotax.com/streaming/quickstart/` | Pipeline example (Kafka → HTTP). |
+| `http://docs.srotax.com/connect/` | Connector overview and discovery usage. |
 
-Use this template to add JDBC or other bespoke sources to the Fluxion streaming runtime.
+Use this template to add JDBC or other bespoke sources to the SrotaX streaming runtime.

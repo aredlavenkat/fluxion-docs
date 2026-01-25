@@ -1,6 +1,6 @@
 # MongoDB Connectors
 
-Fluxion Connect ships MongoDB source and sink connectors so pipelines can watch
+SrotaX Connect ships MongoDB source and sink connectors so pipelines can watch
 change streams and persist results back to collections.
 
 ---

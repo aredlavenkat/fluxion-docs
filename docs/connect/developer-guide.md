@@ -1,6 +1,6 @@
 # Connector Developer Guide
 
-How to build, package, and register connectors with Fluxion using manifests,
+How to build, package, and register connectors with SrotaX using manifests,
 the Java SDK, and the streaming SPI.
 
 ## Quick checklist (copy/paste for LLMs)
@@ -15,7 +15,7 @@ the Java SDK, and the streaming SPI.
 ## 1) Pick an execution type
 - `http` — outbound HTTP/REST (declarative).
 - `javaBean` — call a Spring bean (SDKs/DB drivers/custom logic).
-- `pipelineCall` — invoke another Fluxion pipeline/ruleset.
+- `pipelineCall` — invoke another SrotaX pipeline/ruleset.
 - `httpServer` — inbound HTTP/webhook trigger.
 -\u00a0`polling` — periodic trigger.
 - `reactiveStream` — continuous stream (Kafka/EventHub/Mongo/etc).

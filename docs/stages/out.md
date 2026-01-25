@@ -1,6 +1,6 @@
 # $out
 
-Fluxion Core does not currently implement `$out`. The stage is reserved for a future module that will stream pipeline results into persistent storage.
+SrotaX Core does not currently implement `$out`. The stage is reserved for a future module that will stream pipeline results into persistent storage.
 
 ---
 

@@ -10,7 +10,7 @@ and sinks beyond in-process pipelines.
 
 | Requirement | Notes |
 | --- | --- |
-| Fluxion modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional for enrichment operators). |
+| SrotaX modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional for enrichment operators). |
 | Runtime host | JVM service/worker running the streaming orchestrator. |
 | Connector credentials | Bootstrap servers, connection strings, auth secrets. |
 | Checkpoint store | JDBC/Redis/custom store for offsets (when streaming). |
@@ -156,8 +156,8 @@ operational caveats.
 | `fluxion-core/src/main/java/.../ConnectorRegistry.java` | Central registry for source/sink providers. |
 | `fluxion-core/src/main/java/.../SourceConnectorProvider.java` | Provider contract. |
 | `fluxion-core/src/main/java/.../SourceConnectorConfig.java` | Config builder/validation. |
-| `fluxion-docs/docs/connect/kafka.md` | Kafka-specific options and examples. |
-| `fluxion-docs/docs/connect/custom-sources.md` | SPI guide for bespoke connectors. |
+| `http://docs.srotax.com/connect/kafka/` | Kafka-specific options and examples. |
+| `http://docs.srotax.com/connect/custom-sources/` | SPI guide for bespoke connectors. |
 
 Run connector tests along with streaming tests:
 

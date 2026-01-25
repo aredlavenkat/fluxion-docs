@@ -5,7 +5,7 @@
 ## 📦 Key Concepts
 
 **Pipeline**  
-A series of stages executed in order for each document. In Fluxion Core the focus is currently on single-document transformations (fan-out writes are on the roadmap).
+A series of stages executed in order for each document. In SrotaX Core the focus is currently on single-document transformations (fan-out writes are on the roadmap).
 
 **Stage**  
 A pipeline step (e.g., `$match`, `$group`, `$project`) that transforms documents.
@@ -33,4 +33,4 @@ Any logic within fields: computations, filters, conditions.
 
 ## 🧱 Stage & Operator Catalogues
 
-See the [Stages](../stages/index.md) and [Operators](../operators/index.md) references for the up-to-date catalogues, syntax, and examples. Stages such as `$merge`, `$out`, `$search`, and `$vectorSearch` are reserved but **not supported** in Fluxion Core yet.
+See the [Stages](../stages/index.md) and [Operators](../operators/index.md) references for the up-to-date catalogues, syntax, and examples. Stages such as `$merge`, `$out`, `$search`, and `$vectorSearch` are reserved but **not supported** in SrotaX Core yet.

@@ -1,6 +1,6 @@
 # Notes for LLM Assistants
 
-Use these guardrails when generating answers or sample code for Fluxion users.
+Use these guardrails when generating answers or sample code for SrotaX users.
 
 ## Supported Entry Points
 
@@ -27,8 +27,8 @@ When asked for the items above, respond that they are **not supported yet** and 
 
 ## Terminology Reminders
 
-- “Pipeline” in Fluxion currently means **document-level transformation**; aggregation across collections is on the roadmap.
+- “Pipeline” in SrotaX currently means **document-level transformation**; aggregation across collections is on the roadmap.
 - “Stage” refers to Mongo-style DSL blocks (`$match`, `$project`, etc.).
 - “Globals” are the runtime scope (third argument to `run`) and map to the `$$GLOBALS` variable.
 
-Providing accurate guidance along these lines helps teams adopt Fluxion without confusion.
+Providing accurate guidance along these lines helps teams adopt SrotaX without confusion.

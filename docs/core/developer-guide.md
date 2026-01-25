@@ -1,6 +1,6 @@
-# Fluxion Core Developer Guide
+# SrotaX Core Developer Guide
 
-This guide explains how to understand, build, test, and extend the Fluxion Core Engine itself. Use
+This guide explains how to understand, build, test, and extend the SrotaX Core Engine itself. Use
 `fluxion-core-engine` when you want to add new stages, expression operators, streaming behaviors, or
 core utilities and ship them independently of the surrounding connectors/enrichers.
 
@@ -28,13 +28,13 @@ Run the suite after any API, operator, or stage change to keep regressions out o
 
 ## Documentation ecosystem
 
-- **Core overview**: [fluxion-docs/docs/core/index.md](https://aredlavenkat.github.io/fluxion-docs/core/)
-- **This developer guide**: [fluxion-docs/docs/core/developer-guide.md](https://aredlavenkat.github.io/fluxion-docs/core/developer-guide/)
-- **Stage reference**: [fluxion-docs/docs/stages/index.md](https://aredlavenkat.github.io/fluxion-docs/stages/)
-- **Operator reference**: [fluxion-docs/docs/operators/index.md](https://aredlavenkat.github.io/fluxion-docs/operators/)
-- **Streaming reference**: [fluxion-docs/docs/streaming/index.md](https://aredlavenkat.github.io/fluxion-docs/streaming/)
+- **Core overview**: [http://docs.srotax.com/core/](http://docs.srotax.com/core/)
+- **This developer guide**: [http://docs.srotax.com/core/developer-guide/](http://docs.srotax.com/core/developer-guide/)
+- **Stage reference**: [http://docs.srotax.com/stages/](http://docs.srotax.com/stages/)
+- **Operator reference**: [http://docs.srotax.com/operators/](http://docs.srotax.com/operators/)
+- **Streaming reference**: [http://docs.srotax.com/streaming/](http://docs.srotax.com/streaming/)
 
-The same content is published at `https://aredlavenkat.github.io/fluxion-docs/` for easy sharing.
+The same content is published at `http://docs.srotax.com/` for easy sharing.
 
 
 Update the MkDocs content whenever you add new stages/operators or change their behavior. Contributors
@@ -60,4 +60,4 @@ preview their documentation changes locally.
 - Observability metrics: `StageMetrics`, `MetricsReporter`, `StageMetricsOtelBridge`
 
 Keep an eye on this guide and the docs repo when you touch any of the above files so future
-contributors understand how Fluxion Core works end-to-end.
+contributors understand how SrotaX Core works end-to-end.

@@ -5,7 +5,7 @@ This glossary summarises the primary domain types exposed by `fluxion-rules` (an
 | Type | Purpose | Key fields / data | Typical usage |
 | --- | --- | --- | --- |
 | `RuleDefinition` | Immutable blueprint of a rule: it packages the metadata, salience, condition pipeline, actions, and hooks that define behaviour. | `id`, `name`, `description`, `salience`, `RuleCondition`, `List<RuleAction>`, rule-level `metadata`, `List<RuleHook>`. | Construct with the fluent builder or DSL; rules are sorted by salience within a `RuleSet`. |
-| `RuleCondition` | Aggregation pipeline that decides whether a rule passes for a document. | Ordered `List<Stage>` (Fluxion core stages). | Created via `RuleCondition.pipeline(...)` when parsing DSL or building rules programmatically. |
+| `RuleCondition` | Aggregation pipeline that decides whether a rule passes for a document. | Ordered `List<Stage>` (SrotaX core stages). | Created via `RuleCondition.pipeline(...)` when parsing DSL or building rules programmatically. |
 | `RuleSet` | Immutable bundle of rules plus shared hooks/metadata. | `id`, `name`, `version`, sorted `List<RuleDefinition>`, rule-set `metadata`, `List<RuleSetHook>`. | Acts as the deployable artifact the `RuleEngine` evaluates. |
 | `RuleAction` | Functional interface executed after a rule passes (during `execute`). | Receives `RuleExecutionContext`; can mutate context, shared attributes, emit side effects. | Register manually (`RuleActionRegistry.register`) or auto-discover via the SPI. |
 | `RuleHook` | Per-rule lifecycle callbacks around evaluation/action execution. | Optional overrides for `beforeEvaluation(...)` and `afterActions(...)`. | Instrument or enrich individual rules without altering the engine. |
@@ -24,7 +24,7 @@ This glossary summarises the primary domain types exposed by `fluxion-rules` (an
 | `RuleActionRegistry` | Global action registry. | Register, resolve, clear, reload actions. | Populate at application start-up or via ServiceLoader contributors. |
 | `RuleHookRegistry` | Registry for named rule and rule-set hooks. | Register, resolve, clear, reload convenience methods. | Enables `addHookByName` in builders so hooks can be referenced declaratively. |
 | `RuleActionContributor` / `RuleHookContributor` | ServiceLoader SPIs for reusable actions/hooks. | Return maps of names → implementations. | Package contributors and `META-INF/services` descriptors to auto-discover behaviours. |
-| `PipelineExecutor` (core) | Shared stage execution engine used across Fluxion. | Executes `List<Stage>` pipelines, collects `StageMetrics`, supports debug tracing. | Rule engine delegates here; other components (streaming, batch) can reuse it. |
+| `PipelineExecutor` (core) | Shared stage execution engine used across SrotaX. | Executes `List<Stage>` pipelines, collects `StageMetrics`, supports debug tracing. | Rule engine delegates here; other components (streaming, batch) can reuse it. |
 | `StageMetrics` | Aggregated performance metrics per stage. | Invocation counts, documents in/out, total duration, queue sizes (latest & max). | Exposed via `RuleExecutionContext.stageMetrics()` and exported through OpenTelemetry. |
 
 > Need another term? Let us know—this glossary is meant to evolve alongside the rule engine.

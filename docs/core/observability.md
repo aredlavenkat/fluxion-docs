@@ -1,6 +1,6 @@
 # Observability & Metrics
 
-Fluxion Core exposes stage-level metrics and an OpenTelemetry bridge so you can
+SrotaX Core exposes stage-level metrics and an OpenTelemetry bridge so you can
 monitor pipeline behaviour. This guide catalogs the available metrics, how to
 configure exports, and how to wire them into observability stacks.
 
@@ -31,12 +31,12 @@ metrics. When enabled, it publishes the following instruments:
 
 | Instrument | Type | Attributes |
 | --- | --- | --- |
-| `fluxion_stage_invocations_total` | Counter | `pipeline`, `stage` |
-| `fluxion_stage_input_docs_total` | Counter | `pipeline`, `stage` |
-| `fluxion_stage_output_docs_total` | Counter | `pipeline`, `stage` |
-| `fluxion_stage_duration_ms` | Histogram (ms) | `pipeline`, `stage` |
-| `fluxion_stage_queue_size_last` | Gauge | `pipeline`, `stage` (streaming only) |
-| `fluxion_stage_queue_size_max` | Gauge | `pipeline`, `stage` (streaming only) |
+| `SrotaX_stage_invocations_total` | Counter | `pipeline`, `stage` |
+| `SrotaX_stage_input_docs_total` | Counter | `pipeline`, `stage` |
+| `SrotaX_stage_output_docs_total` | Counter | `pipeline`, `stage` |
+| `SrotaX_stage_duration_ms` | Histogram (ms) | `pipeline`, `stage` |
+| `SrotaX_stage_queue_size_last` | Gauge | `pipeline`, `stage` (streaming only) |
+| `SrotaX_stage_queue_size_max` | Gauge | `pipeline`, `stage` (streaming only) |
 
 ### Enabling the bridge
 
@@ -107,7 +107,7 @@ OpenTelemetryManager.initialize(OpenTelemetrySdk.builder().setMeterProvider(mete
 // run pipelines, then inspect reader.collectAllMetrics()
 ```
 
-Run Fluxion core tests to ensure metrics wiring stays intact:
+Run SrotaX core tests to ensure metrics wiring stays intact:
 
 ```bash
 mvn -pl fluxion-core test -Dtest=*StageMetrics*

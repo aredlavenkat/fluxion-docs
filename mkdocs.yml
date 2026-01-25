@@ -1,4 +1,4 @@
-site_name: Fluxion Docs
+site_name: SrotaX Docs
 theme:
   name: material
 nav:
@@ -8,7 +8,7 @@ nav:
   - Platform Architecture:
     - Overview: platform/overview.md
   - Platform Modules:
-    - Fluxion Core:
+    - SrotaX Core:
       - Overview: core/index.md
       - Integration Guide: core/integration-developer-guide.md
       - Developer Guide: core/developer-guide.md
@@ -102,7 +102,7 @@ nav:
         - $trunc: operators/trunc.md
         - $unsetField: operators/unsetField.md
         - $zip: operators/zip.md
-    - Fluxion Connect:
+    - SrotaX Connect:
       - Overview: connect/index.md
       - Manifest & SDK: connect/manifest-and-sdk.md
       - Developer Guide: connect/developer-guide.md
@@ -110,7 +110,7 @@ nav:
       - Event Hubs: connect/eventhub.md
       - MongoDB: connect/mongodb.md
       - Custom Sources: connect/custom-sources.md
-    - Fluxion Enrich:
+    - SrotaX Enrich:
       - Overview: enrich/index.md
       - Operators:
         - $httpCall: enrich/operators/httpCall.md

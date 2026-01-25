@@ -1,6 +1,6 @@
 # Stage Support Matrix
 
-Fluxion exposes the full MongoDB-style aggregation vocabulary, but the runtime
+SrotaX exposes the full MongoDB-style aggregation vocabulary, but the runtime
 you choose determines how practical a stage is. The Streaming Engine must emit
 results incrementally, whereas a future batch job engine can materialise whole
 result sets before emitting. This guide calls out how each stage behaves today.
@@ -45,7 +45,7 @@ result sets before emitting. This guide calls out how each stage behaves today.
 
 | Stage            | Streaming | Batch | Notes |
 | ---------------- | --------- | ----- | ----- |
-| `$merge` / `$out` | ⏳       | ✅    | Not part of the current Fluxion stage set. For streaming, write to sinks through Fluxion Connect instead. Once batch jobs are available, `$out`-style materialisation becomes more attractive. |
+| `$merge` / `$out` | ⏳       | ✅    | Not part of the current SrotaX stage set. For streaming, write to sinks through SrotaX Connect instead. Once batch jobs are available, `$out`-style materialisation becomes more attractive. |
 | `$lookup`        | ⚠️        | ✅    | Supported via Enrich or native stages. Streaming lookups must guard against high latency; pair with caching or asynchronous enrichment. |
 | `$graphLookup`   | ⏳        | ✅    | Depth-first traversal is expensive for streaming; reserve for batch workloads. |
 
@@ -58,7 +58,7 @@ result sets before emitting. This guide calls out how each stage behaves today.
    or `$bucketAuto`, split it: stream the critical detection piece, and hand off
    the expensive report-building stages to a scheduled batch job.
 3. **Use sinks for persistence.** Until a batch job engine ships with `$out`
-   semantics, the recommended way to materialise results is via Fluxion Connect
+   semantics, the recommended way to materialise results is via SrotaX Connect
    sinks (HTTP, SQL, Kafka, MongoDB, …).
 4. **Budget state carefully.** Stateful stages keep per-key accumulators in
    memory. Pick grouping keys with bounded cardinality and monitor metrics such

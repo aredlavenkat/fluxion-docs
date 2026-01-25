@@ -1,6 +1,6 @@
 # Azure Event Hubs Connectors
 
-Fluxion Connect includes Event Hubs source and sink connectors so pipelines can
+SrotaX Connect includes Event Hubs source and sink connectors so pipelines can
 ingest from and publish back to Azure Event Hubs without extra glue code.
 
 ---
@@ -10,7 +10,7 @@ ingest from and publish back to Azure Event Hubs without extra glue code.
 | Requirement | Notes |
 | --- | --- |
 | Dependency | `ai.fluxion:fluxion-connect` plus `com.azure:azure-messaging-eventhubs`. |
-| Azure namespace | Event Hubs namespace reachable from the Fluxion service. |
+| Azure namespace | Event Hubs namespace reachable from the SrotaX service. |
 | Access | SAS connection string with `Listen`/`Send` permissions as needed. |
 | Checkpoint store | JDBC/Redis/custom store when running streaming pipelines. |
 

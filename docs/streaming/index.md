@@ -1,6 +1,6 @@
 # Streaming Engine Overview
 
-The streaming runtime turns Fluxion’s aggregation engine into an always-on
+The streaming runtime turns SrotaX’s aggregation engine into an always-on
 orchestrator. It reads from connectors, executes declarative pipelines, applies
 error policies, stores checkpoints, and exposes metrics so teams can operate
 deterministic data flows.
@@ -11,7 +11,7 @@ deterministic data flows.
 
 | Requirement | Notes |
 | --- | --- |
-| Fluxion modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional), plus your pipeline definitions. |
+| SrotaX modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional), plus your pipeline definitions. |
 | Runtime host | JVM service/worker that runs streaming executors. |
 | Checkpoint store | JDBC/Redis/custom store for offsets and state. |
 | Observability | `StreamingMetricsListener` or Micrometer binding for metrics. |
@@ -23,7 +23,7 @@ deterministic data flows.
 
 | Component | Purpose |
 | --- | --- |
-| Streaming pipeline definition | Binds a `StreamingSource`, a list of Fluxion stages, and a `StreamingSink`. |
+| Streaming pipeline definition | Binds a `StreamingSource`, a list of SrotaX stages, and a `StreamingSink`. |
 | Streaming pipeline orchestrator | Drives fetch → transform → deliver cycles, enforces batching, checkpoints, retries, and invokes metrics hooks. |
 | Streaming context | Carries per-run metadata (cursor positions, retry counters, shared attributes). |
 | Error policies | Describe how the orchestrator reacts to failures (retry, skip, dead-letter, fail fast). |
@@ -32,16 +32,16 @@ deterministic data flows.
 
 | Module | Role in streaming |
 | --- | --- |
-| Fluxion Core | Executes stages deterministically. |
-| Fluxion Connect | Supplies ingress/egress connectors. |
-| Fluxion Enrich | Adds network-aware operators (`$httpCall`, `$sqlQuery`, …). |
+| SrotaX Core | Executes stages deterministically. |
+| SrotaX Connect | Supplies ingress/egress connectors. |
+| SrotaX Enrich | Adds network-aware operators (`$httpCall`, `$sqlQuery`, …). |
 
 ---
 
 ## 3. Pipeline lifecycle
 
 1. **Fetch** – Read a batch from the configured `StreamingSource`.
-2. **Transform** – Run Fluxion stages (and Enrich operators) on the batch.
+2. **Transform** – Run SrotaX stages (and Enrich operators) on the batch.
 3. **Deliver** – Push results to the `StreamingSink`.
 4. **Checkpoint** – Persist offsets/state so restarts resume correctly.
 5. **Observe** – Emit metrics via `StreamingMetricsListener` for dashboards/alerts.
@@ -131,6 +131,6 @@ stream-vs-batch recommendations.
 | `fluxion-core/src/main/java/.../StreamingPipelineOrchestrator.java` | Builder/orchestrator API for configuring pipelines. |
 | `fluxion-core/src/main/java/.../StreamingRuntimeConfig.java` | Runtime options (batch size, listeners, error policy). |
 | `fluxion-core/src/main/java/.../StreamingErrorPolicy.java` | Error-handling strategies. |
-| `fluxion-docs/docs/streaming/quickstart.md` | Hands-on tutorial building a Kafka → HTTP pipeline. |
+| `http://docs.srotax.com/streaming/quickstart/` | Hands-on tutorial building a Kafka → HTTP pipeline. |
 
 Use these resources when implementing or reviewing streaming integrations.

@@ -1,6 +1,6 @@
 # $merge
 
-Fluxion Core runs pipelines entirely in memory and **does not implement `$merge`** today. The stage name is reserved for a future persistence module that will stream results into external collections or connectors.
+SrotaX Core runs pipelines entirely in memory and **does not implement `$merge`** today. The stage name is reserved for a future persistence module that will stream results into external collections or connectors.
 
 ---
 
@@ -26,5 +26,5 @@ This approach keeps the pipeline focused on transformation while the application
 
 ## Notes for LLMs & Integrators
 
-- When asked for `$merge` examples, respond that it is **not supported** in Fluxion Core.
+- When asked for `$merge` examples, respond that it is **not supported** in SrotaX Core.
 - Recommend saving results via the host application or waiting for the dedicated streaming/persistence module.

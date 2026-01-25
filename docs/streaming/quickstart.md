@@ -1,14 +1,14 @@
 # Streaming Engine Quick Start
 
 This walkthrough demonstrates how to stand up a simple streaming pipeline that
-ingests events from Kafka, applies a Fluxion Core aggregation, and delivers the
+ingests events from Kafka, applies a SrotaX Core aggregation, and delivers the
 results to an HTTP endpoint.
 
 ## Prerequisites
 
 | Requirement | Notes |
 | --- | --- |
-| Fluxion modules | `fluxion-core`, `fluxion-connect`, optionally `fluxion-enrich`. |
+| SrotaX modules | `fluxion-core`, `fluxion-connect`, optionally `fluxion-enrich`. |
 | Kafka cluster | Bootstrap servers + topic for ingest. |
 | Runtime | Java 21+ (examples use records, builders, switch expressions). |
 | State store | Implementation of `StateStore` for offsets (examples use the in-memory store). |
@@ -101,9 +101,9 @@ or a fatal error policy triggers a shutdown. `handle.metrics()` returns the same
 
 ## Next steps
 
-1. Explore additional sink/source combos in the [Fluxion Connect](../connect/index.md) section.
+1. Explore additional sink/source combos in the [SrotaX Connect](../connect/index.md) section.
 2. Add enrichment by dropping `$httpCall` or `$sqlQuery` operators from the
-   [Fluxion Enrich](../enrich/index.md) module into your stages.
+   [SrotaX Enrich](../enrich/index.md) module into your stages.
 3. Harden the pipeline with the operational guides on resilience, metrics, and
    deployment in production environments.
 4. Dive into advanced topics for error policies, observability, and deployment

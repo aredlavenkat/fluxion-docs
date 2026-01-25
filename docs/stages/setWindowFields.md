@@ -125,7 +125,7 @@ Standard accumulators (`$sum`, `$avg`, `$min`, `$max`, etc.) are also available 
 - Ensure the `sortBy` field is monotonic (numeric epoch or ISO string). `$derivative` and `$integral` rely on the resolved time delta.
 - Combine `partitionBy` with compound expressions to segment by tenant, device, region, etc.
 - Bounds of `[ "unbounded", "current" ]` produce cumulative metrics. Use offsets like `[-2, 0]` for sliding windows.
-- Custom accumulators registered via the Fluxion registry are automatically available inside `$setWindowFields`.
+- Custom accumulators registered via the SrotaX registry are automatically available inside `$setWindowFields`.
 
 ---
 

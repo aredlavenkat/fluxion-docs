@@ -1,6 +1,6 @@
 # Stage Reference Overview
 
-Fluxion implements a large subset of MongoDB aggregation stages. Use this index to jump to detailed pages for each stage and discover related functionality.
+SrotaX implements a large subset of MongoDB aggregation stages. Use this index to jump to detailed pages for each stage and discover related functionality.
 
 ## Core Transformation Stages
 

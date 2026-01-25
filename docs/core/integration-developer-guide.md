@@ -1,10 +1,10 @@
 # Integration Developer Guide
 
-Fluxion targets engineers who need MongoDB-style analytics and enrichment inside their own services without operating a database engine. This guide shows how to assemble aggregation pipelines, execute them in-process, and extend Fluxion with custom operators or stages.
+SrotaX targets engineers who need MongoDB-style analytics and enrichment inside their own services without operating a database engine. This guide shows how to assemble aggregation pipelines, execute them in-process, and extend SrotaX with custom operators or stages.
 
 ## Audience Checklist
 
-- You embed Fluxion into a JVM service (Spring Boot, Quarkus, Micronaut, etc.).
+- You embed SrotaX into a JVM service (Spring Boot, Quarkus, Micronaut, etc.).
 - You want the pipeline DSL (Mongo-style stages and expressions) for batch or request/response workloads.
 - You may need to add bespoke stages or operators for domain-specific logic.
 
@@ -40,7 +40,7 @@ Add the modules that match the features you plan to use. At minimum you will nee
 
 ## Pipeline Anatomy
 
-Fluxion reuses MongoDB aggregation constructs. A pipeline is composed of:
+SrotaX reuses MongoDB aggregation constructs. A pipeline is composed of:
 
 - **Stage list**: ordered MongoDB-style stages (`$match`, `$project`, `$group`, `$setWindowFields`, etc.).
 - **Expressions**: stage payloads that use operators (`$add`, `$map`, `$dateDiff`, etc.).
@@ -120,7 +120,7 @@ results.forEach(doc -> System.out.println(doc.toJson()));
 
 Key points:
 
-- `DocumentParser` converts JSON arrays into Fluxion `Document` and `Stage` instances.
+- `DocumentParser` converts JSON arrays into SrotaX `Document` and `Stage` instances.
 - `PipelineExecutor#run` accepts the input documents, stage list, and optional globals.
 - Pipelines are pure functions: they return a new list of documents without mutating the input.
 
@@ -285,5 +285,5 @@ Tips:
 - [Stage reference](../stages/index.md) for payload schemas, aliases, and gotchas.
 - [Operator reference](../operators/index.md) for complete expression coverage.
 - [Enrichment operators](../enrich/index.md) for `$httpCall`, `$sqlQuery`, and service integrations.
-- Fluxion Core repository (`fluxion-core-engine-java/docs/fluxion-core-developer-guide.md`) for engine internals and SPI details.
+- SrotaX Core repository (`fluxion-core-engine-java/docs/fluxion-core-developer-guide.md`) for engine internals and SPI details.
 - [LLM assistant notes](../shared/llm-assistant-notes.md) to keep generated answers aligned with current capabilities.

@@ -131,4 +131,4 @@ Pass `ruleSetRef::get` into your controllers/services so they always read the mo
 - Use `RuleHookRegistry.addHookByName` / `RuleSet.Builder.addHookByName` when consuming contributors by name.
 - Keep actions idempotent; they may run again if you call `execute` multiple times.
 
-With these patterns, you can embed Fluxion’s rule engine directly into your service while retaining full control over configuration, deployment, and lifecycle.
+With these patterns, you can embed SrotaX’s rule engine directly into your service while retaining full control over configuration, deployment, and lifecycle.

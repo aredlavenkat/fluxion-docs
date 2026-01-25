@@ -1,6 +1,6 @@
 # Usage Guide
 
-Step-by-step walkthrough for running Fluxion pipelines inside a Java service. This
+Step-by-step walkthrough for running SrotaX pipelines inside a Java service. This
 focuses on single-document/request-response scenarios; streaming pipelines have
 separate guides.
 
@@ -10,7 +10,7 @@ separate guides.
 
 | Requirement | Notes |
 | --- | --- |
-| Fluxion module | Add `ai.fluxion:fluxion-core` to your build. |
+| SrotaX module | Add `ai.fluxion:fluxion-core` to your build. |
 | Runtime | Java 21+ |
 | Pipeline definition | JSON file or programmatic builder. |
 | Optional helpers | Caching library (e.g., Caffeine) if you want to reuse parsed stages. |
@@ -37,7 +37,7 @@ code. Example: enrich a device reading with derived fields.
 
 ## 3. Parse documents and stages
 
-Use `DocumentParser` to load JSON into Fluxion types (or build them manually).
+Use `DocumentParser` to load JSON into SrotaX types (or build them manually).
 
 ```java
 List<Document> input = DocumentParser.getDocumentsFromJsonArray("""

@@ -9,7 +9,7 @@ This walkthrough shows how to go from an empty project to a running rule engine 
 
 ## 1. Dependencies
 
-Add the Fluxion artifacts to your build. With Maven:
+Add the SrotaX artifacts to your build. With Maven:
 
 ```xml
 <dependency>

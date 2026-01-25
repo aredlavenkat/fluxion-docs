@@ -1,6 +1,6 @@
 # Expression Operator Overview
 
-Fluxion mirrors MongoDB aggregation operators so you can compose complex transformations inside `$project`, `$addFields`, `$group`, and other stages. Browse the categories below, then use the sidebar for the complete alphabetical list.
+SrotaX mirrors MongoDB aggregation operators so you can compose complex transformations inside `$project`, `$addFields`, `$group`, and other stages. Browse the categories below, then use the sidebar for the complete alphabetical list.
 
 ## Comparison & Logic
 

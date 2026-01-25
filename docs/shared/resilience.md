@@ -1,6 +1,6 @@
 # Resilience Patterns (Retry & Circuit Breaker)
 
-Fluxion leverages Resilience4j across enrichment operators (`$httpCall`,
+SrotaX leverages Resilience4j across enrichment operators (`$httpCall`,
 `$sqlQuery`) and streaming connectors. This guide consolidates the available
 options, usage tips, and testing helpers.
 

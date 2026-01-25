@@ -2,7 +2,7 @@
 ## 🚀 Live Site
 
 You can browse the full documentation here:  
-👉 [https://aredlavenkat.github.io/fluxion-docs/](https://aredlavenkat.github.io/fluxion-docs/)
+👉 [http://docs.srotax.com/](http://docs.srotax.com/)
 
 ---
 

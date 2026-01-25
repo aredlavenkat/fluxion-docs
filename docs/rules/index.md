@@ -1,6 +1,6 @@
 # Rule Engine Overview
 
-Fluxion’s rule engine lets you wrap aggregation pipelines in declarative rules.
+SrotaX’s rule engine lets you wrap aggregation pipelines in declarative rules.
 Each rule evaluates a document, tracks salience (priority), executes actions, and
 exposes hooks/state you can integrate into services or workflow engines.
 
@@ -10,7 +10,7 @@ exposes hooks/state you can integrate into services or workflow engines.
 
 | Requirement | Notes |
 | --- | --- |
-| Fluxion modules | `fluxion-core`, `fluxion-rules`, optional `fluxion-enrich` for external lookups. |
+| SrotaX modules | `fluxion-core`, `fluxion-rules`, optional `fluxion-enrich` for external lookups. |
 | Runtime | JVM service/worker where you evaluate rules. |
 | DSL / JSON | Rule-set definitions (JSON DSL or builder API). |
 | Persistence (optional) | Wherever you store rule sets (Git, DB, config service). |
@@ -49,7 +49,7 @@ For a full stack view (Core ↔ Connect ↔ Enrich ↔ Engines), see the
 1. **Document ingestion** – Connectors or application code supply a `Document`.
 2. **Rule iteration** – Rules are sorted by salience (highest first). Missing
    stages or unsupported operators are rejected during validation.
-3. **Pipeline execution** – Each rule runs its Fluxion stages via `RulePipelineExecutor`.
+3. **Pipeline execution** – Each rule runs its SrotaX stages via `RulePipelineExecutor`.
 4. **Shared state update** – Rules can read/write `sharedAttributes` across the
    entire rule set.
 5. **Actions & hooks** – On pass, actions run and hooks fire (`before/after`).
