@@ -1,6 +1,6 @@
 # Connector Module Overview
 
-Fluxion Connect packages the ingress/egress connectors that feed streaming
+SrotaX Connect packages the ingress/egress connectors that feed streaming
 pipelines. Use it when you need Kafka, Event Hubs, MongoDB, or custom sources
 and sinks beyond in-process pipelines.
 
