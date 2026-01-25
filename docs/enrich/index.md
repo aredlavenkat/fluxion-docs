@@ -122,9 +122,9 @@ manual registries) and reference by `connection` name inside pipeline definition
 | --- | --- |
 | `fluxion-enrich/src/main/java/.../$httpCall` | Implementation of the HTTP operator. |
 | `fluxion-enrich/src/main/java/.../$sqlQuery` | JDBC-backed SQL operator. |
-| `http://docs.srotax.com/enrich/operators/httpCall/` | Detailed HTTP options with examples. |
-| `http://docs.srotax.com/enrich/operators/sqlQuery/` | Detailed SQL options with examples. |
-| `http://docs.srotax.com/examples/` | Pipelines mixing core and enrichment features. |
+| `https://docs.srotax.com/enrich/operators/httpCall/` | Detailed HTTP options with examples. |
+| `https://docs.srotax.com/enrich/operators/sqlQuery/` | Detailed SQL options with examples. |
+| `https://docs.srotax.com/examples/` | Pipelines mixing core and enrichment features. |
 
 Run enrichment tests with:
 

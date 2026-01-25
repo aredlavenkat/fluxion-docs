@@ -206,7 +206,7 @@ pipeline-service discovery endpoints.
 | `fluxion-core/src/main/java/.../StreamingPipelineExecutor.java` | Orchestrator entry point. |
 | `fluxion-core/src/main/java/.../ConnectorStreamDescriptor.java` | Catalog metadata for streams (name/namespace/schema/cursor hints). |
 | `fluxion-core/src/main/java/.../SourceConnectorProvider.java` | Override `discoverStreams` to expose catalogs. |
-| `http://docs.srotax.com/streaming/quickstart/` | Pipeline example (Kafka → HTTP). |
-| `http://docs.srotax.com/connect/` | Connector overview and discovery usage. |
+| `https://docs.srotax.com/streaming/quickstart/` | Pipeline example (Kafka → HTTP). |
+| `https://docs.srotax.com/connect/` | Connector overview and discovery usage. |
 
 Use this template to add JDBC or other bespoke sources to the SrotaX streaming runtime.

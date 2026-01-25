@@ -148,7 +148,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 | --- | --- |
 | `fluxion-core/src/main/java/.../KafkaSourceConnectorProvider.java` | Source provider implementation. |
 | `fluxion-core/src/main/java/.../KafkaSinkConnectorProvider.java` | Sink provider implementation. |
-| `http://docs.srotax.com/streaming/quickstart/` | Kafka → HTTP streaming tutorial. |
+| `https://docs.srotax.com/streaming/quickstart/` | Kafka → HTTP streaming tutorial. |
 
 Use these snippets as templates for your own pipeline definitions and adjust
 properties according to your cluster’s configuration.

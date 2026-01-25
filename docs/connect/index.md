@@ -156,8 +156,8 @@ operational caveats.
 | `fluxion-core/src/main/java/.../ConnectorRegistry.java` | Central registry for source/sink providers. |
 | `fluxion-core/src/main/java/.../SourceConnectorProvider.java` | Provider contract. |
 | `fluxion-core/src/main/java/.../SourceConnectorConfig.java` | Config builder/validation. |
-| `http://docs.srotax.com/connect/kafka/` | Kafka-specific options and examples. |
-| `http://docs.srotax.com/connect/custom-sources/` | SPI guide for bespoke connectors. |
+| `https://docs.srotax.com/connect/kafka/` | Kafka-specific options and examples. |
+| `https://docs.srotax.com/connect/custom-sources/` | SPI guide for bespoke connectors. |
 
 Run connector tests along with streaming tests:
 

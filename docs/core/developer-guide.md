@@ -28,13 +28,13 @@ Run the suite after any API, operator, or stage change to keep regressions out o
 
 ## Documentation ecosystem
 
-- **Core overview**: [http://docs.srotax.com/core/](http://docs.srotax.com/core/)
-- **This developer guide**: [http://docs.srotax.com/core/developer-guide/](http://docs.srotax.com/core/developer-guide/)
-- **Stage reference**: [http://docs.srotax.com/stages/](http://docs.srotax.com/stages/)
-- **Operator reference**: [http://docs.srotax.com/operators/](http://docs.srotax.com/operators/)
-- **Streaming reference**: [http://docs.srotax.com/streaming/](http://docs.srotax.com/streaming/)
+- **Core overview**: [https://docs.srotax.com/core/](https://docs.srotax.com/core/)
+- **This developer guide**: [https://docs.srotax.com/core/developer-guide/](https://docs.srotax.com/core/developer-guide/)
+- **Stage reference**: [https://docs.srotax.com/stages/](https://docs.srotax.com/stages/)
+- **Operator reference**: [https://docs.srotax.com/operators/](https://docs.srotax.com/operators/)
+- **Streaming reference**: [https://docs.srotax.com/streaming/](https://docs.srotax.com/streaming/)
 
-The same content is published at `http://docs.srotax.com/` for easy sharing.
+The same content is published at `https://docs.srotax.com/` for easy sharing.
 
 
 Update the MkDocs content whenever you add new stages/operators or change their behavior. Contributors

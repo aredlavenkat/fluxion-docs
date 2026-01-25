@@ -2,7 +2,7 @@
 ## 🚀 Live Site
 
 You can browse the full documentation here:  
-👉 [http://docs.srotax.com/](http://docs.srotax.com/)
+👉 [https://docs.srotax.com/](https://docs.srotax.com/)
 
 ---
 

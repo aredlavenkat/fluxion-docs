@@ -131,6 +131,6 @@ stream-vs-batch recommendations.
 | `fluxion-core/src/main/java/.../StreamingPipelineOrchestrator.java` | Builder/orchestrator API for configuring pipelines. |
 | `fluxion-core/src/main/java/.../StreamingRuntimeConfig.java` | Runtime options (batch size, listeners, error policy). |
 | `fluxion-core/src/main/java/.../StreamingErrorPolicy.java` | Error-handling strategies. |
-| `http://docs.srotax.com/streaming/quickstart/` | Hands-on tutorial building a Kafka → HTTP pipeline. |
+| `https://docs.srotax.com/streaming/quickstart/` | Hands-on tutorial building a Kafka → HTTP pipeline. |
 
 Use these resources when implementing or reviewing streaming integrations.
