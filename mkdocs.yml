@@ -2,6 +2,7 @@ site_name: SrotaX Docs
 site_url: https://docs.srotax.com
 theme:
   name: material
+  logo: assets/logo_white.png
 nav:
   - Home: index.md
   - Usage: usage.md
