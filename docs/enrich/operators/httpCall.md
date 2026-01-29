@@ -4,6 +4,24 @@ Performs an HTTP request during pipeline evaluation. Supports dynamic URL/parame
 substitution, custom headers, payloads, and optional resilience settings (retry,
 circuit breaker).
 
+**Usage scope:** `$httpCall` is an expression operator. Use it inside a stage such as `$addFields`/`$set` and assign the result into your document:
+
+```json
+{
+  "$addFields": {
+    "profile": {
+      "$httpCall": {
+        "connection": "identity-service",
+        "path": "/api/v1/profile/{userId}",
+        "pathParams": { "userId": "$user.id" },
+        "method": "GET",
+        "response": { "extract": "$.data" }
+      }
+    }
+  }
+}
+```
+
 ---
 
 ## 1. Prerequisites

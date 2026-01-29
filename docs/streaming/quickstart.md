@@ -35,24 +35,56 @@ stage.
 
 ## 2. Wire up source and sink connectors
 
+### Using built-in providers (Kafka → Mongo)
+
+```java
+Properties consumerProps = new Properties();
+consumerProps.put("bootstrap.servers", System.getenv("KAFKA_BOOTSTRAP"));
+consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+KafkaStreamingSource source = new KafkaStreamingSource(consumerProps, "orders.v1", Duration.ofMillis(500), 64);
+
+MongoSink sink = new MongoSink(
+    "mongodb://mongo0:27017,mongo1:27017/?replicaSet=rs0",
+    "analytics",
+    "orders_out"
+);
+```
+
+### Using manifest/SDK-driven connectors (custom source/sink)
+
+Implement `SourceConnectorProvider`/`SinkConnectorProvider`, register via ServiceLoader, and reference by `type` in YAML/JSON:
+
+```yaml
+source:
+  type: myCustomSource
+  options:
+    apiKey: ${API_KEY}
+    endpoint: https://api.example.com/events
+
+sink:
+  type: myCustomSink
+  options:
+    queue: payments
+```
+
+In code, load the configs and let the registry resolve them to connectors:
+
 ```java
 SourceConnectorConfig sourceConfig =
-    SourceConnectorConfig.builder("kafka")
-        .option("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP"))
-        .option("topic", "orders.v1")
-        .option("groupId", "fluxion-ltv")
+    SourceConnectorConfig.builder("myCustomSource")
+        .option("apiKey", System.getenv("API_KEY"))
+        .option("endpoint", "https://api.example.com/events")
         .build();
 
 ConnectorConfig sinkConfig =
-    ConnectorConfig.builder("http", ConnectorConfig.Kind.SINK)
-        .option("endpoint", "https://api.example.com/ltv")
-        .option("allowEmpty", false)
+    ConnectorConfig.builder("myCustomSink", ConnectorConfig.Kind.SINK)
+        .option("queue", "payments")
         .build();
 ```
 
 Connector providers in `fluxion-connect` resolve these configs into runtime
-`StreamingSource` and `StreamingSink` instances, so swapping connectors only
-requires changing the config payload.
+`StreamingSource` and `StreamingSink` instances. Swapping connectors only requires changing the config payload.
 
 ## 3. Configure the orchestrator
 

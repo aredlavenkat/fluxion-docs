@@ -133,3 +133,72 @@ mvn -pl fluxion-enrich -am test
 ```
 
 This validates HTTP/SQL operators and shared resilience components.
+
+---
+
+## 8. Building a custom enrichment operator
+
+Enrichment operators are expression operators registered via `OperatorContributor`. They return a value; embed them inside a stage such as `$addFields`/`$set` to write the result into your document.
+
+Example: `FooLookup` operator that calls an external service through the shared enrichment transport:
+
+```java
+package ai.fluxion.enrich.evaluator.operators.foo;
+
+import ai.fluxion.core.engine.ExecutionContext;
+import ai.fluxion.core.engine.enrichment.EnrichmentTransport;
+import ai.fluxion.core.expression.Context;
+import ai.fluxion.core.expression.Operator;
+import ai.fluxion.core.expression.OperatorContributor;
+
+import java.util.Map;
+import java.util.ServiceLoader;
+
+public final class FooLookupOperator implements OperatorContributor, Operator {
+    private final EnrichmentTransport transport = ServiceLoader.load(EnrichmentTransport.class)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No EnrichmentTransport found (add fluxion-connect)"));
+
+    @Override
+    public Map<String, Operator> contributors() {
+        return Map.of("$fooLookup", this);
+    }
+
+    @Override
+    public Object apply(Context ctx, Object rawConfig) {
+        FooConfig cfg = FooConfig.from(rawConfig);
+        var req = EnrichmentTransport.HttpRequest.builder()
+                .connectionRef(cfg.connection())
+                .method("GET")
+                .url(cfg.url(ctx))
+                .headers(cfg.headers(ctx))
+                .build();
+        var resp = transport.executeHttp(req, ExecutionContext.current());
+        return cfg.extract(resp.body()); // select a sub-field or return the whole payload
+    }
+}
+```
+
+Register it via ServiceLoader:
+
+```
+# src/main/resources/META-INF/services/ai.fluxion.core.expression.OperatorContributor
+ai.fluxion.enrich.evaluator.operators.foo.FooLookupOperator
+```
+
+Use it in a pipeline:
+
+```json
+{
+  "$addFields": {
+    "foo": {
+      "$fooLookup": {
+        "connection": "fooService",
+        "url": "https://api.example.com/foo/{id}",
+        "params": { "id": "$entity.id" },
+        "responsePath": "/body/data"
+      }
+    }
+  }
+}
+```

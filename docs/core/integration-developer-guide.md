@@ -10,7 +10,7 @@ SrotaX targets engineers who need MongoDB-style analytics and enrichment inside 
 
 ## Dependencies
 
-Add the modules that match the features you plan to use. At minimum you will need `fluxion-core`. Add `fluxion-enrich` if you rely on `$httpCall`, `$sqlQuery`, or other service-aware operators.
+Add the modules that match the features you plan to use. At minimum you will need `fluxion-core`. Add `fluxion-enrich` if you rely on `$httpCall`, `$sqlQuery`, or other service-aware operators (they are expression operators used inside stages like `$addFields`/`$set`), and `fluxion-connect` when you want the external transports/connectors (HTTP/JDBC/Kafka/Mongo) and the shared enrichment transport.
 
 ```xml
 <dependencyManagement>
@@ -34,6 +34,11 @@ Add the modules that match the features you plan to use. At minimum you will nee
   <dependency>
     <groupId>ai.fluxion</groupId>
     <artifactId>fluxion-enrich</artifactId>
+  </dependency>
+  <!-- Optional connector/transport layer for HTTP/JDBC/Kafka/etc. -->
+  <dependency>
+    <groupId>ai.fluxion</groupId>
+    <artifactId>fluxion-connect</artifactId>
   </dependency>
 </dependencies>
 ```

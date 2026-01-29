@@ -50,7 +50,38 @@ source:
 
 ---
 
-## 3. Sink configuration (`type: mongodb`)
+## 3. Using the MongoDB connectors in code
+
+The Mongo change-stream source and sink are provided by `MongoChangeStreamSource` and `MongoSinkProvider`. Configure them via your `source`/`sink` blocks and wire them into the streaming executor:
+
+```java
+MongoChangeStreamSource source = new MongoChangeStreamSource(
+    "mongodb://mongo0:27017,mongo1:27017/?replicaSet=rs0",
+    "orders",
+    "events",
+    List.of(Map.of("$match", Map.of("operationType", Map.of("$in", List.of("insert", "update"))))),
+    64,   // queue capacity
+    128,  // max batch size
+    Duration.ofSeconds(5)
+);
+
+MongoSink sink = new MongoSink(
+    "mongodb://mongo0:27017,mongo1:27017/?replicaSet=rs0",
+    "analytics",
+    "enriched_orders"
+);
+
+List<Stage> stages = List.of(new Stage(Map.of("$set", Map.of("processed", true))));
+StreamingRuntimeConfig runtime = StreamingRuntimeConfig.builder().queueCapacity(64).build();
+StreamingPipelineExecutor executor = new StreamingPipelineExecutor(32, runtime, StreamingErrorPolicy.failFast());
+executor.processStream(source, stages, sink, new StreamingContext());
+```
+
+Map YAML/JSON `options` to these constructor arguments; the providers handle change streams, batching, and backpressure.
+
+---
+
+## 4. Sink configuration (`type: mongodb`)
 
 ### YAML snippet
 
@@ -79,7 +110,7 @@ sink:
 
 ---
 
-## 4. Stream catalogs (for UIs/CLIs)
+## 5. Stream catalogs (for UIs/CLIs)
 
 - **Source** (`discoverStreams`): `name=collection`, `namespace=database`, `supportedSyncModes=[FULL_REFRESH, INCREMENTAL]`, `primaryKeys=[["_id"]]`, `cursorFields=["resumeToken"]`, `sourceDefinedCursor=true` (connector-owned).
 - **Sink** (`destinationStreams`): `name=collection`, `namespace=database`, `primaryKeys=[keyField]`, `supportedSyncModes=[FULL_REFRESH]`.
@@ -88,7 +119,7 @@ Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs conne
 
 ---
 
-## 5. Troubleshooting
+## 6. Troubleshooting
 
 | Symptom | Possible cause | Remedy |
 | --- | --- | --- |
@@ -99,7 +130,7 @@ Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs conne
 
 ---
 
-## 6. Testing
+## 7. Testing
 
 - Run MongoDB connector tests:
   ```bash
@@ -110,7 +141,7 @@ Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs conne
 
 ---
 
-## 7. References
+## 8. References
 
 | Path | Description |
 | --- | --- |

@@ -121,7 +121,37 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ---
 
-## 6. Troubleshooting
+## 6. Using the Kafka connectors in code
+
+The connectors are `SourceConnectorProvider`/`SinkConnectorProvider` implementations discovered via ServiceLoader. Supply the `source`/`sink` blocks above, then wire them into the streaming executor:
+
+```java
+Properties consumerProps = new Properties();
+consumerProps.put("bootstrap.servers", "localhost:9092");
+consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
+KafkaStreamingSource source = new KafkaStreamingSource(consumerProps, "orders", Duration.ofMillis(500), 64);
+
+Properties producerProps = new Properties();
+producerProps.put("bootstrap.servers", "localhost:9092");
+producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+KafkaProducerSink sink = new KafkaProducerSink(producerProps, "orders-out");
+
+List<Stage> stages = List.of(new Stage(Map.of("$set", Map.of("processed", true))));
+StreamingRuntimeConfig runtime = StreamingRuntimeConfig.builder().queueCapacity(64).build();
+StreamingPipelineExecutor executor = new StreamingPipelineExecutor(32, runtime, StreamingErrorPolicy.failFast());
+
+StreamingContext ctx = new StreamingContext();
+executor.processStream(source, stages, sink, ctx);
+```
+
+Use the YAML/JSON `source`/`sink` sections for configuration, map them to `Properties`, and let the built-in providers handle Kafka plumbing.
+
+---
+
+## 7. Troubleshooting
 
 | Symptom | Possible cause | Remedy |
 | --- | --- | --- |
@@ -132,7 +162,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ---
 
-## 7. Testing
+## 8. Testing
 
 - Run connector tests alongside streaming tests:
   ```bash
@@ -142,7 +172,7 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ---
 
-## 8. References
+## 9. References
 
 | Path | Description |
 | --- | --- |

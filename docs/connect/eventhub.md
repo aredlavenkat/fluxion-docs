@@ -78,7 +78,41 @@ sink:
 
 ---
 
-## 4. Stream catalogs (for UIs/CLIs)
+## 4. Using the Event Hubs connectors in code
+
+The Event Hub source/sink providers are discovered via ServiceLoader. Configure them via your `source`/`sink` blocks and wire them into the streaming executor:
+
+```java
+EventHubStreamingSource source = new EventHubStreamingSource(
+    "Endpoint=sb://...;SharedAccessKeyName=Listen;SharedAccessKey=...",
+    "orders",
+    "$Default",
+    64,   // queue capacity
+    128,  // max batch size
+    Duration.ofSeconds(5),
+    300   // prefetch
+);
+
+EventHubSink sink = new EventHubSink(
+    "Endpoint=sb://...;SharedAccessKeyName=Send;SharedAccessKey=...",
+    "orders-out",
+    100,                // batch size
+    Duration.ofSeconds(10),
+    null,               // partitionId
+    "customer-id"       // partitionKey
+);
+
+List<Stage> stages = List.of(new Stage(Map.of("$set", Map.of("processed", true))));
+StreamingRuntimeConfig runtime = StreamingRuntimeConfig.builder().queueCapacity(64).build();
+StreamingPipelineExecutor executor = new StreamingPipelineExecutor(32, runtime, StreamingErrorPolicy.failFast());
+executor.processStream(source, stages, sink, new StreamingContext());
+```
+
+Map YAML/JSON `options` into these constructor arguments; the providers handle Event Hubs client setup, batching, and backpressure.
+
+---
+
+## 5. Stream catalogs (for UIs/CLIs)
 
 - **Source** (`discoverStreams`): `name=eventHubName`, `namespace=eventhub`, `supportedSyncModes=[FULL_REFRESH, INCREMENTAL]`, `cursorFields=["sequenceNumber"]`, `sourceDefinedCursor=true` (connector-owned).
 - **Sink** (`destinationStreams`): `name=eventHubName`, `namespace=eventhub`, `supportedSyncModes=[FULL_REFRESH]`.
@@ -87,7 +121,7 @@ Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs conne
 
 ---
 
-## 5. Troubleshooting
+## 6. Troubleshooting
 
 | Symptom | Possible cause | Remedy |
 | --- | --- | --- |
@@ -98,7 +132,7 @@ Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs conne
 
 ---
 
-## 6. Testing
+## 7. Testing
 
 - Run Event Hubs connector tests:
   ```bash
@@ -108,7 +142,7 @@ Fetch via `/api/connectors/discovery/sources|sinks` to keep pipeline specs conne
 
 ---
 
-## 7. References
+## 8. References
 
 | Path | Description |
 | --- | --- |
