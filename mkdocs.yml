@@ -6,7 +6,6 @@ theme:
 nav:
   - Home: index.md
   - Usage: usage.md
-  - What's New: changelog.md
   - Platform Architecture:
     - Overview: platform/overview.md
   - Platform Modules:
@@ -106,6 +105,16 @@ nav:
         - $zip: operators/zip.md
     - SrotaX Connect:
       - Overview: connect/index.md
+      - Primer: connect/primer.md
+      - Build Custom Connector:
+        - Overview: connect/build-custom-connector.md
+        - HTTP Action: connect/build-custom-connector.md#http-action
+        - JavaBean Action/Trigger: connect/build-custom-connector.md#javabean-actiontrigger
+        - Pipeline Call Action: connect/build-custom-connector.md#pipeline-call-action
+        - Webhook Trigger: connect/build-custom-connector.md#webhook-trigger
+        - Polling Trigger: connect/build-custom-connector.md#polling-trigger
+        - Streaming Trigger: connect/build-custom-connector.md#streaming-trigger-source--sink
+        - Timer Trigger: connect/build-custom-connector.md#timer-trigger
       - Manifest & SDK: connect/manifest-and-sdk.md
       - Developer Guide: connect/developer-guide.md
       - Kafka Source: connect/kafka.md
