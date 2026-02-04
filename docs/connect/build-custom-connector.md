@@ -3,12 +3,12 @@
 Use this page when you need a focused recipe for each action/trigger type—both
 manifest-first and SDK/SPI-first.
 
-## HTTP action
+## HTTP action {#http-action}
 - **Manifest:** `execution.type=http` with `method`, `urlTemplate`, headers, retry/CB.
 - **SDK:** `ManifestConnectorDispatcher.executeAction(manifest, op, ctx, body)`.
 - **When to customize:** add auth headers, retry/CB config, or templating.
 
-## JavaBean action/trigger
+## JavaBean action/trigger {#javabean-actiontrigger}
 - **Manifest:** `execution.type=javaBean`, `beanName`.
 - **SDK:** register handlers on the dispatcher:
   ```java
@@ -17,20 +17,20 @@ manifest-first and SDK/SPI-first.
   ```
 - **Trigger:** same beanName with `startTrigger(...)`.
 
-## Pipeline call action
+## Pipeline call action {#pipeline-call-action}
 - **Manifest:** `execution.type=pipelineCall`, `targetPipeline`, optional `version`.
 - **SDK:** register a `PipelineCallInvoker` or default invoker on the dispatcher.
 
-## Webhook trigger
+## Webhook trigger {#webhook-trigger}
 - **Manifest:** `execution.type=webhook`, `path`, `method`.
 - **SDK:** `dispatcher.startTrigger(manifest, op, ctx, Map.of("port", 8080))` returns a Flux of payloads.
 - **Note:** Dispatcher hosts the HTTP listener; no extra provider needed.
 
-## Polling trigger
+## Polling trigger {#polling-trigger}
 - **Manifest:** `execution.type=polling`, `intervalMillis`, optional `handlerBean`.
 - **SDK:** register a trigger handler or rely on the default tick payloads.
 
-## Streaming trigger (source → sink)
+## Streaming trigger (source → sink) {#streaming-trigger-source--sink}
 - **Manifest:** `execution.type=streaming` with `source` and `sink` maps; set `type` to a provider id (e.g., `kafka`, `eventhub`, `mongodb`, `http` sink).
 - **SDK (SPI):** implement `SourceConnectorProvider` / `SinkConnectorProvider`, register via `META-INF/services`, then build `SourceConnectorConfig` / `ConnectorConfig` and run `StreamingPipelineExecutor`.
 - **Defaults:** built-in providers live in:
@@ -40,6 +40,7 @@ manifest-first and SDK/SPI-first.
   - `fluxion-connect` HTTP sink (`type=http`)
 
 ### Write a custom streaming source
+> Provider vs runtime: the provider is the factory (discovered via ServiceLoader). The runtime is the class that actually emits records. In your provider’s `create(...)` you instantiate the runtime—typically a subclass of `AbstractAsyncStreamingSource` (for built-in worker/queue/end-of-stream handling) or a custom `StreamingSource` if you need a different threading model.
 1. Implement `SourceConnectorProvider`:
    ```java
    public class MySourceProvider implements SourceConnectorProvider {
@@ -82,7 +83,7 @@ StreamingSink dest = ConnectorFactory.createSink(sink);
 new StreamingPipelineExecutor().processStream(source, List.of(), dest, new StreamingContext());
 ```
 
-## Timer trigger
+## Timer trigger {#timer-trigger}
 - **Manifest:** `execution.type=timer`, `cron` (ISO-8601 duration or cron string).
 - **SDK:** `dispatcher.startTrigger(manifest, op, ctx, Map.of())` emits ticks.
 
