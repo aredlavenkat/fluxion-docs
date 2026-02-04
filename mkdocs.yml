@@ -120,6 +120,7 @@ nav:
         - Kafka Source/Sink: connect/kafka.md
         - Event Hubs Source/Sink: connect/eventhub.md
         - MongoDB Source/Sink: connect/mongodb.md
+      - Spring Boot Starter: connect/connect-spring-boot-starter.md
       - Manifest & SDK: connect/manifest-and-sdk.md
       - Developer Guide: connect/developer-guide.md
       - Custom Sources: connect/custom-sources.md
