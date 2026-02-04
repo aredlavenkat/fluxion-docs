@@ -1,91 +1,103 @@
 # Build Custom Connectors (per execution type)
 
-Use this page when you need a focused recipe for each action/trigger type—both
-manifest-first and SDK/SPI-first.
+Copy-paste recipes (manifest + SDK/SPI) for each action/trigger type.
 
-## HTTP action {#http-action}
-- **Manifest:** `execution.type=http` with `method`, `urlTemplate`, headers, retry/CB.
-- **SDK:** `ManifestConnectorDispatcher.executeAction(manifest, op, ctx, body)`.
-- **When to customize:** add auth headers, retry/CB config, or templating.
+## HTTP action
+- Manifest: `execution.type=http` with `method`, `urlTemplate`, headers, retry/CB.
+- SDK: `dispatcher.executeAction(manifest, op, ctx, body)`.
 
-## JavaBean action/trigger {#javabean-actiontrigger}
-- **Manifest:** `execution.type=javaBean`, `beanName`.
-- **SDK:** register handlers on the dispatcher:
+## JavaBean action/trigger
+- Manifest: `execution.type=javaBean`, `beanName`.
+- SDK:
   ```java
   dispatcher.registerActionHandler("myHandler", (c, in) -> Map.of("ok", true));
   dispatcher.executeAction(manifest, "myOp", ctx, Map.of());
   ```
-- **Trigger:** same beanName with `startTrigger(...)`.
+  Use the same bean for triggers with `startTrigger(...)`.
 
-## Pipeline call action {#pipeline-call-action}
-- **Manifest:** `execution.type=pipelineCall`, `targetPipeline`, optional `version`.
-- **SDK:** register a `PipelineCallInvoker` or default invoker on the dispatcher.
+## Pipeline call action
+- Manifest: `execution.type=pipelineCall`, `targetPipeline`, optional `version`.
+- SDK: register a `PipelineCallInvoker` (or default invoker) on the dispatcher.
 
-## Webhook trigger {#webhook-trigger}
-- **Manifest:** `execution.type=webhook`, `path`, `method`.
-- **SDK:** `dispatcher.startTrigger(manifest, op, ctx, Map.of("port", 8080))` returns a Flux of payloads.
-- **Note:** Dispatcher hosts the HTTP listener; no extra provider needed.
+## Webhook trigger
+- Manifest: `execution.type=webhook`, `path`, `method`.
+- SDK: `dispatcher.startTrigger(manifest, op, ctx, Map.of("port", 8080))` returns a Flux of payloads. The dispatcher hosts the HTTP listener.
 
-## Polling trigger {#polling-trigger}
-- **Manifest:** `execution.type=polling`, `intervalMillis`, optional `handlerBean`.
-- **SDK:** register a trigger handler or rely on the default tick payloads.
+## Polling trigger
+- Manifest: `execution.type=polling`, `intervalMillis`, optional `handlerBean`.
+- SDK: register a trigger handler or rely on default tick payloads.
 
-## Streaming trigger (source → sink) {#streaming-trigger-source--sink}
-- **Manifest:** `execution.type=streaming` with `source` and `sink` maps; set `type` to a provider id (e.g., `kafka`, `eventhub`, `mongodb`, `http` sink).
-- **SDK (SPI):** implement `SourceConnectorProvider` / `SinkConnectorProvider`, register via `META-INF/services`, then build `SourceConnectorConfig` / `ConnectorConfig` and run `StreamingPipelineExecutor`.
-- **Defaults:** built-in providers live in:
-  - `fluxion-connect-kafka` (`type=kafka`)
-  - `fluxion-connect-eventhub` (`type=eventhub`)
-  - `fluxion-connect-mongo` (`type=mongodb`)
-  - `fluxion-connect` HTTP sink (`type=http`)
+## Streaming trigger (source → sink)
+- Manifest: `execution.type=streaming` with `source` and `sink` maps; set `type` to a provider id (e.g., `kafka`, `eventhub`, `mongodb`, `http` sink).
+- SDK/SPI: implement `SourceConnectorProvider` / `SinkConnectorProvider`, register via `META-INF/services`, build configs, and run `StreamingPipelineExecutor`.
+- Built-ins: `type=kafka` (connect-kafka), `type=eventhub` (connect-eventhub), `type=mongodb` (connect-mongo), `type=http` sink (core).
 
 ### Write a custom streaming source
-> Provider vs runtime: the provider is the factory (discovered via ServiceLoader). The runtime is the class that actually emits records. In your provider’s `create(...)` you instantiate the runtime—typically a subclass of `AbstractAsyncStreamingSource` (for built-in worker/queue/end-of-stream handling) or a custom `StreamingSource` if you need a different threading model.
-1. Implement `SourceConnectorProvider`:
-   ```java
-   public class MySourceProvider implements SourceConnectorProvider {
-       public SourceConnectorDescriptor descriptor() {
-           return SourceConnectorDescriptor.builder("my-source", "My Streaming Source").build();
-       }
-       public List<ConnectorOption> options() { /* declare schema */ }
-       public StreamingSource create(SourceConnectorContext ctx, SourceConnectorConfig cfg) {
-           return new MyStreamingSource(cfg.getString("endpoint", null));
-       }
-   }
-   ```
-2. Implement `MyStreamingSource` by extending `AbstractAsyncStreamingSource` or implementing `StreamingSource`, emitting `Document` batches.
-3. Register via `src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider`.
-4. Use in a manifest: `"source": { "type": "my-source", ... }`.
+*Provider vs runtime:* the provider is the factory (ServiceLoader). The runtime emits records. Have the provider’s `create(...)` return your runtime—usually a subclass of `AbstractAsyncStreamingSource` (recommended) or a custom `StreamingSource` if you need bespoke threading/backpressure.
+
+1) Provider:
+```java
+public class MySourceProvider implements SourceConnectorProvider {
+    public SourceConnectorDescriptor descriptor() {
+        return SourceConnectorDescriptor.builder("my-source", "My Streaming Source").build();
+    }
+    public List<ConnectorOption> options() { /* schema */ }
+    public StreamingSource create(SourceConnectorContext ctx, SourceConnectorConfig cfg) {
+        return new MyStreamingSource(cfg.getString("endpoint", null));
+    }
+}
+```
+
+2) Runtime: implement `MyStreamingSource` (extend `AbstractAsyncStreamingSource`), emit `Document` batches.
+
+3) ServiceLoader registration:
+```
+src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider
+com.acme.connectors.MySourceProvider
+```
+
+4) Manifest usage: `"source": { "type": "my-source", ... }`.
 
 ### Write a custom streaming sink
-1. Implement `SinkConnectorProvider`:
-   ```java
-   public class MySinkProvider implements SinkConnectorProvider {
-       public SinkConnectorDescriptor descriptor() {
-           return SinkConnectorDescriptor.builder("my-sink", "My Streaming Sink").build();
-       }
-       public List<ConnectorOption> options() { /* declare schema */ }
-       public StreamingSink create(ConnectorConfig cfg) {
-           return new MyStreamingSink(cfg.getString("endpoint", null));
-       }
-   }
-   ```
-2. Implement `MyStreamingSink` (accept batches of `Document`), optionally AutoCloseable.
-3. Register via `src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SinkConnectorProvider`.
-4. Use in a manifest: `"sink": { "type": "my-sink", ... }`.
-
-Minimal `StreamingPipelineExecutor` wiring:
+1) Provider:
 ```java
-SourceConnectorConfig src = SourceConnectorConfig.builder("my-source").option("endpoint", "...").build();
-ConnectorConfig sink = ConnectorConfig.builder("my-sink", ConnectorConfig.Kind.SINK).option("endpoint", "...").build();
+public class MySinkProvider implements SinkConnectorProvider {
+    public SinkConnectorDescriptor descriptor() {
+        return SinkConnectorDescriptor.builder("my-sink", "My Streaming Sink").build();
+    }
+    public List<ConnectorOption> options() { /* schema */ }
+    public StreamingSink create(ConnectorConfig cfg) {
+        return new MyStreamingSink(cfg.getString("endpoint", null));
+    }
+}
+```
+
+2) Runtime: implement `MyStreamingSink` (consumes batches of `Document`, optionally AutoCloseable).
+
+3) ServiceLoader registration:
+```
+src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SinkConnectorProvider
+com.acme.connectors.MySinkProvider
+```
+
+4) Manifest usage: `"sink": { "type": "my-sink", ... }`.
+
+Minimal executor wiring:
+```java
+SourceConnectorConfig src = SourceConnectorConfig.builder("my-source")
+    .option("endpoint", "...")
+    .build();
+ConnectorConfig sink = ConnectorConfig.builder("my-sink", ConnectorConfig.Kind.SINK)
+    .option("endpoint", "...")
+    .build();
 StreamingSource source = ConnectorFactory.createSource(src, SourceConnectorContext.from(new StreamingContext()));
 StreamingSink dest = ConnectorFactory.createSink(sink);
 new StreamingPipelineExecutor().processStream(source, List.of(), dest, new StreamingContext());
 ```
 
-## Timer trigger {#timer-trigger}
-- **Manifest:** `execution.type=timer`, `cron` (ISO-8601 duration or cron string).
-- **SDK:** `dispatcher.startTrigger(manifest, op, ctx, Map.of())` emits ticks.
+## Timer trigger
+- Manifest: `execution.type=timer`, `cron` (ISO-8601 duration or cron string).
+- SDK: `dispatcher.startTrigger(manifest, op, ctx, Map.of())` emits ticks.
 
 ---
 
