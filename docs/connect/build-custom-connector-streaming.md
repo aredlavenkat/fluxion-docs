@@ -79,3 +79,49 @@ StreamingSource source = ConnectorFactory.createSource(src, SourceConnectorConte
 StreamingSink dest = ConnectorFactory.createSink(sink);
 new StreamingPipelineExecutor().processStream(source, List.of(), dest, new StreamingContext());
 ```
+
+## Full example: custom source provider
+
+Manifest (`src/main/resources/manifests/orders.stream.json`):
+```json
+{
+  "schemaVersion": "1.0.0",
+  "id": "demo.orders.stream",
+  "version": "1.0.0",
+  "operations": { "orders": { "$ref": "#/operationDefs/orders" } },
+  "operationDefs": {
+    "orders": {
+      "operationId": "orders",
+      "kind": "trigger",
+      "execution": {
+        "type": "streaming",
+        "stream": "orders",
+        "source": { "type": "demo-orders" },
+        "sink": { "type": "http", "endpoint": "https://my.service/ingest" }
+      }
+    }
+  }
+}
+```
+
+Source provider (`OrdersStreamProvider.java`):
+```java
+public final class OrdersStreamProvider implements SourceConnectorProvider {
+    @Override
+    public SourceConnectorDescriptor descriptor() {
+        return SourceConnectorDescriptor.builder("demo-orders", "Demo Orders Stream").build();
+    }
+    @Override
+    public List<ConnectorOption> options() { return List.of(/* schema */); }
+    @Override
+    public StreamingSource create(SourceConnectorContext ctx, SourceConnectorConfig cfg) {
+        ReactiveOrdersClient client = new ReactiveOrdersClient(cfg.getString("endpoint", null));
+        return new OrdersStreamingSource(client); // implement emitting Documents
+    }
+}
+```
+
+ServiceLoader (`src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider`):
+```
+com.acme.connectors.OrdersStreamProvider
+```
