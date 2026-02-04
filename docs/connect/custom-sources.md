@@ -28,7 +28,7 @@ executor owns polling, backpressure, and shutdown.
 
 ---
 
-## 3. Minimal JDBC source example
+## 3. Minimal JDBC streaming source (revised)
 
 ```java
 class JdbcStreamingSource extends AbstractAsyncStreamingSource {
@@ -37,33 +37,42 @@ class JdbcStreamingSource extends AbstractAsyncStreamingSource {
     private long offset;
     private boolean finished;
 
-    JdbcStreamingSource(DataSource dataSource, int queueCapacity, int batchSize) {
+    JdbcStreamingSource(DataSource dataSource, int queueCapacity, int batchSize, long startOffset) {
         super(queueCapacity);
         this.dataSource = dataSource;
         this.batchSize = batchSize;
+        this.offset = startOffset;
     }
 
     @Override
     protected List<Document> poll() {
         if (finished) {
-            return null; // signals end-of-stream
+            return null; // signal end-of-stream to executor
         }
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT id, amount FROM orders WHERE id > ? ORDER BY id ASC LIMIT ?")) {
+             PreparedStatement ps = conn.prepareStatement("""
+                 SELECT id, amount
+                 FROM orders
+                 WHERE id > ?
+                 ORDER BY id ASC
+                 LIMIT ?
+             """)) {
             ps.setLong(1, offset);
             ps.setInt(2, batchSize);
             try (ResultSet rs = ps.executeQuery()) {
                 List<Document> batch = new ArrayList<>();
                 while (rs.next()) {
                     Document doc = new Document();
-                    doc.put("_id", rs.getLong("id"));
+                    long id = rs.getLong("id");
+                    doc.put("_id", id);
                     doc.put("amount", rs.getBigDecimal("amount"));
                     batch.add(doc);
-                    offset = rs.getLong("id");
+                    offset = id;
                 }
                 if (batch.isEmpty()) {
                     finished = true;
+                } else {
+                    persistCheckpoint(offset);
                 }
                 return batch;
             }
@@ -71,16 +80,17 @@ class JdbcStreamingSource extends AbstractAsyncStreamingSource {
             throw new RuntimeException("JDBC source failed", e);
         }
     }
+
+    private void persistCheckpoint(long id) {
+        // store to StreamingContext.stateStore() in a real implementation
+    }
 }
 ```
 
 **Highlights**
-
-- Returning `null` tells `AbstractAsyncStreamingSource` to enqueue an
-  end-of-stream marker. The executor flushes remaining stages and closes sinks.
-- Wrap polling in retry/backoff logic (or rely on `StreamingErrorPolicy`) if
-  your data source can transiently fail.
-- Persist `offset` (primary key) to resume after restarts.
+- Return `null` to end the stream; empty batch marks completion.
+- Persist `offset` so you can resume after restarts.
+- Wrap polling in retry/backoff or use `StreamingErrorPolicy` for transient DB errors.
 
 ---
 
@@ -197,7 +207,79 @@ pipeline-service discovery endpoints.
 
 ---
 
-## 10. References
+## 10. Manifest-driven custom source (complete example)
+
+**1) Implement and register your provider**
+```java
+// src/main/java/com/acme/connectors/OrdersSourceProvider.java
+public class OrdersSourceProvider implements SourceConnectorProvider {
+    public SourceConnectorDescriptor descriptor() {
+        return SourceConnectorDescriptor.builder("acme-orders", "Acme Orders Source").build();
+    }
+    public List<ConnectorOption> options() {
+        return List.of(
+            ConnectorOption.builder("endpoint", ConnectorOptionType.STRING).required(true).build(),
+            ConnectorOption.builder("apiKey", ConnectorOptionType.STRING).build()
+        );
+    }
+    public StreamingSource create(SourceConnectorContext ctx, SourceConnectorConfig cfg) {
+        String endpoint = cfg.getString("endpoint", null);
+        String apiKey = cfg.getString("apiKey", null);
+        return new OrdersStreamingSource(endpoint, apiKey); // emits Documents
+    }
+}
+```
+Register it:
+```
+# src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider
+com.acme.connectors.OrdersSourceProvider
+```
+
+**2) Manifest wiring the source into a streaming trigger**
+```json
+{
+  "schemaVersion": "1.0.0",
+  "id": "acme.orders.stream",
+  "version": "1.0.0",
+  "displayName": "Acme Orders Stream",
+  "operations": { "stream": "stream" },
+  "operationDefs": {
+    "stream": {
+      "kind": "trigger",
+      "execution": {
+        "type": "streaming",
+        "stream": "orders",
+        "source": {
+          "type": "acme-orders",
+          "endpoint": "https://api.acme.com/orders",
+          "apiKey": "{{ACME_API_KEY}}"
+        },
+        "sink": {
+          "type": "http",
+          "endpoint": "https://my.service/ingest"
+        }
+      }
+    }
+  }
+}
+```
+
+**3) Run it via the dispatcher**
+```java
+ConnectorManifest manifest = new ConnectorManifestLoader()
+    .load(Path.of("manifests/acme-orders-stream.json"));
+ManifestConnectorDispatcher dispatcher = new ManifestConnectorDispatcher();
+ConnectorContext ctx = new SimpleConnectorContext(/* tenant, pipeline, etc. */);
+
+Flux<Map<String,Object>> events =
+    dispatcher.startTrigger(manifest, "stream", ctx, Map.of());
+
+events.take(10).collectList().block(); // consume
+```
+
+---
+
+## 11. References
 
 | Path | Description |
 | --- | --- |

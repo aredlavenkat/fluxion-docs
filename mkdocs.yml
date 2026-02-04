@@ -115,11 +115,13 @@ nav:
         - Polling Trigger: connect/build-custom-connector.md#polling-trigger
         - Streaming Trigger: connect/build-custom-connector.md#streaming-trigger-source--sink
         - Timer Trigger: connect/build-custom-connector.md#timer-trigger
+      - Built-in Connectors:
+        - HTTP Sink: connect/http-sink.md
+        - Kafka Source/Sink: connect/kafka.md
+        - Event Hubs Source/Sink: connect/eventhub.md
+        - MongoDB Source/Sink: connect/mongodb.md
       - Manifest & SDK: connect/manifest-and-sdk.md
       - Developer Guide: connect/developer-guide.md
-      - Kafka Source: connect/kafka.md
-      - Event Hubs: connect/eventhub.md
-      - MongoDB: connect/mongodb.md
       - Custom Sources: connect/custom-sources.md
     - SrotaX Enrich:
       - Overview: enrich/index.md

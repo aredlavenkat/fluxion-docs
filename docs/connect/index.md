@@ -25,6 +25,7 @@ and sinks beyond in-process pipelines.
 | Kafka Source/Sink | [connect/kafka.md](kafka.md) | **Beta** | Reference implementation of the connector SPI. |
 | Event Hubs Source/Sink | [connect/eventhub.md](eventhub.md) | **Alpha** | Azure Event Hubs ingestion/delivery. |
 | MongoDB Source/Sink | [connect/mongodb.md](mongodb.md) | **Alpha** | MongoDB change streams + writers. |
+| HTTP Sink | [connect/http-sink.md](http-sink.md) | **Beta** | Batch sink that posts documents to HTTP endpoints. |
 | Primer | [connect/primer.md](primer.md) | **Concepts** | End-to-end connector model, runtimes, and authoring modes. |
 | Developer Guide | [connect/developer-guide.md](developer-guide.md) | **How-to** | Build and package connectors (manifest + SDK + SPI). |
 | Custom Sources | [connect/custom-sources.md](custom-sources.md) | **How-to** | Build bespoke connectors with the SPI. |
