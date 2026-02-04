@@ -1,4 +1,13 @@
 # Build Custom Connector: Timer Trigger
 
-- **Manifest:** `execution.type=timer`, `cron` (ISO-8601 duration or cron string).
-- **SDK:** `dispatcher.startTrigger(manifest, op, ctx, Map.of())` emits ticks.
+**When to use:** cron/interval ticks that emit simple events into the pipeline.
+
+## Manifest
+```json
+"execution": { "type": "timer", "cron": "PT30S" }
+```
+
+## SDK
+```java
+dispatcher.startTrigger(manifest, "tick", ctx, Map.of());
+```

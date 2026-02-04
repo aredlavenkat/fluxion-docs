@@ -1,7 +1,8 @@
 # Connector Manifest & SDK
 
-This page documents the connector manifest format and the Java SDK used for custom
-handlers. The goals:
+This page documents the connector manifest format and how the dispatcher/SDK
+load it. For building custom providers/runtimes, see the “Build Custom Connector”
+pages in the sidebar.
 
 - Thin, reusable integrations for external systems (HTTP, DBs, Kafka, S3, etc.).
 - Multi-tenant aware: never leak data/secrets across tenants.
@@ -17,23 +18,18 @@ Every operation declares an `execution.type` (do not invent new types):
 - `http` — generic HTTP/REST calls
 - `javaBean` — call a Spring bean implementing connector logic (SDKs, DB drivers, etc.)
 - `pipelineCall` — invoke another SrotaX pipeline or ruleset
-- `httpServer` — inbound HTTP/webhook triggers
+- `webhook` — inbound HTTP/webhook triggers
 - `polling` — periodic polling of external systems
-- `reactiveStream` — streaming sources (Kafka, Pub/Sub, CDC, etc.)
+- `streaming` — streaming sources/sinks (Kafka, EventHub, Mongo, HTTP sink, custom)
 - `timer` — cron triggers, delays, scheduled tasks
 
 ## LLM-friendly recipe
-1. Pick `execution.type` (http | javaBean | pipelineCall | httpServer | polling | reactiveStream | timer).
+1. Pick `execution.type` (http | javaBean | pipelineCall | webhook | polling | streaming | timer).
 2. Write a manifest with `id`, `version`, `operations`, `operationDefs[*].kind` (action/trigger), and `execution.type`.
-3. Implement handlers:
+3. Implement handlers (if using SDK):
    - Actions: `ConnectorActionHandler` or extend `AbstractActionHandler`.
    - Triggers: `ConnectorTriggerHandler` returning `Flux<O>`.
-   - Streaming: `SourceConnectorProvider` / `SinkConnectorProvider` + `discoverStreams` returning `ConnectorStreamDescriptor`.
-4. Package:
-   - Put manifest under `src/main/resources/manifests/`.
-   - Add ServiceLoader files: `META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider` / `...SinkConnectorProvider`.
-   - Register Spring beans for `javaBean`/`httpServer`/`pipelineCall` executions.
-5. Enforce secrets/multi-tenancy via `ConnectorContext.resolveSecret`, keep handlers stateless, use discovery endpoints for catalogs.
+4. Enforce secrets/multi-tenancy via `ConnectorContext.resolveSecret`, keep handlers stateless.
 
 ## Sample manifests by execution.type
 
@@ -91,7 +87,7 @@ Every operation declares an `execution.type` (do not invent new types):
 }
 ```
 
-**httpServer (trigger/webhook)**
+**webhook (trigger)**
 ```json
 {
   "operations": { "ingest": "ingest" },
@@ -100,7 +96,7 @@ Every operation declares an `execution.type` (do not invent new types):
       "operationId": "ingest",
       "kind": "trigger",
       "execution": {
-        "type": "httpServer",
+        "type": "webhook",
         "path": "/webhook",
         "method": "POST"
       }
@@ -126,7 +122,7 @@ Every operation declares an `execution.type` (do not invent new types):
 }
 ```
 
-**reactiveStream (trigger)**
+**streaming (trigger)**
 ```json
 {
   "operations": { "stream": "stream" },
@@ -135,9 +131,10 @@ Every operation declares an `execution.type` (do not invent new types):
       "operationId": "stream",
       "kind": "trigger",
       "execution": {
-        "type": "reactiveStream",
+        "type": "streaming",
         "stream": "orders",
-        "group": "connectors"
+        "source": { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders", "groupId": "g1" },
+        "sink": { "type": "http", "endpoint": "https://my.service/ingest" }
       }
     }
   }
@@ -161,42 +158,14 @@ Every operation declares an `execution.type` (do not invent new types):
 }
 ```
 
-### End-to-end: timer-triggered pipeline (5-minute heartbeat)
-
-1) Manifest (`src/main/resources/manifests/ops.timer.json`)
-
-```json
-{
-  "schemaVersion": "1.0.0",
-  "id": "ops.timer",
-  "version": "1.0.0",
-  "operations": { "tick": { "$ref": "#/operationDefs/tick" } },
-  "operationDefs": {
-    "tick": {
-      "operationId": "tick",
-      "kind": "trigger",
-      "execution": { "type": "timer", "cron": "PT5M" }
-    }
-  }
-}
-```
-
-2) Pipeline definition (`pipelines/heartbeat.json`)
-
-```json
-[
-  {
-    "$set": {
-      "firedAt": "$$NOW",
-      "message": "heartbeat"
-    }
-  }
-]
-```
-
-3) Wire-up (Spring Boot sketch)
-
-Load the manifest and pipeline, then schedule the pipeline every five minutes. In production you typically let the trigger runtime read the manifest and manage scheduling; the snippet below shows the wiring inline so you can see the pieces.
+For custom providers/runtimes and per-type recipes, see:
+- [Build custom connector: HTTP](build-custom-connector-http.md)
+- [Build custom connector: JavaBean](build-custom-connector-javabean.md)
+- [Build custom connector: Pipeline call](build-custom-connector-pipeline-call.md)
+- [Build custom connector: Webhook](build-custom-connector-webhook.md)
+- [Build custom connector: Polling](build-custom-connector-polling.md)
+- [Build custom connector: Streaming](build-custom-connector-streaming.md)
+- [Build custom connector: Timer](build-custom-connector-timer.md)
 
 ```java
 @Configuration
@@ -280,191 +249,13 @@ Fields:
 
 ---
 
-## Example: custom action connector (JavaBean) + manifest
-
-Manifest (`src/main/resources/manifests/hello.json`):
-
-```json
-{
-  "schemaVersion": "1.0.0",
-  "id": "demo.hello",
-  "version": "1.0.0",
-  "operations": { "sayHello": { "$ref": "#/operationDefs/sayHello" } },
-  "operationDefs": {
-    "sayHello": {
-      "operationId": "sayHello",
-      "kind": "action",
-      "inputSchema": { "type": "object", "properties": { "name": { "type": "string" } } },
-      "outputSchema": { "type": "object" },
-      "execution": {
-        "type": "javaBean",
-        "beanName": "helloConnector"
-      }
-    }
-  }
-}
-```
-
-Handler (`HelloConnector.java`):
-
-```java
-@Component("helloConnector")
-public class HelloConnector extends AbstractActionHandler<Map<String,Object>, Map<String,Object>> {
-    @Override
-    protected Map<String,Object> doExecute(ConnectorContext ctx, Map<String,Object> input) {
-        String name = String.valueOf(input.getOrDefault("name", "world"));
-        ctx.getLogger().info("Hello {} from tenant {}", name, ctx.getTenantId());
-        return Map.of("greeting", "Hello " + name);
-    }
-}
-```
-
-Use from a pipeline (expression-style inside `$set`):
-
-```json
-{
-  "$set": {
-    "greeting": {
-      "$enrich": {
-        "connectionRef": "demo.hello",
-        "connectorId": "demo.hello",
-        "operationId": "sayHello",
-        "input": { "name": "$user.name" }
-      }
-    }
-  }
-}
-```
-
-This reuses the shared connector dispatcher: the enrichment operator invokes `demo.hello`/`sayHello` via the JavaBean execution you registered.
-
----
-
-## Example: polling trigger (Java SDK)
-
-Manifest (`src/main/resources/manifests/orders.poller.json`):
-
-```json
-{
-  "schemaVersion": "1.0.0",
-  "id": "demo.orders.poller",
-  "version": "1.0.0",
-  "operations": { "pollNew": { "$ref": "#/operationDefs/pollNew" } },
-  "operationDefs": {
-    "pollNew": {
-      "operationId": "pollNew",
-      "kind": "trigger",
-      "inputSchema": { "type": "object" },
-      "outputSchema": { "type": "object" },
-      "execution": {
-        "type": "polling",
-        "intervalMillis": 60000,
-        "beanName": "ordersPoller"
-      }
-    }
-  }
-}
-```
-
-Handler (`OrdersPoller.java`):
-
-```java
-@Component("ordersPoller")
-public class OrdersPoller implements ConnectorTriggerHandler<Map<String, Object>, Map<String, Object>> {
-    private final OrdersClient client;
-
-    public OrdersPoller(OrdersClient client) {
-        this.client = client;
-    }
-
-    @Override
-    public Flux<Map<String, Object>> trigger(ConnectorContext ctx, Map<String, Object> input) {
-        return Flux.defer(() -> {
-            String since = ctx.getState("lastSeenId", "0");
-            List<Order> newOrders = client.fetchSince(since);
-            String maxId = newOrders.stream().map(Order::id).max(String::compareTo).orElse(since);
-            ctx.setState("lastSeenId", maxId); // checkpoint
-            return Flux.fromIterable(newOrders)
-                       .map(order -> Map.of(
-                               "orderId", order.id(),
-                               "tenantId", ctx.getTenantId(),
-                               "total", order.total()));
-        });
-    }
-}
-```
-
-Use this as a trigger when deploying a pipeline: each emitted map becomes the first document into the pipeline every minute.
-
----
-
-## Example: reactiveStream source provider
-
-Manifest (`src/main/resources/manifests/orders.stream.json`):
-
-```json
-{
-  "schemaVersion": "1.0.0",
-  "id": "demo.orders.stream",
-  "version": "1.0.0",
-  "operations": { "orders": { "$ref": "#/operationDefs/orders" } },
-  "operationDefs": {
-    "orders": {
-      "operationId": "orders",
-      "kind": "trigger",
-      "execution": {
-        "type": "reactiveStream",
-        "stream": "orders",
-        "group": "connectors"
-      }
-    }
-  }
-}
-```
-
-Source provider (`OrdersStreamProvider.java`):
-
-```java
-public final class OrdersStreamProvider implements SourceConnectorProvider {
-    @Override
-    public ConnectorStreamDescriptor descriptor() {
-        return ConnectorStreamDescriptor.builder()
-                .stream("orders")
-                .namespace("demo")
-                .schema(Map.of("type", "object"))
-                .build();
-    }
-
-    @Override
-    public Publisher<ConnectorStreamDescriptor> discoverStreams(ConnectorContext ctx) {
-        return Flux.just(descriptor());
-    }
-
-    @Override
-    public Publisher<Document> create(SourceConnectorProvider.Options options, ConnectorContext ctx) {
-        ReactiveOrdersClient client = options.getConfig(ReactiveOrdersClient.class);
-        return client.subscribe("orders-topic")
-                     .map(payload -> Document.from(Map.of(
-                             "orderId", payload.id(),
-                             "total", payload.total(),
-                             "tenantId", ctx.getTenantId())));
-    }
-}
-```
-
-ServiceLoader registration (`src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider`):
-
-```
-com.acme.connectors.OrdersStreamProvider
-```
-
-Deploy the manifest and jar; bind the `reactiveStream` operation to a streaming pipeline so events from the client feed the first stage continuously.
-
----
+For per-type recipes and custom connector creation, see the “Build Custom Connector”
+pages in the sidebar (HTTP, JavaBean, pipeline call, webhook, polling, streaming,
+timer).
 
 ## Execution-type examples at a glance
 
-Use these patterns per `execution.type` when authoring manifests. Pair them with the SDK interfaces shown above and register providers via ServiceLoader when applicable.
+Use these patterns per `execution.type` when authoring manifests.
 
 ### http (action)
 ```json

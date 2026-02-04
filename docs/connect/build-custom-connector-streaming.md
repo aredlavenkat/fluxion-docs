@@ -1,8 +1,21 @@
 # Build Custom Connector: Streaming Trigger (source → sink)
 
-- **Manifest:** `execution.type=streaming` with `source` and `sink` maps; set `type` to a provider id (e.g., `kafka`, `eventhub`, `mongodb`, `http` sink).
-- **SDK/SPI:** implement `SourceConnectorProvider` / `SinkConnectorProvider`, register via `META-INF/services`, build configs, and run `StreamingPipelineExecutor`.
-- **Built-ins:** `type=kafka` (connect-kafka), `type=eventhub` (connect-eventhub), `type=mongodb` (connect-mongo), `type=http` sink (core).
+**When to use:** long-lived pipelines that read from a source and deliver to a
+sink. Built-in provider ids: `kafka`, `eventhub`, `mongodb`, `http` sink.
+
+## Manifest
+```json
+"execution": {
+  "type": "streaming",
+  "source": { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders", "groupId": "g1" },
+  "sink":   { "type": "http",  "endpoint": "https://api.example.com/ingest" }
+}
+```
+
+## SDK/SPI overview
+- Implement providers via `SourceConnectorProvider` / `SinkConnectorProvider`.
+- Register via `META-INF/services`.
+- Build configs, then run `StreamingPipelineExecutor`.
 
 ## Write a custom streaming source
 *Provider vs runtime:* the provider is the factory (ServiceLoader). The runtime emits records. Have the provider’s `create(...)` return your runtime—usually a subclass of `AbstractAsyncStreamingSource` (recommended) or a custom `StreamingSource` if you need bespoke threading/backpressure.
@@ -54,7 +67,7 @@ com.acme.connectors.MySinkProvider
 
 4) Manifest usage: `"sink": { "type": "my-sink", ... }`.
 
-Minimal executor wiring:
+## Minimal executor wiring
 ```java
 SourceConnectorConfig src = SourceConnectorConfig.builder("my-source")
     .option("endpoint", "...")
