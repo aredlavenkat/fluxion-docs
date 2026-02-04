@@ -128,6 +128,7 @@ nav:
       - Operators:
         - $httpCall: enrich/operators/httpCall.md
         - $sqlQuery: enrich/operators/sqlQuery.md
+        - $enrich: enrich/operators/enrich.md
   - Execution Runtimes:
     - Rule Engine:
       - Overview: rules/index.md

@@ -49,8 +49,12 @@ for enriching documents with relational data during pipeline evaluation.
 | `query` | SQL statement with positional `?` parameters. | **Required** |
 | `params` | Array of expressions bound sequentially to `?` placeholders. | `[]` |
 | `expectSingle` | Return first row or `null` when no rows. If `false`, returns a list of rows. | `false` |
-| `retry` | Resilience4j retry configuration (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
+| `retry` | Resilience4j retry configuration (see [Resilience Patterns](../../shared/resilience.md)); supports `retryOn` / `ignore` exception lists. | Disabled |
 | `circuitBreaker` | Resilience4j circuit breaker configuration. | Disabled |
+
+Resilience layers:
+- **Connection-level**: define `retry`/`circuitBreaker` on the SQL connector; all `$sqlQuery` usages inherit them.
+- **Call-level overrides**: set `retry` / `circuitBreaker` in the operator to override defaults for a single query.
 
 ---
 

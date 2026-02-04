@@ -62,7 +62,7 @@ circuit breaker).
 
 | Field | Description | Default |
 | --- | --- | --- |
-| `connection` | Name of registered `HttpConnector`. Optional when `url` provided. | `null` |
+| `connection` | Name of registered `HttpConnector`. Required (provides base URL/auth/resilience defaults). | **required** |
 | `url` | Request URL template. `{}` placeholders replaced by `params`. | Connector URL |
 | `method` | HTTP verb (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, etc.). | `GET` |
 | `headers` | Map of header expressions (evaluated per request). | `{}` |
@@ -71,8 +71,12 @@ circuit breaker).
 | `responsePath` | JSON Pointer applied to the parsed response body. | Entire payload |
 | `connectTimeoutMs` | Connection timeout in milliseconds. | `5000` |
 | `readTimeoutMs` | Read timeout in milliseconds. | `5000` |
-| `retry` | Resilience4j retry config (see [Resilience Patterns](../../shared/resilience.md)). | Disabled |
+| `retry` | Resilience4j retry config (see [Resilience Patterns](../../shared/resilience.md)); supports `retryOn` / `ignore` exception lists. | Disabled |
 | `circuitBreaker` | Resilience4j circuit breaker config. | Disabled |
+
+Resilience layers:
+- **Connection-level**: define `retry`/`circuitBreaker` on the HTTP connector; all `$httpCall` usages inherit them.
+- **Call-level overrides**: set `retry` / `circuitBreaker` in the operator to override defaults for a single call.
 
 ---
 
