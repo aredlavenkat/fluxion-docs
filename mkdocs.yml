@@ -107,14 +107,14 @@ nav:
       - Overview: connect/index.md
       - Primer: connect/primer.md
       - Build Custom Connector:
-        - Overview: connect/build-custom-connector.md
-        - HTTP Action: connect/build-custom-connector.md#http-action
-        - JavaBean Action/Trigger: connect/build-custom-connector.md#javabean-actiontrigger
-        - Pipeline Call Action: connect/build-custom-connector.md#pipeline-call-action
-        - Webhook Trigger: connect/build-custom-connector.md#webhook-trigger
-        - Polling Trigger: connect/build-custom-connector.md#polling-trigger
-        - Streaming Trigger: connect/build-custom-connector.md#streaming-trigger-source--sink
-        - Timer Trigger: connect/build-custom-connector.md#timer-trigger
+        - Overview: connect/build-custom-connector-overview.md
+        - HTTP Action: connect/build-custom-connector-http.md
+        - JavaBean Action/Trigger: connect/build-custom-connector-javabean.md
+        - Pipeline Call Action: connect/build-custom-connector-pipeline-call.md
+        - Webhook Trigger: connect/build-custom-connector-webhook.md
+        - Polling Trigger: connect/build-custom-connector-polling.md
+        - Streaming Trigger: connect/build-custom-connector-streaming.md
+        - Timer Trigger: connect/build-custom-connector-timer.md
       - Built-in Connectors:
         - HTTP Sink: connect/http-sink.md
         - Kafka Source/Sink: connect/kafka.md
