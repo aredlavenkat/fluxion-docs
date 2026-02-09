@@ -141,6 +141,32 @@ Every operation declares an `execution.type` (do not invent new types):
 }
 ```
 
+**streaming with pipeline process + pipeline sink (trigger)**
+```json
+{
+  "operations": { "stream": "stream" },
+  "operationDefs": {
+    "stream": {
+      "operationId": "stream",
+      "kind": "trigger",
+      "execution": {
+        "type": "streaming",
+        "stream": "orders",
+        "process": { "type": "pipeline", "pipeline": "enrich-orders", "version": "v1" },
+        "sink": {
+          "type": "pipeline",
+          "pipeline": "ship-orders",
+          "next": { "type": "http", "endpoint": "https://my.service/notify" }
+        }
+      }
+    }
+  }
+}
+```
+Notes:
+- `process` runs before the sink; output feeds the sink chain/fan-out.
+- `pipeline`/`pipelineCall` sinks forward their output into `next` sinks if present.
+
 **timer (trigger)**
 ```json
 {
@@ -191,6 +217,31 @@ public class HeartbeatTimerConfig {
 ```
 
 Swap out the scheduler for your trigger runtime so that the timer manifest drives scheduling automatically and the emitted document (`firedAt`, `message`) becomes the first input into your pipeline.
+
+## Pipeline invoker + resilience (starter defaults)
+- The Spring Boot starter ships a default `PipelineCallInvoker` that POSTs to `/api/pipelines/{name}/{version}:run` on the pipeline-service.
+- Configure target URL + timeout and bind retry/circuit-breaker via Resilience4j registries:
+```yaml
+fluxion:
+  connect:
+    pipeline:
+      base-url: http://fluxion-pipeline-service:8085
+      timeout-ms: 10000
+resilience4j:
+  retry:
+    instances:
+      pipeline-service:
+        max-attempts: 3
+        wait-duration: 500ms
+  circuitbreaker:
+    instances:
+      pipeline-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+```
+- This invoker is used for `execution.type=pipelineCall`, streaming `process`, and pipeline sinks. Inputs are sent as `document`; outputs flow to the sink chain or back to the caller.
 
 ---
 
@@ -248,6 +299,12 @@ Fields:
 - **Auth/config**: `ConnectorContext` supplies tenant/pipeline IDs, config, secret resolution, logger, metrics, and tracing; never cache per-tenant secrets statically.
 
 ---
+
+### Dispatcher vs. providers
+- Built-in in the dispatcher: `webhook`, `polling`, `timer`, `javaBean`, `pipelineCall`, `http`. With a manifest that declares these types, the dispatcher spins up the webhook server, polling interval, timer ticks, or invokes the registered bean/pipeline/HTTP call. No provider SPI is needed—just register your action/trigger handlers (for javaBean/polling) and optional pipeline invoker/HTTP headers, etc.
+- Invocation paths: use `ManifestConnectorDispatcher` directly, or invoke actions from pipelines via `$enrich` (or the specialized operators like `$httpCall`/`$sqlQuery` where available).
+- Provider SPI required: `streaming` sources/sinks. You must have `SourceConnectorProvider` / `SinkConnectorProvider` implementations for the `source.type` / `sink.type` (Kafka/EventHub/Mongo/custom) discovered via ServiceLoader.
+- Manifest loading: ServiceLoader only discovers providers. Manifests must be loaded separately—either via the Spring Boot starter classpath scan (e.g., `classpath*:manifests/*.json`) or manually with `ConnectorManifestLoader.load(...)` before using the dispatcher/`$enrich`.
 
 For per-type recipes and custom connector creation, see the “Build Custom Connector”
 pages in the sidebar (HTTP, JavaBean, pipeline call, webhook, polling, streaming,

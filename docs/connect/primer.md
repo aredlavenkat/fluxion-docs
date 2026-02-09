@@ -175,6 +175,23 @@ Flux<Map<String,Object>> flux = dispatcher.startTrigger(manifest, "hookOp", ctx,
   "sink":   { "type": "http",  "endpoint": "http://localhost:8081/ingest" }
 }
 ```
+**Streaming with a pre-sink process (pipeline)**
+- Add a single top-level `process` block to run a pipeline before delivering to the sink/fan-out.
+- Supports `type: "pipeline"` / `"pipelineCall"` with `pipeline`/`version` (defaults to `v1`).
+- Output from the process pipeline becomes the input to the sink (or chained/fan-out sinks).
+```json
+"execution": {
+  "type": "streaming",
+  "stream": "orders",
+  "process": { "type": "pipeline", "pipeline": "enrich-orders", "version": "v1" },
+  "sink": {
+    "fanout": [
+      { "type": "http", "endpoint": "http://localhost:8081/a" },
+      { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders-enriched" }
+    ]
+  }
+}
+```
 **SDK**
 ```java
 SourceConnectorConfig src = SourceConnectorConfig.builder("kafka")
@@ -190,6 +207,34 @@ new StreamingPipelineExecutor().processStream(source, List.of(), httpSink, new S
 ```json
 "execution": { "type": "timer", "cron": "PT30S" }
 ```
+
+**Pipeline invoker & resilience (Spring Boot starter)**
+- The starter auto-registers a `PipelineCallInvoker` that POSTs to the pipeline-service endpoint `/api/pipelines/{name}/{version}:run`. It is used by:
+  - `execution.type=pipelineCall` actions
+  - Streaming `process` blocks (top-level)
+  - Streaming sinks with `type=pipeline` / `pipelineCall`
+- Configure target service, timeout, and Resilience4j policies:
+```yaml
+fluxion:
+  connect:
+    pipeline:
+      base-url: http://fluxion-pipeline-service:8085
+      timeout-ms: 10000
+resilience4j:
+  retry:
+    instances:
+      pipeline-service:
+        max-attempts: 3
+        wait-duration: 500ms
+  circuitbreaker:
+    instances:
+      pipeline-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+```
+- Inputs are sent as `document` in the POST body; the pipeline response (Map/Document/list) is forwarded to the next sink or returned to the caller.
 
 ---
 
