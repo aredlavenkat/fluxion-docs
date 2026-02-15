@@ -11,8 +11,8 @@ to mirror the clarity of the Camunda connector docs.
   events into pipelines.
 - **Outbound runtimes (actions):** HTTP/JavaBean/pipeline-call actions push data
   out or invoke downstream work.
-- **Transports vs. runtimes:** transports encapsulate I/O (Kafka, EventHub,
-  Mongo, HTTP). Runtimes orchestrate how that transport is executed.
+- **Transports vs. runtimes:** transports encapsulate I/O (Kafka, HTTP, custom).
+  Runtimes orchestrate how that transport is executed.
 
 ---
 
@@ -77,33 +77,83 @@ my-connector/
 
 ## 6) Resilience, security, observability
 
-- **Resilience:** HTTP execution supports retry/circuit-breaker headers or
-  manifest fields; streaming connectors inherit backpressure/batching; timers/
-  polling provide intervals and handler hooks.
-- **Security:** Secrets come from `ConnectorContext::secretResolver`; keep creds
-  in vaults, not manifests.
-- **Observability:** `ConnectorLogger`, `ConnectorMeterRegistry`, `ConnectorTracer`
-  flow through contexts—wire them to your logging/metrics/tracing backends.
+- **Resilience:** HTTP/Kafka sinks accept retry/circuit-breaker instance names
+  (`retry` / `circuitBreaker` or via `connectionRef`). Registries come from the
+  Spring Boot starter or manual wiring.
+- **Security:** Keep credentials out of manifests; inject them via connection
+  instances and `ConnectorContext::resolveSecret`.
+- **Observability:** `ConnectorLogger`, `ConnectorMeterRegistry`,
+  `ConnectorTracer` flow through contexts—wire them to your logging/metrics/
+  tracing backends.
 
 ---
 
-## 7) Quick starts
+## 7) Streaming shape and chaining rules
+
+- `connectionRef` is required on streaming `source` and `sink` blocks (they pull
+  transport config + resilience from the registry).
+- **Process block (supported):** a top-level `process` array can run one or more
+  pipelines before the sink chain. Its output flows into the sink/fanout.
+- **Fanout** (parallel delivery) uses `fanout` on the sink block; calls are
+  synchronous/serial today.
+- **Pipeline chaining** uses `type:"pipeline"` sinks with `next` (single sink or
+  list for fanout after the pipeline). `next` is honored only on pipeline sinks;
+  use `fanout` for non-pipeline sinks.
+
+Examples:
+```json
+// Fanout without a pipeline
+"sink": {
+  "fanout": [
+    { "type": "http", "connectionRef": "http-a" },
+    { "type": "kafka", "connectionRef": "kafka-b" }
+  ]
+}
+
+// Pipeline, then fanout to HTTP/Kafka
+"sink": {
+  "type": "pipeline",
+  "pipeline": "enrich-orders",
+  "next": [
+    { "type": "http", "connectionRef": "http-a" },
+    { "type": "kafka", "connectionRef": "kafka-b" }
+  ]
+}
+
+// Top-level process array, then pipeline sink with next
+"process": [
+  { "pipeline": "normalize" },
+  { "pipeline": "score" }
+],
+"sink": {
+  "type": "pipeline",
+  "pipeline": "route",
+  "next": { "fanout": [
+    { "type": "http", "connectionRef": "http-a" },
+    { "type": "kafka", "connectionRef": "kafka-b" }
+  ] }
+}
+```
+
+---
+
+## 8) Quick starts
 
 - **Manifest action (HTTP):** place a manifest under `resources/manifests`, then
   `new ManifestConnectorDispatcher().executeAction(manifest, "op", ctx, body)`.
-- **Manifest streaming:** use `execution.type=streaming` with `source` and `sink`
-  maps (Kafka → HTTP sink). `startTrigger(...)` returns a `Flux` of documents.
+- **Manifest streaming:** `execution.type=streaming` with `connectionRef` on
+  source/sink (e.g., Kafka → HTTP sink). `startTrigger(...)` returns a `Flux`.
 - **SDK streaming:** build configs, then:
 
 ```java
 StreamingSource source = ConnectorFactory.createSource(sourceCfg, SourceConnectorContext.from(new StreamingContext()));
 StreamingSink sink = ConnectorFactory.createSink(sinkCfg);
-new StreamingPipelineExecutor().processStream(source, stages, sink, new StreamingContext());
+new StreamingPipelineExecutor().processStream(source, List.of(), sink, new StreamingContext());
 ```
 
 ---
 
-## 8) Choosing a model
+## 9) Choosing a model
 
 - **Pick manifest-first** for low-code/operator consoles and tenant-level
   customization without rebuilds.
@@ -114,7 +164,7 @@ new StreamingPipelineExecutor().processStream(source, stages, sink, new Streamin
 
 ---
 
-## 9) Execution examples (manifest + SDK)
+## 10) Execution examples (manifest + SDK)
 
 **HTTP action (manifest)**
 ```json
@@ -171,24 +221,24 @@ Flux<Map<String,Object>> flux = dispatcher.startTrigger(manifest, "hookOp", ctx,
 "execution": {
   "type": "streaming",
   "stream": "orders",
-  "source": { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders", "groupId": "g1" },
-  "sink":   { "type": "http",  "endpoint": "http://localhost:8081/ingest" }
+  "source": { "type": "kafka", "connectionRef": "kafka-orders" },
+  "sink":   { "type": "http",  "connectionRef": "http-sink" }
 }
 ```
-**Streaming with a pre-sink process (pipeline)**
-- Add a single top-level `process` block to run a pipeline before delivering to the sink/fan-out.
-- Supports `type: "pipeline"` / `"pipelineCall"` with `pipeline`/`version` (defaults to `v1`).
-- Output from the process pipeline becomes the input to the sink (or chained/fan-out sinks).
+**Streaming with a pre-sink process (pipeline sink)**
 ```json
 "execution": {
   "type": "streaming",
   "stream": "orders",
-  "process": { "type": "pipeline", "pipeline": "enrich-orders", "version": "v1" },
   "sink": {
-    "fanout": [
-      { "type": "http", "endpoint": "http://localhost:8081/a" },
-      { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders-enriched" }
-    ]
+    "type": "pipeline",
+    "pipeline": "enrich-orders",
+    "next": {
+      "fanout": [
+        { "type": "http", "connectionRef": "http-a" },
+        { "type": "kafka", "connectionRef": "kafka-b" }
+      ]
+    }
   }
 }
 ```
@@ -211,8 +261,8 @@ new StreamingPipelineExecutor().processStream(source, List.of(), httpSink, new S
 **Pipeline invoker & resilience (Spring Boot starter)**
 - The starter auto-registers a `PipelineCallInvoker` that POSTs to the pipeline-service endpoint `/api/pipelines/{name}/{version}:run`. It is used by:
   - `execution.type=pipelineCall` actions
-  - Streaming `process` blocks (top-level)
   - Streaming sinks with `type=pipeline` / `pipelineCall`
+  - Top-level `process` (if present in the execution model; optional/future)
 - Configure target service, timeout, and Resilience4j policies:
 ```yaml
 fluxion:
@@ -235,6 +285,7 @@ resilience4j:
         sliding-window-size: 10
 ```
 - Inputs are sent as `document` in the POST body; the pipeline response (Map/Document/list) is forwarded to the next sink or returned to the caller.
+- You can also load connection instances (YAML/JSON) into the registry at startup so `connectionRef` values resolve without code changes; use connector-specific config such as `urlTemplate`, `headers`, `bootstrapServers`, `topic` scoped by tenant/pipeline.
 
 ---
 
@@ -244,8 +295,6 @@ resilience4j:
 | --- | --- | --- | --- |
 | HTTP sink (`type=http`) | fluxion-connect | Action (http), Streaming sink | `execution.type=http` for actions; in streaming manifests use `sink.type=http` to post batches. |
 | Kafka (`type=kafka`) | fluxion-connect-kafka | Streaming source & sink | `execution.type=streaming` with `source.type=kafka` and/or `sink.type=kafka`. |
-| EventHub (`type=eventhub`) | fluxion-connect-eventhub | Streaming source & sink | `execution.type=streaming` with `source.type=eventhub` and/or `sink.type=eventhub`. |
-| MongoDB (`type=mongodb`) | fluxion-connect-mongo | Streaming source & sink | `execution.type=streaming` with `source.type=mongodb` and/or `sink.type=mongodb`. |
 | JavaBean | dispatcher (handlers) | Action/trigger | `execution.type=javaBean` with `beanName`; register handlers in dispatcher. |
 | Pipeline call | dispatcher | Action | `execution.type=pipelineCall` targeting another pipeline. |
 | Webhook | dispatcher | Trigger | `execution.type=webhook` to start an HTTP listener and emit payloads. |
@@ -258,5 +307,5 @@ resilience4j:
 
 - [Module overview](index.md)
 - [Manifest + SDK format](manifest-and-sdk.md)
-- Connector specifics: [Kafka](kafka.md), [EventHub](eventhub.md), [Mongo](mongodb.md)
+- Connector specifics: [Kafka](kafka.md)
 - [Developer guide](developer-guide.md)

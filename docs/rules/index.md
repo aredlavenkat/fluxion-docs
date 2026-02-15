@@ -10,7 +10,7 @@ exposes hooks/state you can integrate into services or workflow engines.
 
 | Requirement | Notes |
 | --- | --- |
-| SrotaX modules | `fluxion-core`, `fluxion-rules`, optional `fluxion-enrich` for external lookups. |
+| SrotaX modules | `fluxion-core`, `fluxion-rules`; add `fluxion-connect` if you need `$httpCall`/`$sqlQuery`. |
 | Runtime | JVM service/worker where you evaluate rules. |
 | DSL / JSON | Rule-set definitions (JSON DSL or builder API). |
 | Persistence (optional) | Wherever you store rule sets (Git, DB, config service). |
@@ -39,7 +39,7 @@ exposes hooks/state you can integrate into services or workflow engines.
                                       └──────────────────────────────────┘
 ```
 
-For a full stack view (Core ↔ Connect ↔ Enrich ↔ Engines), see the
+For a full stack view (Core ↔ Connect ↔ Engines with enrichment inside Connect), see the
 [Platform Architecture overview](../platform/overview.md).
 
 ---

@@ -1,16 +1,20 @@
 # Build Custom Connector: Streaming Trigger (source → sink)
 
 **When to use:** long-lived pipelines that read from a source and deliver to a
-sink. Built-in provider ids: `kafka`, `eventhub`, `mongodb`, `http` sink.
+sink. Built-in provider ids today: `kafka` (source/sink) and `http` (sink). Add
+your own sources/sinks via the SPI when you need other transports.
 
 ## Manifest
 ```json
 "execution": {
   "type": "streaming",
-  "source": { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders", "groupId": "g1" },
-  "sink":   { "type": "http",  "endpoint": "https://api.example.com/ingest" }
+  "source": { "type": "kafka", "connectionRef": "kafka-orders" },
+  "sink":   { "type": "http",  "connectionRef": "http-ingest" }
 }
 ```
+Load `kafka-orders` / `http-ingest` into the connector registry (file or
+programmatic registration) so sources/sinks can resolve credentials, endpoints,
+and resilience policies.
 
 ## SDK/SPI overview
 - Implement providers via `SourceConnectorProvider` / `SinkConnectorProvider`.
@@ -33,7 +37,7 @@ public class MySourceProvider implements SourceConnectorProvider {
 }
 ```
 
-2) Runtime: implement `MyStreamingSource` (extend `AbstractAsyncStreamingSource`), emit `Document` batches.
+2) Runtime: implement `MyStreamingSource` (extend `AbstractAsyncStreamingSource`), emit `Document` batches; apply checkpoints via `StreamingContext`.
 
 3) ServiceLoader registration:
 ```
@@ -41,7 +45,8 @@ src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SourceCon
 com.acme.connectors.MySourceProvider
 ```
 
-4) Manifest usage: `"source": { "type": "my-source", ... }`.
+4) Manifest usage: `"source": { "type": "my-source", ... }` (or `connectionRef`
+   if you register an instance in the connector registry).
 
 ## Write a custom streaming sink
 1) Provider:
@@ -65,7 +70,8 @@ src/main/resources/META-INF/services/ai.fluxion.core.engine.connectors.SinkConne
 com.acme.connectors.MySinkProvider
 ```
 
-4) Manifest usage: `"sink": { "type": "my-sink", ... }`.
+4) Manifest usage: `"sink": { "type": "my-sink", ... }` (or `connectionRef` if
+   you register an instance in the connector registry).
 
 ## Minimal executor wiring
 ```java
@@ -79,6 +85,13 @@ StreamingSource source = ConnectorFactory.createSource(src, SourceConnectorConte
 StreamingSink dest = ConnectorFactory.createSink(sink);
 new StreamingPipelineExecutor().processStream(source, List.of(), dest, new StreamingContext());
 ```
+
+## Chaining rules
+- Add a top-level `process` array to run one or more pipelines before the sink.
+- Use `type:"pipeline"` sinks with `next` (single or list) to chain/fanout after
+  a pipeline sink.
+- For non-pipeline sinks, use `fanout` directly on the sink block to synchronously
+  deliver to additional sinks.
 
 ## Full example: custom source provider
 

@@ -1,8 +1,8 @@
 # Connector Module Overview
 
 SrotaX Connect packages the ingress/egress connectors that feed streaming
-pipelines. Use it when you need Kafka, Event Hubs, MongoDB, or custom sources
-and sinks beyond in-process pipelines.
+pipelines. Use it when you need Kafka ingress/egress, HTTP sinks, or custom
+sources and sinks beyond in-process pipelines.
 
 ---
 
@@ -10,7 +10,7 @@ and sinks beyond in-process pipelines.
 
 | Requirement | Notes |
 | --- | --- |
-| SrotaX modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional for enrichment operators). |
+| SrotaX modules | `fluxion-core`, `fluxion-connect` (includes enrichment operators). |
 | Runtime host | JVM service/worker running the streaming orchestrator. |
 | Connector credentials | Bootstrap servers, connection strings, auth secrets. |
 | Checkpoint store | JDBC/Redis/custom store for offsets (when streaming). |
@@ -23,8 +23,6 @@ and sinks beyond in-process pipelines.
 | --- | --- | --- | --- |
 | Module | `ai.fluxion:fluxion-connect` | **Experimental** | APIs may shift while streaming runtime stabilises. |
 | Kafka Source/Sink | [connect/kafka.md](kafka.md) | **Beta** | Reference implementation of the connector SPI. |
-| Event Hubs Source/Sink | [connect/eventhub.md](eventhub.md) | **Alpha** | Azure Event Hubs ingestion/delivery. |
-| MongoDB Source/Sink | [connect/mongodb.md](mongodb.md) | **Alpha** | MongoDB change streams + writers. |
 | HTTP Sink | [connect/http-sink.md](http-sink.md) | **Beta** | Batch sink that posts documents to HTTP endpoints. |
 | Primer | [connect/primer.md](primer.md) | **Concepts** | End-to-end connector model, runtimes, and authoring modes. |
 | Developer Guide | [connect/developer-guide.md](developer-guide.md) | **How-to** | Build and package connectors (manifest + SDK + SPI). |
@@ -101,7 +99,7 @@ and sinks beyond in-process pipelines.
    List<ConnectorStreamDescriptor> sources =
            ConnectorFactory.discoverSourceStreams(source);
 
-   // Sink streams (e.g., Mongo collection schema + PK)
+   // Sink streams (e.g., Kafka destination topic catalog)
    List<ConnectorStreamDescriptor> sinks =
            ConnectorFactory.destinationStreams(sink);
    ```
@@ -115,15 +113,15 @@ and sinks beyond in-process pipelines.
 | Option | Connectors | Description |
 | --- | --- | --- |
 | `bootstrapServers` | Kafka | Comma-separated broker list. |
-| `topic` | Kafka, Event Hubs | Source/sink topic or event hub. Also appears in stream descriptors. |
+| `topic` | Kafka | Source/sink topic. Also appears in stream descriptors. |
 | `groupId` | Kafka | Consumer group for checkpointing. |
-| `connectionString` | Event Hubs, MongoDB | Service connection string/URI. |
-| `checkpointStore` | All streaming connectors | Where offsets are saved (JDBC, Redis, etc.). |
-| `queueCapacity` | Kafka, Event Hubs, Mongo source | Internal handoff queue size (source to pipeline). |
-| `cursorField` (implicit) | Source-defined for Kafka/EventHub/Mongo | Cursor is connector-owned; pipeline stays cursor-agnostic. |
+| `checkpointStore` | Kafka source | Where offsets are saved (JDBC, Redis, etc.). |
+| `queueCapacity` | Kafka source | Internal handoff queue size (source to pipeline). |
+| `connectionRef` | HTTP sink | Name of HTTP connection registered in the connector registry. |
+| `cursorField` (implicit) | Source-defined for Kafka | Cursor is connector-owned; pipeline stays cursor-agnostic. |
 
-Refer to the connector-specific docs for security settings (SASL, TLS, Azure SAS,
-Mongo credentials) and batching controls.
+Refer to the connector-specific docs for security settings (SASL, TLS, auth headers)
+and batching controls.
 
 ---
 
@@ -131,9 +129,8 @@ Mongo credentials) and batching controls.
 
 | Connector | Direction | Highlights |
 | --- | --- | --- |
-| Kafka | Source & Sink | Backpressure-aware batching, SASL/TLS support, per-batch metrics; source-defined cursor (offset). |
-| Event Hubs | Source & Sink | Consumer groups, partition lease management; source-defined cursor (sequence number). |
-| MongoDB | Source & Sink | Change-stream support, resume tokens; upsert/replace modes; source-defined cursor (resume token). |
+| Kafka | Source & Sink | Backpressure-aware batching, SASL/TLS support, per-batch metrics; source-defined cursor (offset); requires `connectionRef` for manifests. |
+| HTTP | Sink | Fan-out sink using registered HTTP connections/resilience policies; supports pipeline chaining via `next` and sink-level `fanout`. |
 
 Each connector page contains option schema tables, example configurations, and
 operational caveats.
@@ -164,7 +161,7 @@ operational caveats.
 Run connector tests along with streaming tests:
 
 ```bash
-mvn -pl fluxion-core -am test
+mvn -pl fluxion-connect -am test
 ```
 
 This ensures connector discovery, option validation, and streaming executors are

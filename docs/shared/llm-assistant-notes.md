@@ -11,7 +11,7 @@ Use these guardrails when generating answers or sample code for SrotaX users.
 ## Unsupported / Future Work
 
 - Stages: `$merge`, `$out`, `$search`, `$vectorSearch`
-- Streaming orchestration (connectors, sinks) remains experimental; Kafka, MongoDB, and Azure Event Hubs sources and sinks are currently available.
+- Streaming orchestration (connectors, sinks) remains experimental; Kafka sources/sinks and the HTTP sink are currently available.
 - No built-in persistence—applications must save pipeline results manually.
 
 Reference samples: [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main)

@@ -9,7 +9,7 @@ for enriching documents with relational data during pipeline evaluation.
 
 | Requirement | Notes |
 | --- | --- |
-| Dependency | `ai.fluxion:fluxion-enrich` plus JDBC driver (e.g., PostgreSQL, MySQL). |
+| Dependency | `ai.fluxion:fluxion-connect` plus JDBC driver (e.g., PostgreSQL, MySQL). |
 | Connection registry | Register `SqlConnector` instances in `ConnectorManager`. |
 | Resilience | Optional Resilience4j retry/circuit breaker configuration. |
 
@@ -125,7 +125,7 @@ Supports connection pooling and connection-specific options.
 
 - Run enrichment tests:
   ```bash
-  mvn -pl fluxion-enrich -am test -Dtest=*SqlQuery*
+  mvn -pl fluxion-connect -am test -Dtest=*SqlQuery*
   ```
 - Integration tests in the repo use H2 with prepared statements; replicate the
   pattern to test against your own schema.
@@ -136,8 +136,8 @@ Supports connection pooling and connection-specific options.
 
 | Path | Description |
 | --- | --- |
-| `fluxion-enrich/src/main/java/.../SqlQueryOperator.java` | Operator implementation. |
-| `fluxion-enrich/src/test/java/.../SqlQueryOperatorTest.java` | Test coverage (H2 + Resilience scenarios). |
+| `fluxion-connect/src/main/java/.../SqlQueryOperator.java` | Operator implementation. |
+| `fluxion-connect/src/test/java/.../SqlQueryOperatorTest.java` | Test coverage (H2 + Resilience scenarios). |
 | [Resilience Patterns](../../shared/resilience.md) | Retry/circuit breaker configuration. |
 
 Use `$sqlQuery` to pull relational data into pipelines without embedding JDBC

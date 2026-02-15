@@ -5,11 +5,9 @@ providers, loads manifests, and exposes connector discovery without manual
 bootstrap code.
 
 ## Modules to include
-- Core SPI: `ai.fluxion:fluxion-connect`
+- Core SPI + enrichment operators: `ai.fluxion:fluxion-connect`
 - Transports (pick what you need):
   - `ai.fluxion:fluxion-connect-kafka`
-  - `ai.fluxion:fluxion-connect-eventhub`
-  - `ai.fluxion:fluxion-connect-mongo`
   - (HTTP sink lives in `fluxion-connect`)
 - Starter: `ai.fluxion:fluxion-connect-spring-boot-starter`
 
@@ -34,6 +32,8 @@ Example:
   `classpath*:manifests/*.json`) into the manifest catalog.
 - Registers connector providers with the registry for streaming execution and
   discovery endpoints.
+- Wires the in-memory connector registry (for `connectionRef`) and Resilience4j
+  retry/circuit breaker registries into the HTTP sink + enrichment operators.
 
 ## Configuration
 Minimal config (defaults used when omitted):

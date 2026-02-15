@@ -10,7 +10,7 @@ source, signal end-of-stream, and resume from checkpoints.
 
 | Requirement | Notes |
 | --- | --- |
-| Dependency | `ai.fluxion:fluxion-core` (streaming runtime) and your JDBC driver. |
+| Dependency | `ai.fluxion:fluxion-connect` (streaming runtime + registries) and your JDBC driver. |
 | Data source | Database/API with incremental offsets (primary key, timestamp, resume token). |
 | Checkpoint store | Persist offsets using `StreamingContext.stateStore()` or external storage. |
 
@@ -184,20 +184,20 @@ You can still enable parallelism by adjusting `StreamingRuntimeConfig` (e.g.,
 - Write unit tests for your source implementation with in-memory databases (H2).
 - Run streaming tests:
   ```bash
-  mvn -pl fluxion-core -am test -Dtest=*StreamingPipeline*
+  mvn -pl fluxion-connect -am test -Dtest=*StreamingPipeline*
   ```
 
 ---
 
 ## 9. Discover/catalog (optional)
 
-If your source exposes a catalog (for UI/CLI use), implement `discoverStreams` on
-your `SourceConnectorProvider` and return `ConnectorStreamDescriptor` entries:
+If your source exposes a catalog (for UI/CLI use), implement `discoverStreams`
+on your `SourceConnectorProvider` and return `ConnectorStreamDescriptor` entries:
 
 - `name`, `namespace` — identify the stream.
 - `jsonSchema` — optional schema hints for tooling.
 - `cursorFields` / `sourceDefinedCursor` — set `sourceDefinedCursor=true` if the
-  connector owns resume tokens (Kafka offsets, EventHub sequence numbers, Mongo
+  connector owns resume tokens (Kafka offsets, JDBC PKs, custom tokens).
   resume tokens). Otherwise list candidate cursor fields.
 - `primaryKeys` — optional PK hints for sinks that upsert/replace.
 - `supportedSyncModes` — `FULL_REFRESH` and/or `INCREMENTAL`.

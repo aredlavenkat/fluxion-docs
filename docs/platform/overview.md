@@ -16,14 +16,13 @@ Connect  →  Streaming Engine  →  Rule Engine
                   ▼                │
               SrotaX Core  ◄──────┘
                     │
-                  Enrich
+        Enrichment operators (Connect)
 ```
 
 | Layer | Purpose |
 | --- | --- |
 | SrotaX Core | Deterministic aggregation engine (stages/operators), expression evaluator, metrics, registries. |
-| SrotaX Connect | Source/sink connectors (Kafka, Event Hubs, MongoDB, custom SPI). |
-| SrotaX Enrich | Operators that call external systems (`$httpCall`, `$sqlQuery`). |
+| SrotaX Connect | Source/sink connectors (Kafka, HTTP sink, custom SPI) plus enrichment operators. |
 | Streaming Engine | Always-on pipelines (fetch → transform → deliver → checkpoint). |
 | Rule Engine | JSON/DSL-defined rule sets for decisioning and governance workflows. |
 
@@ -35,7 +34,7 @@ Connect  →  Streaming Engine  →  Rule Engine
 | --- | --- | --- |
 | Aggregation runtime | `fluxion-core` | [Core Overview](../core/index.md) |
 | Connectors | `fluxion-connect` | [Connect Overview](../connect/index.md) |
-| Enrichment operators | `fluxion-enrich` | [Enrich Overview](../enrich/index.md) |
+| Enrichment operators | `fluxion-connect` | [Enrich Overview](../enrich/index.md) |
 | Rule engine | `fluxion-rules` | [Rule Engine Overview](../rules/index.md) |
 | Streaming engine | (contained in `fluxion-core` module today) | [Streaming Overview](../streaming/index.md) |
 
@@ -46,10 +45,10 @@ Connect  →  Streaming Engine  →  Rule Engine
 | Need | Start here |
 | --- | --- |
 | Run aggregation pipelines in-process | `fluxion-core` (see [Usage Guide](../usage.md)) |
-| Ingest from Kafka/Event Hubs/Mongo | `fluxion-connect` + Streaming Engine |
-| Enrich with HTTP/SQL lookups | `fluxion-enrich` operators |
+| Ingest from Kafka/HTTP | `fluxion-connect` + Streaming Engine |
+| Enrich with HTTP/SQL lookups | Enrichment operators in `fluxion-connect` |
 | Declarative rule authoring/governance | `fluxion-rules` (Rule Engine) |
-| Long-running stream processing | Streaming Engine (with Connect + Enrich) |
+| Long-running stream processing | Streaming Engine (with Connect) |
 
 ---
 
@@ -58,7 +57,7 @@ Connect  →  Streaming Engine  →  Rule Engine
 1. **Add capabilities at the lowest layer.**
    - New operator/stage → contribute to SrotaX Core.
    - New connector → implement SPI in SrotaX Connect.
-   - New enrichment behaviour → extend SrotaX Enrich.
+   - New enrichment behaviour → extend the operators in SrotaX Connect.
 2. **Expose through runtimes.** Surface new operators/connectors to rule/streaming
    engines so users can adopt them immediately.
 3. **Document + test.** Update docs/tests alongside the new contribution to keep
@@ -72,7 +71,7 @@ Connect  →  Streaming Engine  →  Rule Engine
 | --- | --- | --- |
 | Request/response service with pipeline execution | Core | Cache parsed stages, use `PipelineExecutor`. |
 | Manual approval workflow (Temporal) | Core + Rules + Workflow integration | See [Temporal Bridge](../workflow/temporal.md). |
-| Real-time enrichment from Kafka to HTTP | Core + Connect + Enrich + Streaming | Use streaming pipeline with Kafka source and HTTP sink/operators. |
+| Real-time enrichment from Kafka to HTTP | Core + Connect + Streaming | Use streaming pipeline with Kafka source and HTTP sink/operators. |
 | Analytics batch job with JDBC source | Core + custom source | Extend streaming SPI or use executor in batch mode. |
 
 ---

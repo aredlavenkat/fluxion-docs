@@ -11,7 +11,7 @@ deterministic data flows.
 
 | Requirement | Notes |
 | --- | --- |
-| SrotaX modules | `fluxion-core`, `fluxion-connect`, `fluxion-enrich` (optional), plus your pipeline definitions. |
+| SrotaX modules | `fluxion-core`, `fluxion-connect` (includes enrichment operators), plus your pipeline definitions. |
 | Runtime host | JVM service/worker that runs streaming executors. |
 | Checkpoint store | JDBC/Redis/custom store for offsets and state. |
 | Observability | `StreamingMetricsListener` or Micrometer binding for metrics. |
@@ -34,7 +34,7 @@ deterministic data flows.
 | --- | --- |
 | SrotaX Core | Executes stages deterministically. |
 | SrotaX Connect | Supplies ingress/egress connectors. |
-| SrotaX Enrich | Adds network-aware operators (`$httpCall`, `$sqlQuery`, …). |
+| Enrichment operators | Packaged inside `fluxion-connect` (`$httpCall`, `$sqlQuery`, …). |
 
 ---
 
@@ -100,7 +100,7 @@ critical alerts (lag spikes, sustained retries) to on-call channels.
 
 Use the Streaming Engine when you need:
 
-- Continuous ingestion/fan-out (Kafka, HTTP, Event Hubs, custom sources).
+- Continuous ingestion/fan-out (Kafka sources and HTTP sinks, plus custom sources).
 - Deterministic replay with durable checkpoints for compliance and audit.
 - Real-time enrichment, windowing, or anomaly detection.
 - Built-in metrics for throughput, lag, and retries.
@@ -108,7 +108,6 @@ Use the Streaming Engine when you need:
 **Sample projects** – runnable demos live in the [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main) repository:
 
 - Kafka topic-to-topic pipeline: `streaming-kafka`
-- MongoDB change-stream pipeline: `streaming-mongo`
 
 Prefer the Rule Engine for single-document evaluation, request/response
 services, or approval workflows orchestrated via Temporal.

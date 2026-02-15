@@ -13,7 +13,7 @@ SrotaX in applications or build custom stages.
 | SrotaX dependency | Add `ai.fluxion:fluxion-core` to your build. |
 | Runtime | Java 21+ (same baseline as the rest of the platform). |
 | JSON pipelines | Store pipeline definitions as JSON or build them programmatically. |
-| Optional | `fluxion-enrich`, `fluxion-connect`, `fluxion-rules` when needed. |
+| Optional | `fluxion-connect`, `fluxion-rules` when needed. |
 
 ---
 

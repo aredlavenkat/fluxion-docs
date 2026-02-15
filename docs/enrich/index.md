@@ -1,8 +1,8 @@
-# Enrichment Module Overview
+# Enrichment Operators Overview
 
-SrotaX Enrich adds operators that call external services or data stores during
-pipeline execution. Use it when a pipeline needs to fetch HTTP resources or run
-SQL queries inline.
+The enrichment operators ship with `fluxion-connect` and let pipelines call
+external services or data stores during execution. Use them when a pipeline
+needs to fetch HTTP resources or run SQL queries inline.
 
 ---
 
@@ -10,7 +10,7 @@ SQL queries inline.
 
 | Requirement | Notes |
 | --- | --- |
-| SrotaX modules | `fluxion-core`, `fluxion-enrich`; optionally `fluxion-connect` for connector integration. |
+| SrotaX modules | `fluxion-core`, `fluxion-connect` (contains enrichment + connectors). |
 | HTTP/SQL back-ends | Services or databases reachable from your pipelines. |
 | Configuration | Named connections (e.g., Spring beans) for HTTP and SQL targets. |
 | Resilience layer | Optional Resilience4j dependencies for retries/circuit breakers (recommended). |
@@ -21,7 +21,7 @@ SQL queries inline.
 
 | Item | Doc | Status | Notes |
 | --- | --- | --- | --- |
-| Module | – | **Beta** | APIs may evolve alongside the shared resilience layer. |
+| Module | `ai.fluxion:fluxion-connect` (enrichment packaged here) | **Beta** | APIs may evolve alongside the shared resilience layer. |
 | `$httpCall` | [operators/httpCall.md](operators/httpCall.md) | **Stable** | JSON payloads, headers, query params, response extraction. |
 | `$sqlQuery` | [operators/sqlQuery.md](operators/sqlQuery.md) | **Beta** | Prepared statements via JDBC (PostgreSQL/MySQL verified). |
 
@@ -120,8 +120,8 @@ manual registries) and reference by `connection` name inside pipeline definition
 
 | Path | Description |
 | --- | --- |
-| `fluxion-enrich/src/main/java/.../$httpCall` | Implementation of the HTTP operator. |
-| `fluxion-enrich/src/main/java/.../$sqlQuery` | JDBC-backed SQL operator. |
+| `fluxion-connect/src/main/java/.../$httpCall` | Implementation of the HTTP operator. |
+| `fluxion-connect/src/main/java/.../$sqlQuery` | JDBC-backed SQL operator. |
 | `https://docs.srotax.com/enrich/operators/httpCall/` | Detailed HTTP options with examples. |
 | `https://docs.srotax.com/enrich/operators/sqlQuery/` | Detailed SQL options with examples. |
 | `https://docs.srotax.com/examples/` | Pipelines mixing core and enrichment features. |
@@ -129,7 +129,7 @@ manual registries) and reference by `connection` name inside pipeline definition
 Run enrichment tests with:
 
 ```bash
-mvn -pl fluxion-enrich -am test
+mvn -pl fluxion-connect -am test
 ```
 
 This validates HTTP/SQL operators and shared resilience components.

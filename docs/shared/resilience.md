@@ -1,8 +1,10 @@
 # Resilience Patterns (Retry & Circuit Breaker)
 
 SrotaX leverages Resilience4j across enrichment operators (`$httpCall`,
-`$sqlQuery`) and streaming connectors. This guide consolidates the available
-options, usage tips, and testing helpers.
+`$sqlQuery`) and streaming connectors. Enrichment now ships inside
+`fluxion-connect` alongside the HTTP/Kafka connectors, so retry/breaker settings
+are handled in one place. This guide consolidates the available options, usage
+tips, and testing helpers.
 
 ---
 
@@ -85,14 +87,15 @@ options, usage tips, and testing helpers.
 
 ## 4. Testing utilities
 
-- `$httpCall`: `HttpCallOperator.resetResilience()` resets retry/breaker state in tests.
+- `$httpCall`: `HttpCallOperator.resetResilience()` resets retry/breaker state in
+  tests.
 - `$sqlQuery`: `SqlQueryOperator.resetResilience()` does the same for SQL.
-- Streaming connectors expose similar reset hooks if needed (`Kafka`/`EventHub`).
+- Streaming connectors expose similar reset hooks if needed (e.g., Kafka).
 
-Run enrichment tests to validate configuration:
+Run connector/enrichment tests to validate configuration:
 
 ```bash
-mvn -pl fluxion-enrich -am test
+mvn -pl fluxion-connect -am test
 ```
 
 ---

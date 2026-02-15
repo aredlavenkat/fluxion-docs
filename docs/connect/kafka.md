@@ -10,7 +10,7 @@ maps cleanly onto streaming pipelines, error policies, and metrics.
 
 | Requirement | Notes |
 | --- | --- |
-| Dependency | Add `ai.fluxion:fluxion-connect` plus Kafka client (`org.apache.kafka:kafka-clients`). |
+| Dependency | Add `ai.fluxion:fluxion-connect` and `ai.fluxion:fluxion-connect-kafka` plus Kafka client (`org.apache.kafka:kafka-clients`). |
 | Kafka cluster | Brokers reachable from the SrotaX service. Tested on Kafka 2.8+. |
 | Credentials (optional) | SASL/TLS material if connecting to secure clusters. |
 | Checkpoint store | JDBC/Redis/custom store for offsets when streaming. |
@@ -123,31 +123,35 @@ Consult Kafka’s security docs for the exact property names; any additional key
 
 ## 6. Using the Kafka connectors in code
 
-The connectors are `SourceConnectorProvider`/`SinkConnectorProvider` implementations discovered via ServiceLoader. Supply the `source`/`sink` blocks above, then wire them into the streaming executor:
+The providers are discovered via ServiceLoader once `fluxion-connect-kafka` is on the classpath. Build connector configs and let `ConnectorFactory` create the runtime connectors:
 
 ```java
-Properties consumerProps = new Properties();
-consumerProps.put("bootstrap.servers", "localhost:9092");
-consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+SourceConnectorConfig sourceConfig = SourceConnectorConfig.builder("kafka")
+        .option("topic", "orders")
+        .option("bootstrapServers", "localhost:9092")
+        .option("groupId", "orders-ltv")
+        .build();
 
-KafkaStreamingSource source = new KafkaStreamingSource(consumerProps, "orders", Duration.ofMillis(500), 64);
+ConnectorConfig sinkConfig = ConnectorConfig.builder("kafka", ConnectorConfig.Kind.SINK)
+        .option("topic", "orders-out")
+        .option("bootstrapServers", "localhost:9092")
+        .option("acks", "all")
+        .build();
 
-Properties producerProps = new Properties();
-producerProps.put("bootstrap.servers", "localhost:9092");
-producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-KafkaProducerSink sink = new KafkaProducerSink(producerProps, "orders-out");
+StreamingSource source = ConnectorFactory.createSource(sourceConfig);
+StreamingSink sink = ConnectorFactory.createSink(sinkConfig);
 
-List<Stage> stages = List.of(new Stage(Map.of("$set", Map.of("processed", true))));
-StreamingRuntimeConfig runtime = StreamingRuntimeConfig.builder().queueCapacity(64).build();
-StreamingPipelineExecutor executor = new StreamingPipelineExecutor(32, runtime, StreamingErrorPolicy.failFast());
+StreamingPipelineDefinition def = StreamingPipelineDefinition.builder(sourceConfig)
+        .pipelineId("orders-ltv")
+        .stages(pipelineStages)
+        .sinkConfig(sinkConfig)
+        .runtimeConfig(StreamingRuntimeConfig.builder().queueCapacity(64).build())
+        .build();
 
-StreamingContext ctx = new StreamingContext();
-executor.processStream(source, stages, sink, ctx);
+new StreamingPipelineOrchestrator().run(def);
 ```
 
-Use the YAML/JSON `source`/`sink` sections for configuration, map them to `Properties`, and let the built-in providers handle Kafka plumbing.
+This keeps pipelines connector-agnostic—swap topics/servers without changing code.
 
 ---
 
@@ -166,7 +170,7 @@ Use the YAML/JSON `source`/`sink` sections for configuration, map them to `Prope
 
 - Run connector tests alongside streaming tests:
   ```bash
-  mvn -pl fluxion-core -am test -Dtest=*Kafka*
+  mvn -pl fluxion-connect-kafka -am test -Dtest=*Kafka*
   ```
 - Local broker for manual testing: `docker run --rm -p 9092:9092 confluentinc/cp-kafka`.
 
@@ -176,8 +180,8 @@ Use the YAML/JSON `source`/`sink` sections for configuration, map them to `Prope
 
 | Path | Description |
 | --- | --- |
-| `fluxion-core/src/main/java/.../KafkaSourceConnectorProvider.java` | Source provider implementation. |
-| `fluxion-core/src/main/java/.../KafkaSinkConnectorProvider.java` | Sink provider implementation. |
+| `fluxion-connect-kafka/src/main/java/.../KafkaSourceConnectorProvider.java` | Source provider implementation. |
+| `fluxion-connect-kafka/src/main/java/.../KafkaSinkProvider.java` | Sink provider implementation. |
 | `https://docs.srotax.com/streaming/quickstart/` | Kafka → HTTP streaming tutorial. |
 
 Use these snippets as templates for your own pipeline definitions and adjust

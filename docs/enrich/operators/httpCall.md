@@ -28,8 +28,8 @@ circuit breaker).
 
 | Requirement | Notes |
 | --- | --- |
-| Dependency | `ai.fluxion:fluxion-enrich` plus HTTP client dependencies (e.g., `okhttp`). |
-| Connection registry | Optional `HttpConnector` registration for shared base URLs/auth. |
+| Dependency | `ai.fluxion:fluxion-connect` (contains enrichment operators and HTTP sink). |
+| Connection registry | Optional `HttpConnector`/connection registry entry for shared base URLs/auth. |
 | Resilience | Resilience4j (optional) for retry/circuit breaker configuration. |
 
 ---
@@ -155,7 +155,7 @@ Pipelines can override headers or provide additional path/query parameters.
 
 - Run enrichment tests:
   ```bash
-  mvn -pl fluxion-enrich -am test -Dtest=*HttpCall*
+  mvn -pl fluxion-connect -am test -Dtest=*HttpCall*
   ```
 - Use mock web servers (e.g., OkHttp MockWebServer) to simulate behaviour during CI.
 
@@ -165,8 +165,8 @@ Pipelines can override headers or provide additional path/query parameters.
 
 | Path | Description |
 | --- | --- |
-| `fluxion-enrich/src/main/java/.../HttpCallOperator.java` | Operator implementation. |
-| `fluxion-enrich/src/test/java/.../HttpCallOperatorTest.java` | Unit/integration tests. |
+| `fluxion-connect/src/main/java/.../HttpCallOperator.java` | Operator implementation. |
+| `fluxion-connect/src/test/java/.../HttpCallOperatorTest.java` | Unit/integration tests. |
 | [Resilience Patterns](../../shared/resilience.md) | Retry/circuit breaker configuration. |
 
 Use `$httpCall` for declarative service calls in both rule and streaming pipelines.

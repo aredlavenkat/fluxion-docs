@@ -1,7 +1,8 @@
 # Build Custom Connector: HTTP Action
 
 **When to use:** outbound HTTP calls with optional retry/circuit-breaker and
-templating.
+templating. The HTTP action uses the same registry/resilience wiring as the
+HTTP sink and `$httpCall` enrichment operator.
 
 ## Manifest
 ```json
@@ -27,12 +28,17 @@ Object out = dispatcher.executeAction(manifest, "call", ctx, Map.of("orderId", "
 ```
 
 ## Notes
-- Headers can carry retry/CB configs (or use manifest fields).
-- Keep secrets out of manifests; resolve via `ConnectorContext::secretResolver`.
+- Prefer `connectionRef` + registry-backed connections for base URLs, headers,
+  auth, and resilience defaults; override per-operation if needed.
+- Keep secrets out of manifests; resolve via `ConnectorContext::resolveSecret`
+  or external connection loaders.
 - Resilience layers:
-  - **Connection-level** (HTTP connection config/manifest) via `retry` / `circuitBreaker` defaults; all `$httpCall` uses inherit them.
-  - **Call-level overrides** in the `$httpCall` expression (`retry`, `circuitBreaker`) for per-call tuning.
-  - `retry` supports `retryOn` / `ignore` lists (exception class names) to control which errors trigger retries.
+  - **Connection-level**: set `retry` / `circuitBreaker` on the connection
+    definition; all `$httpCall` or connector operations inherit them.
+  - **Operation-level overrides**: set `retry` / `circuitBreaker` inside the
+    manifest for this operation only.
+  - `retry` supports `retryOn` / `ignore` lists (exception class names) to
+    control which errors trigger retries.
 
 ## Full example (action + pipeline usage)
 
@@ -79,11 +85,11 @@ Pipeline usage (expression inside a stage):
 {
   "$set": {
     "shippingResponse": {
-      "$enrich": {
-        "connectionRef": "demo.http",
-        "connectorId": "demo.http",
-        "operationId": "ship",
-        "input": { "orderId": "$order.id" }
+      "$httpCall": {
+        "connection": "demo.http",
+        "path": "/ship",
+        "method": "POST",
+        "body": { "orderId": "$order.id" }
       }
     }
   }

@@ -106,6 +106,15 @@ nav:
     - SrotaX Connect:
       - Overview: connect/index.md
       - Primer: connect/primer.md
+      - Manifest & SDK: connect/manifest-and-sdk.md
+      - Spring Boot Starter: connect/connect-spring-boot-starter.md
+      - Built-in Connectors:
+        - HTTP Sink: connect/http-sink.md
+        - Kafka Source/Sink: connect/kafka.md
+      - Enrichment Operators (in Connect):
+        - $httpCall: enrich/operators/httpCall.md
+        - $sqlQuery: enrich/operators/sqlQuery.md
+        - $enrich: enrich/operators/enrich.md
       - Build Custom Connector:
         - Overview: connect/build-custom-connector-overview.md
         - HTTP Action: connect/build-custom-connector-http.md
@@ -115,21 +124,8 @@ nav:
         - Polling Trigger: connect/build-custom-connector-polling.md
         - Streaming Trigger: connect/build-custom-connector-streaming.md
         - Timer Trigger: connect/build-custom-connector-timer.md
-      - Built-in Connectors:
-        - HTTP Sink: connect/http-sink.md
-        - Kafka Source/Sink: connect/kafka.md
-        - Event Hubs Source/Sink: connect/eventhub.md
-        - MongoDB Source/Sink: connect/mongodb.md
-      - Spring Boot Starter: connect/connect-spring-boot-starter.md
-      - Manifest & SDK: connect/manifest-and-sdk.md
       - Developer Guide: connect/developer-guide.md
       - Custom Sources: connect/custom-sources.md
-    - SrotaX Enrich:
-      - Overview: enrich/index.md
-      - Operators:
-        - $httpCall: enrich/operators/httpCall.md
-        - $sqlQuery: enrich/operators/sqlQuery.md
-        - $enrich: enrich/operators/enrich.md
   - Execution Runtimes:
     - Rule Engine:
       - Overview: rules/index.md

@@ -20,7 +20,7 @@ Every operation declares an `execution.type` (do not invent new types):
 - `pipelineCall` — invoke another SrotaX pipeline or ruleset
 - `webhook` — inbound HTTP/webhook triggers
 - `polling` — periodic polling of external systems
-- `streaming` — streaming sources/sinks (Kafka, EventHub, Mongo, HTTP sink, custom)
+- `streaming` — streaming sources/sinks (Kafka, HTTP sink, or custom)
 - `timer` — cron triggers, delays, scheduled tasks
 
 ## LLM-friendly recipe
@@ -133,8 +133,8 @@ Every operation declares an `execution.type` (do not invent new types):
       "execution": {
         "type": "streaming",
         "stream": "orders",
-        "source": { "type": "kafka", "bootstrapServers": "localhost:9092", "topic": "orders", "groupId": "g1" },
-        "sink": { "type": "http", "endpoint": "https://my.service/ingest" }
+        "source": { "type": "kafka", "connectionRef": "kafka-orders" },
+        "sink": { "type": "http", "connectionRef": "http-ingest" }
       }
     }
   }
@@ -152,20 +152,107 @@ Every operation declares an `execution.type` (do not invent new types):
       "execution": {
         "type": "streaming",
         "stream": "orders",
-        "process": { "type": "pipeline", "pipeline": "enrich-orders", "version": "v1" },
+        "process": [
+          { "pipeline": "normalize" },
+          { "pipeline": "score" }
+        ],
         "sink": {
           "type": "pipeline",
-          "pipeline": "ship-orders",
-          "next": { "type": "http", "endpoint": "https://my.service/notify" }
-        }
+          "pipeline": "enrich-orders",
+          "next": [
+            { "type": "http", "connectionRef": "http-notify" },
+            { "type": "kafka", "connectionRef": "kafka-out" }
+          ]
+        },
+        "fanout": [
+          { "type": "http", "connectionRef": "audit-hook" }
+        ]
       }
     }
   }
 }
 ```
 Notes:
-- `process` runs before the sink; output feeds the sink chain/fan-out.
-- `pipeline`/`pipelineCall` sinks forward their output into `next` sinks if present.
+- `pipeline`/`pipelineCall` sinks forward their output into `next` sinks; `next`
+  accepts a single sink or a list for fan-out.
+- Top-level `process` (array) runs before the sink and feeds the sink chain/fan-out.
+- `fanout` on the sink block sends the processed batch to additional sinks
+  without requiring a pipeline sink; delivery is synchronous/serial today.
+
+---
+
+## Define connectors programmatically (no manifest files)
+
+Build the manifest objects in code and register them with the `ConnectorRegistry`
+so they show up in discovery endpoints and run through the same dispatcher as
+file-based manifests.
+
+```java
+ConnectorOperationDefinition echoOp =
+        ConnectorOperationDefinition.builder("echo", ConnectorOperationDefinition.Kind.ACTION)
+                .execution(HttpExecution.builder()
+                        .method("POST")
+                        .urlTemplate("https://api.example.com/echo")
+                        .build())
+                .inputSchema(Map.of("type", "object"))
+                .outputSchema(Map.of("type", "object"))
+                .build();
+
+ConnectorManifest manifest = ConnectorManifest.builder("demo.echo", "1.0.0", "Demo Echo")
+        .operations(Map.of("echo", "echo"))
+        .operationDefs(Map.of("echo", echoOp))
+        .build();
+
+ConnectorRegistry.getInstance().registerManifest(manifest);
+```
+
+For streaming triggers, build a `ReactiveStreamExecution` with `source`/`sink`
+maps (including `process`/`next`/`fanout` if needed) and attach it to the
+operation definition. Registering the manifest makes it discoverable and
+executable without shipping JSON/YAML files.
+
+**connections (file → registry)**
+- You can register connection instances (like ADF “linked services”) from a YAML/JSON file at startup and they’ll be available via `connectionRef`:
+```yaml
+- connectionRef: demo.http
+  connectorId: demo.http      # ties to the connector template
+  scope: { tenantId: acme, pipelineId: orders }
+  config:
+    type: http
+    urlTemplate: https://api.example.com/ship
+    headers:
+      Authorization: ${SECRET_TOKEN}
+    timeoutMs: 8000
+- connectionRef: orders-db
+  connectorId: sql.connector
+  scope: { tenantId: acme, pipelineId: orders }
+  config:
+    type: sql
+    jdbcUrl: jdbc:postgresql://db:5432/orders
+    username: orders
+    password: ${DB_PASSWORD}
+```
+- A bootstrapper loads these and registers them into the connector registry per scope so `$enrich`/`$httpCall`/pipeline sinks can resolve `connectionRef`.
+- Runtime loader: point `fluxion.connect.templates-path` / `fluxion.connect.connections-path` system properties at your YAML/JSON files and initialize via `ConnectorRegistryInitializer.loadFromSystemProperties()`. The HTTP and Kafka sinks and enrichment operators then resolve `connectionRef` from the in-memory registry.
+- HTTP and Kafka sinks also accept `retryInstance` / `circuitBreakerInstance` (Resilience4j names) when using `connectionRef` or inline config; populate the Resilience4j registries and the sink will wrap calls accordingly.
+
+**connections (programmatic registration)**
+- Build connections at runtime and register them directly with the in-memory registry; useful for SDK-only flows or when pulling config from a service:
+```java
+InMemoryConnectorRegistry registry = new InMemoryConnectorRegistry();
+registry.registerConnection(
+        ConnectionScope.defaultScope(),
+        "orders-api",
+        Map.of(
+            "type", "http",
+            "endpoint", "https://api.example.com/orders",
+            "headers", Map.of("Authorization", "Bearer TOKEN"),
+            "retryInstance", "http-retry"
+        )
+);
+HttpSinkProvider.RegistryHolder.registry = registry; // make sinks/operators see it
+```
+- You can also register templates in code if you need to hydrate multiple `connectionRef`s from the same base template.
 
 **timer (trigger)**
 ```json
@@ -227,6 +314,10 @@ fluxion:
     pipeline:
       base-url: http://fluxion-pipeline-service:8085
       timeout-ms: 10000
+      headers:
+        Authorization: "Bearer <token>"    # optional default headers (e.g., auth)
+      retry-instance: pipeline-service     # optional override for retry instance name
+      circuit-breaker-instance: pipeline-service
 resilience4j:
   retry:
     instances:
@@ -241,7 +332,8 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
         sliding-window-size: 10
 ```
-- This invoker is used for `execution.type=pipelineCall`, streaming `process`, and pipeline sinks. Inputs are sent as `document`; outputs flow to the sink chain or back to the caller.
+- This invoker is used for `execution.type=pipelineCall`, pipeline sinks (with `next`), and optional top-level streaming `process` if present. Inputs are sent as `document`; outputs flow to the sink chain or back to the caller. Default headers are applied to the POST.
+- Connections loaded via the registry loader become available to any connector/operator that uses `connectionRef` (e.g., `$httpCall`, `$enrich`, streaming sources/sinks).
 
 ---
 
@@ -303,7 +395,7 @@ Fields:
 ### Dispatcher vs. providers
 - Built-in in the dispatcher: `webhook`, `polling`, `timer`, `javaBean`, `pipelineCall`, `http`. With a manifest that declares these types, the dispatcher spins up the webhook server, polling interval, timer ticks, or invokes the registered bean/pipeline/HTTP call. No provider SPI is needed—just register your action/trigger handlers (for javaBean/polling) and optional pipeline invoker/HTTP headers, etc.
 - Invocation paths: use `ManifestConnectorDispatcher` directly, or invoke actions from pipelines via `$enrich` (or the specialized operators like `$httpCall`/`$sqlQuery` where available).
-- Provider SPI required: `streaming` sources/sinks. You must have `SourceConnectorProvider` / `SinkConnectorProvider` implementations for the `source.type` / `sink.type` (Kafka/EventHub/Mongo/custom) discovered via ServiceLoader.
+- Provider SPI required: `streaming` sources/sinks. You must have `SourceConnectorProvider` / `SinkConnectorProvider` implementations for the `source.type` / `sink.type` (Kafka/custom) discovered via ServiceLoader.
 - Manifest loading: ServiceLoader only discovers providers. Manifests must be loaded separately—either via the Spring Boot starter classpath scan (e.g., `classpath*:manifests/*.json`) or manually with `ConnectorManifestLoader.load(...)` before using the dispatcher/`$enrich`.
 
 For per-type recipes and custom connector creation, see the “Build Custom Connector”
@@ -348,11 +440,11 @@ Use these patterns per `execution.type` when authoring manifests.
 }
 ```
 
-### httpServer (trigger/webhook)
+### webhook (trigger)
 ```json
 {
   "execution": {
-    "type": "httpServer",
+    "type": "webhook",
     "path": "/webhook",
     "method": "POST"
   }
@@ -370,16 +462,16 @@ Use these patterns per `execution.type` when authoring manifests.
 }
 ```
 
-### reactiveStream (streaming)
+### streaming (trigger)
 ```json
 {
   "execution": {
-    "type": "reactiveStream",
+    "type": "streaming",
     "stream": "orders",
-    "group": "connectors"
+    "source": { "type": "kafka", "connectionRef": "kafka-orders" },
+    "sink": { "type": "http", "connectionRef": "http-sink" }
   }
 }
-// Provide SourceConnectorProvider via META-INF/services for stream "orders"
 ```
 
 ### timer (trigger)
@@ -397,7 +489,7 @@ Use these patterns per `execution.type` when authoring manifests.
 ## Java Connector SDK
 
 Use these interfaces when custom logic is needed (typically for `javaBean`, `polling`,
-`reactiveStream`):
+`streaming` implementations):
 
 - `ConnectorActionHandler<I, O>` — one-shot actions (send email/HTTP/db write).
 - `ConnectorTriggerHandler<I, O>` — triggers/streams; returns `Flux<O>`.
@@ -446,7 +538,7 @@ public class SmtpEmailConnector extends AbstractActionHandler<SendEmailInput, Se
 ## Catalogs (streams/sinks)
 
 - `ConnectorStreamDescriptor` exposes stream metadata (name, namespace, schema,
-  sync modes, cursor/PK hints) for `reactiveStream`/`polling` connectors and sinks.
+  sync modes, cursor/PK hints) for `streaming`/`polling` connectors and sinks.
 - Use discovery endpoints (`/api/connectors/discovery/sources|sinks` in pipeline-service)
   to fetch catalogs; pipeline specs remain connector-agnostic.
 

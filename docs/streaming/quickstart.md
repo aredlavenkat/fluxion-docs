@@ -8,7 +8,7 @@ results to an HTTP endpoint.
 
 | Requirement | Notes |
 | --- | --- |
-| SrotaX modules | `fluxion-core`, `fluxion-connect`, optionally `fluxion-enrich`. |
+| SrotaX modules | `fluxion-core`, `fluxion-connect` (includes enrichment operators). |
 | Kafka cluster | Bootstrap servers + topic for ingest. |
 | Runtime | Java 21+ (examples use records, builders, switch expressions). |
 | State store | Implementation of `StateStore` for offsets (examples use the in-memory store). |
@@ -35,21 +35,23 @@ stage.
 
 ## 2. Wire up source and sink connectors
 
-### Using built-in providers (Kafka → Mongo)
+### Using built-in providers (Kafka → HTTP)
 
 ```java
-Properties consumerProps = new Properties();
-consumerProps.put("bootstrap.servers", System.getenv("KAFKA_BOOTSTRAP"));
-consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-KafkaStreamingSource source = new KafkaStreamingSource(consumerProps, "orders.v1", Duration.ofMillis(500), 64);
+SourceConnectorConfig sourceConfig = SourceConnectorConfig.builder("kafka")
+        .option("topic", "orders.v1")
+        .option("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP"))
+        .option("groupId", "orders-ltv")
+        .build();
 
-MongoSink sink = new MongoSink(
-    "mongodb://mongo0:27017,mongo1:27017/?replicaSet=rs0",
-    "analytics",
-    "orders_out"
-);
+ConnectorConfig sinkConfig = ConnectorConfig.builder("http", ConnectorConfig.Kind.SINK)
+        .option("endpoint", System.getenv("ORDERS_HTTP_ENDPOINT"))
+        .option("allowEmpty", false)
+        .build();
 ```
+
+`endpoint` can be swapped for `connectionRef` if you preload HTTP connections via
+`ConnectorRegistryInitializer`.
 
 ### Using manifest/SDK-driven connectors (custom source/sink)
 
@@ -134,15 +136,15 @@ or a fatal error policy triggers a shutdown. `handle.metrics()` returns the same
 ## Next steps
 
 1. Explore additional sink/source combos in the [SrotaX Connect](../connect/index.md) section.
-2. Add enrichment by dropping `$httpCall` or `$sqlQuery` operators from the
-   [SrotaX Enrich](../enrich/index.md) module into your stages.
+2. Add enrichment by dropping `$httpCall` or `$sqlQuery` operators (packaged in
+   `fluxion-connect`) into your stages.
 3. Harden the pipeline with the operational guides on resilience, metrics, and
    deployment in production environments.
 4. Dive into advanced topics for error policies, observability, and deployment
    in the [Streaming Engine overview](index.md#error-handling-strategies).
 5. Review which aggregation stages fit streaming versus batch workloads in the
    [Stage Support Matrix](stage-compatibility.md).
-6. Run the streaming module tests with `mvn -pl fluxion-core -am test` to
+6. Run the streaming module tests with `mvn -pl fluxion-connect -am test` to
    validate connectors and executors before deploying.
-7. Try the runnable demos in [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main)
-   (`streaming-kafka` for Kafka, `streaming-mongo` for MongoDB).
+7. Try the runnable demo in [`fluxion-samples`](https://github.com/aredlavenkat/fluxion-samples/tree/main)
+   (`streaming-kafka` for Kafka source + HTTP sink).
