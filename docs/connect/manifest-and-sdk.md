@@ -495,6 +495,39 @@ Use these patterns per `execution.type` when authoring manifests.
 }
 ```
 
+**Per-operation schemas (input/output)**
+- Define payload shapes per operation via `operationDefs[*].inputSchema` / `outputSchema` (separate from connector config in templates.yaml).
+- Example (Slack `postMessage`):
+```json
+{
+  "operations": { "postMessage": "postMessage" },
+  "operationDefs": {
+    "postMessage": {
+      "operationId": "postMessage",
+      "kind": "action",
+      "inputSchema": {
+        "type": "object",
+        "required": ["channel", "text"],
+        "properties": {
+          "channel": { "type": "string" },
+          "text": { "type": "string" },
+          "thread_ts": { "type": "string" },
+          "attachments": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "outputSchema": { "type": "object" },
+      "execution": {
+        "type": "http",
+        "method": "POST",
+        "urlTemplate": "{{config.baseUrl}}/chat.postMessage",
+        "headers": { "Authorization": "Bearer {{config.tokenRef}}" }
+      }
+    }
+  }
+}
+```
+Each operation can have its own schema; reuse the connector template/config for shared settings like base URL, auth, and timeouts.
+
 ### javaBean (action)
 ```json
 {
