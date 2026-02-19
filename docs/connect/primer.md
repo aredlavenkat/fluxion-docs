@@ -92,8 +92,9 @@ my-connector/
 
 - `connectionRef` is required on streaming `source` and `sink` blocks (they pull
   transport config + resilience from the registry).
-- **Process block (supported):** a top-level `process` array can run one or more
-  pipelines before the sink chain. Its output flows into the sink/fanout.
+- **Process block (supported):** a single top-level `process` object
+  (`type: pipeline|pipelineCall`) runs before the sink chain. Its output flows
+  into the sink/fanout.
 - **Fanout** (parallel delivery) uses `fanout` on the sink block; calls are
   synchronous/serial today.
 - **Pipeline chaining** uses `type:"pipeline"` sinks with `next` (single sink or
@@ -120,11 +121,8 @@ Examples:
   ]
 }
 
-// Top-level process array, then pipeline sink with next
-"process": [
-  { "pipeline": "normalize" },
-  { "pipeline": "score" }
-],
+// Top-level process (single object), then pipeline sink with next
+"process": { "type": "pipeline", "pipeline": "normalize", "version": "1.0.0" },
 "sink": {
   "type": "pipeline",
   "pipeline": "route",
@@ -262,7 +260,7 @@ new StreamingPipelineExecutor().processStream(source, List.of(), httpSink, new S
 - The starter auto-registers a `PipelineCallInvoker` that POSTs to the pipeline-service endpoint `/api/pipelines/{name}/{version}:run`. It is used by:
   - `execution.type=pipelineCall` actions
   - Streaming sinks with `type=pipeline` / `pipelineCall`
-  - Top-level `process` (if present in the execution model; optional/future)
+  - Top-level streaming `process` (single object: `type=pipeline|pipelineCall`)
 - Configure target service, timeout, and Resilience4j policies:
 ```yaml
 fluxion:

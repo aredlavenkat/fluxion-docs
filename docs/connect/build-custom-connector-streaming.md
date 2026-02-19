@@ -87,7 +87,8 @@ new StreamingPipelineExecutor().processStream(source, List.of(), dest, new Strea
 ```
 
 ## Chaining rules
-- Add a top-level `process` array to run one or more pipelines before the sink.
+- Add a top-level `process` object (`type: pipeline|pipelineCall`) to run a
+  pipeline before the sink.
 - Use `type:"pipeline"` sinks with `next` (single or list) to chain/fanout after
   a pipeline sink.
 - For non-pipeline sinks, use `fanout` directly on the sink block to synchronously

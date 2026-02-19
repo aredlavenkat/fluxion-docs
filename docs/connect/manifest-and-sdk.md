@@ -152,10 +152,11 @@ Every operation declares an `execution.type` (do not invent new types):
       "execution": {
         "type": "streaming",
         "stream": "orders",
-        "process": [
-          { "pipeline": "normalize" },
-          { "pipeline": "score" }
-        ],
+        "process": {
+          "type": "pipeline",
+          "pipeline": "normalize",
+          "version": "1.0.0"
+        },
         "sink": {
           "type": "pipeline",
           "pipeline": "enrich-orders",
@@ -163,10 +164,85 @@ Every operation declares an `execution.type` (do not invent new types):
             { "type": "http", "connectionRef": "http-notify" },
             { "type": "kafka", "connectionRef": "kafka-out" }
           ]
-        },
-        "fanout": [
-          { "type": "http", "connectionRef": "audit-hook" }
-        ]
+        }
+      }
+    }
+  }
+}
+```
+
+### End-to-end: Kafka source → process → HTTP sink (templates + connections + manifest)
+
+**templates.yaml**
+```yaml
+- id: kafka.source
+  displayName: Kafka Source
+  category: kafka
+  executionType: STREAMING
+  sourceSchema:
+    type: object
+    required: [bootstrapServers, topic, groupId]
+    properties:
+      bootstrapServers: { type: string }
+      topic: { type: string }
+      groupId: { type: string }
+      keyDeserializer: { type: string, default: org.apache.kafka.common.serialization.StringDeserializer }
+      valueDeserializer: { type: string, default: org.apache.kafka.common.serialization.StringDeserializer }
+
+- id: http.sink
+  displayName: HTTP Sink
+  category: http
+  executionType: STREAMING
+  sinkSchema:
+    type: object
+    required: [urlTemplate]
+    properties:
+      urlTemplate: { type: string }
+      headers: { type: object, additionalProperties: { type: string } }
+      retryInstance: { type: string }
+      circuitBreakerInstance: { type: string }
+      allowEmpty: { type: boolean, default: false }
+```
+
+**connections.yaml**
+```yaml
+- connectionRef: kafka.orders
+  connectorId: kafka.source
+  config:
+    type: kafka
+    bootstrapServers: broker1:9092,broker2:9092
+    topic: orders
+    groupId: orders-stream
+
+- connectionRef: http.orders
+  connectorId: http.sink
+  config:
+    type: http
+    urlTemplate: https://api.example.com/orders
+    headers:
+      Authorization: Bearer TOKEN
+    retryInstance: retry-a
+    circuitBreakerInstance: cb-a
+```
+
+**manifest (JSON)**
+```json
+{
+  "schemaVersion": "1.0.0",
+  "id": "orders-streaming",
+  "version": "1.0.0",
+  "displayName": "Orders Stream",
+  "operations": { "orders-stream": "orders-stream" },
+  "operationDefs": {
+    "orders-stream": {
+      "operationId": "orders-stream",
+      "kind": "trigger",
+      "execution": {
+        "type": "streaming",
+        "stream": "orders",
+        "source": { "type": "kafka", "connectionRef": "kafka.orders" },
+        "process": { "type": "pipeline", "pipeline": "transform-orders", "version": "1.0.0" },
+        "sink": { "type": "http", "connectionRef": "http.orders", "allowEmpty": false }
       }
     }
   }
@@ -175,9 +251,9 @@ Every operation declares an `execution.type` (do not invent new types):
 Notes:
 - `pipeline`/`pipelineCall` sinks forward their output into `next` sinks; `next`
   accepts a single sink or a list for fan-out.
-- Top-level `process` (array) runs before the sink and feeds the sink chain/fan-out.
-- `fanout` on the sink block sends the processed batch to additional sinks
-  without requiring a pipeline sink; delivery is synchronous/serial today.
+- Top-level `process` is a single object; supported types: `pipeline` / `pipelineCall`.
+- `fanout` lives on the sink block (or via `next` list on a pipeline sink) and
+  delivers synchronously/serially today.
 
 ---
 
@@ -207,9 +283,9 @@ ConnectorRegistry.getInstance().registerManifest(manifest);
 ```
 
 For streaming triggers, build a `ReactiveStreamExecution` with `source`/`sink`
-maps (including `process`/`next`/`fanout` if needed) and attach it to the
-operation definition. Registering the manifest makes it discoverable and
-executable without shipping JSON/YAML files.
+maps (including a single `process` object and sink `next`/`fanout` if needed)
+and attach it to the operation definition. Registering the manifest makes it
+discoverable and executable without shipping JSON/YAML files.
 
 **connections (file → registry)**
 - You can register connection instances (like ADF “linked services”) from a YAML/JSON file at startup and they’ll be available via `connectionRef`:
@@ -332,7 +408,7 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
         sliding-window-size: 10
 ```
-- This invoker is used for `execution.type=pipelineCall`, pipeline sinks (with `next`), and optional top-level streaming `process` if present. Inputs are sent as `document`; outputs flow to the sink chain or back to the caller. Default headers are applied to the POST.
+- This invoker is used for `execution.type=pipelineCall`, pipeline sinks (with `next`), and top-level streaming `process` (single object). Inputs are sent as `document`; outputs flow to the sink chain or back to the caller. Default headers are applied to the POST.
 - Connections loaded via the registry loader become available to any connector/operator that uses `connectionRef` (e.g., `$httpCall`, `$enrich`, streaming sources/sinks).
 
 ---
