@@ -1,0 +1,6224 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.srotax.com/connect/manifest-and-sdk/">
+      
+      
+        <link rel="prev" href="../primer/">
+      
+      
+        <link rel="next" href="../connect-spring-boot-starter/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Manifest & SDK - Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#connector-manifest-sdk" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Docs" class="md-header__button md-logo" aria-label="Docs" data-md-component="logo">
+      
+  <img src="../../assets/logo_white.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Manifest & SDK
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Docs" class="md-nav__button md-logo" aria-label="Docs" data-md-component="logo">
+      
+  <img src="../../assets/logo_white.png" alt="logo">
+
+    </a>
+    Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Platform Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Platform Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platform/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Platform Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Platform Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SrotaX Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SrotaX Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/integration-developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1_5" id="__nav_4_1_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Stages
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/addFields/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $addFields
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/bucket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $bucket
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/bucketAuto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $bucketAuto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/densify/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $densify
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/facet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $facet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/group/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $group
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/limit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $limit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/lookup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $lookup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/match/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $match
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/replaceRoot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $replaceRoot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/replaceWith/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $replaceWith
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/set/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $set
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/fill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $fill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/subPipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $subPipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/skip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $skip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/sort/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $sort
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/sortByCount/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $sortByCount
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/unwind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $unwind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/setWindowFields/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $setWindowFields
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/sampleRate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $sampleRate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1_6" id="__nav_4_1_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operators
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operators
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/abs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $abs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/add/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $add
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/allElementsTrue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $allElementsTrue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/and/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $and
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/anyElementTrue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $anyElementTrue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/arrayElemAt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $arrayElemAt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/arrayToObject/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $arrayToObject
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/avg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $avg
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/ceil/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $ceil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/concat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $concat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/concatArrays/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $concatArrays
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/cond/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $cond
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/convert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $convert
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/divide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $divide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/eq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $eq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/exp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $exp
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/filter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $filter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/floor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $floor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/function/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $function
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/getField/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $getField
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/gt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $gt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/gte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $gte
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/ifNull/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $ifNull
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/in/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $in
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/indexOfArray/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $indexOfArray
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/ln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $ln
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/log10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $log10
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/lt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $lt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/lte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $lte
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/max/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $max
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/mergeObjects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $mergeObjects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/min/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $min
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/multiply/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $multiply
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/ne/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $ne
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/nin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $nin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/not/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $not
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/objectToArray/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $objectToArray
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/or/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $or
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/pow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $pow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/reduce/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $reduce
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/reverseArray/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $reverseArray
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/round/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $round
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/setField/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $setField
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/agentCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $agentCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/size/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $size
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/slice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $slice
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/split/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $split
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/sqrt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $sqrt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/strcasecmp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $strcasecmp
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/substr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $substr
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/subtract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $subtract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/sum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $sum
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/switch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $switch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toBool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toBool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toDate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toDate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toDouble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toDouble
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toInt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toInt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toLower/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toLower
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toString/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toString
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/toUpper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $toUpper
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/trunc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $trunc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/unsetField/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $unsetField
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operators/zip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $zip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SrotaX Connect
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SrotaX Connect
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../primer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Primer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifest & SDK
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifest & SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#execution-types-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution types (required)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-friendly-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM-friendly recipe
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-manifests-by-executiontype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample manifests by execution.type
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sample manifests by execution.type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-kafka-source-process-http-sink-templates-connections-manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end: Kafka source → process → HTTP sink (templates + connections + manifest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#define-connectors-programmatically-no-manifest-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Define connectors programmatically (no manifest files)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pipeline-invoker-resilience-starter-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline invoker + resilience (starter defaults)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manifest-shape-jsonyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest shape (JSON/YAML)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-connectors-are-resolved-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How connectors are resolved at runtime
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How connectors are resolved at runtime">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dispatcher-vs-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dispatcher vs. providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-type-examples-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution-type examples at a glance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution-type examples at a glance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        http (action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javabean-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        javaBean (action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinecall-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipelineCall (action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        webhook (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polling-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        polling (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#streaming-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        streaming (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timer-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        timer (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-connector-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Java Connector SDK
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-and-multi-tenancy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets and multi-tenancy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#orchestration-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestration boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#catalogs-streamssinks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Catalogs (streams/sinks)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checklist-for-new-connectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist for new connectors
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../connect-spring-boot-starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spring Boot Starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_5" id="__nav_4_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Connectors
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built-in Connectors
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-sink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP Sink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kafka/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kafka Source/Sink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_6" id="__nav_4_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enrichment Operators (in Connect)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Enrichment Operators (in Connect)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../enrich/operators/httpCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $httpCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../enrich/operators/sqlQuery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $sqlQuery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../enrich/operators/enrich/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    $enrich
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_7" id="__nav_4_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build Custom Connector
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Build Custom Connector
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-http/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP Action
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-javabean/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JavaBean Action/Trigger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-pipeline-call/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Call Action
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-webhook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Webhook Trigger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-polling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polling Trigger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming Trigger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-custom-connector-timer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timer Trigger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution Runtimes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution Runtimes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Engine
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Rule Engine
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring Rule Sets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/dsl-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DSL Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation & Linting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/extensions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extensions & SPIs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing & Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lifecycle & Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/tooling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tooling & IDE Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1_14" id="__nav_5_1_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/spring-boot-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spring Boot Starter Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming Engine
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Streaming Engine
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../streaming/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../streaming/stage-compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stage Compatibility
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflow Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/temporal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Temporal Workflow Bridge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operational Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operational Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../shared/resilience/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resilience Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../shared/llm-assistant-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes for LLM Assistants
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples Gallery
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples Gallery
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/exampleSet1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example Set 1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/exampleSet2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example Set 2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/exampleSet3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example Set 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#execution-types-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution types (required)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-friendly-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM-friendly recipe
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-manifests-by-executiontype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample manifests by execution.type
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sample manifests by execution.type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-kafka-source-process-http-sink-templates-connections-manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end: Kafka source → process → HTTP sink (templates + connections + manifest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#define-connectors-programmatically-no-manifest-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Define connectors programmatically (no manifest files)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pipeline-invoker-resilience-starter-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline invoker + resilience (starter defaults)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manifest-shape-jsonyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest shape (JSON/YAML)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-connectors-are-resolved-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How connectors are resolved at runtime
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How connectors are resolved at runtime">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dispatcher-vs-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dispatcher vs. providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-type-examples-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution-type examples at a glance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution-type examples at a glance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        http (action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javabean-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        javaBean (action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinecall-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipelineCall (action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        webhook (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polling-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        polling (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#streaming-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        streaming (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timer-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        timer (trigger)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-connector-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Java Connector SDK
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-and-multi-tenancy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets and multi-tenancy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#orchestration-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestration boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#catalogs-streamssinks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Catalogs (streams/sinks)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checklist-for-new-connectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist for new connectors
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="connector-manifest-sdk">Connector Manifest &amp; SDK</h1>
+<p>This page documents the connector manifest format and how the dispatcher/SDK
+load it. For building custom providers/runtimes, see the “Build Custom Connector”
+pages in the sidebar.</p>
+<ul>
+<li>Thin, reusable integrations for external systems (HTTP, DBs, Kafka, S3, etc.).</li>
+<li>Multi-tenant aware: never leak data/secrets across tenants.</li>
+<li>Declarative manifests (JSON/YAML) plus optional Java handlers.</li>
+<li>A fixed set of execution types—no connector-specific executors.</li>
+</ul>
+<hr />
+<h2 id="execution-types-required">Execution types (required)</h2>
+<p>Every operation declares an <code>execution.type</code> (do not invent new types):</p>
+<ul>
+<li><code>http</code> — generic HTTP/REST calls</li>
+<li><code>javaBean</code> — call a Spring bean implementing connector logic (SDKs, DB drivers, etc.)</li>
+<li><code>pipelineCall</code> — invoke another SrotaX pipeline or ruleset</li>
+<li><code>webhook</code> — inbound HTTP/webhook triggers</li>
+<li><code>polling</code> — periodic polling of external systems</li>
+<li><code>streaming</code> — streaming sources/sinks (Kafka, HTTP sink, or custom)</li>
+<li><code>timer</code> — cron triggers, delays, scheduled tasks</li>
+</ul>
+<h2 id="llm-friendly-recipe">LLM-friendly recipe</h2>
+<ol>
+<li>Pick <code>execution.type</code> (http | javaBean | pipelineCall | webhook | polling | streaming | timer).</li>
+<li>Write a manifest with <code>id</code>, <code>version</code>, <code>operations</code>, <code>operationDefs[*].kind</code> (action/trigger), and <code>execution.type</code>.</li>
+<li>Implement handlers (if using SDK):</li>
+<li>Actions: <code>ConnectorActionHandler</code> or extend <code>AbstractActionHandler</code>.</li>
+<li>Triggers: <code>ConnectorTriggerHandler</code> returning <code>Flux&lt;O&gt;</code>.</li>
+<li>Enforce secrets/multi-tenancy via <code>ConnectorContext.resolveSecret</code>, keep handlers stateless.</li>
+</ol>
+<h2 id="sample-manifests-by-executiontype">Sample manifests by execution.type</h2>
+<p><strong>http (action)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;echo&quot;: &quot;echo&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;echo&quot;: {
+      &quot;operationId&quot;: &quot;echo&quot;,
+      &quot;kind&quot;: &quot;action&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;http&quot;,
+        &quot;method&quot;: &quot;POST&quot;,
+        &quot;urlTemplate&quot;: &quot;https://api.example.com/echo&quot;,
+        &quot;timeoutMs&quot;: 5000
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>javaBean (action)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;add&quot;: &quot;add&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;add&quot;: {
+      &quot;operationId&quot;: &quot;add&quot;,
+      &quot;kind&quot;: &quot;action&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;javaBean&quot;,
+        &quot;beanName&quot;: &quot;addHandler&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>pipelineCall (action)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;invoke&quot;: &quot;invoke&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;invoke&quot;: {
+      &quot;operationId&quot;: &quot;invoke&quot;,
+      &quot;kind&quot;: &quot;action&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;pipelineCall&quot;,
+        &quot;targetPipeline&quot;: &quot;downstream.orders&quot;,
+        &quot;version&quot;: &quot;1.0.0&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>webhook (trigger)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;ingest&quot;: &quot;ingest&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;ingest&quot;: {
+      &quot;operationId&quot;: &quot;ingest&quot;,
+      &quot;kind&quot;: &quot;trigger&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;webhook&quot;,
+        &quot;path&quot;: &quot;/webhook&quot;,
+        &quot;method&quot;: &quot;POST&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>polling (trigger)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;poll&quot;: &quot;poll&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;poll&quot;: {
+      &quot;operationId&quot;: &quot;poll&quot;,
+      &quot;kind&quot;: &quot;trigger&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;polling&quot;,
+        &quot;intervalMillis&quot;: 30000
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>streaming (trigger)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;stream&quot;: &quot;stream&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;stream&quot;: {
+      &quot;operationId&quot;: &quot;stream&quot;,
+      &quot;kind&quot;: &quot;trigger&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;streaming&quot;,
+        &quot;stream&quot;: &quot;orders&quot;,
+        &quot;source&quot;: { &quot;type&quot;: &quot;kafka&quot;, &quot;connectionRef&quot;: &quot;kafka-orders&quot; },
+        &quot;sink&quot;: { &quot;type&quot;: &quot;http&quot;, &quot;connectionRef&quot;: &quot;http-ingest&quot; }
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>streaming with pipeline process + pipeline sink (trigger)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;stream&quot;: &quot;stream&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;stream&quot;: {
+      &quot;operationId&quot;: &quot;stream&quot;,
+      &quot;kind&quot;: &quot;trigger&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;streaming&quot;,
+        &quot;stream&quot;: &quot;orders&quot;,
+        &quot;process&quot;: {
+          &quot;type&quot;: &quot;pipeline&quot;,
+          &quot;pipeline&quot;: &quot;normalize&quot;,
+          &quot;version&quot;: &quot;1.0.0&quot;
+        },
+        &quot;sink&quot;: {
+          &quot;type&quot;: &quot;pipeline&quot;,
+          &quot;pipeline&quot;: &quot;enrich-orders&quot;,
+          &quot;next&quot;: [
+            { &quot;type&quot;: &quot;http&quot;, &quot;connectionRef&quot;: &quot;http-notify&quot; },
+            { &quot;type&quot;: &quot;kafka&quot;, &quot;connectionRef&quot;: &quot;kafka-out&quot; }
+          ]
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="end-to-end-kafka-source-process-http-sink-templates-connections-manifest">End-to-end: Kafka source → process → HTTP sink (templates + connections + manifest)</h3>
+<p><strong>templates.yaml</strong></p>
+<pre><code class="language-yaml">- id: kafka.source
+  displayName: Kafka Source
+  category: kafka
+  executionType: STREAMING
+  sourceSchema:
+    type: object
+    required: [bootstrapServers, topic, groupId]
+    properties:
+      bootstrapServers: { type: string }
+      topic: { type: string }
+      groupId: { type: string }
+      keyDeserializer: { type: string, default: org.apache.kafka.common.serialization.StringDeserializer }
+      valueDeserializer: { type: string, default: org.apache.kafka.common.serialization.StringDeserializer }
+
+- id: http.sink
+  displayName: HTTP Sink
+  category: http
+  executionType: STREAMING
+  sinkSchema:
+    type: object
+    required: [urlTemplate]
+    properties:
+      urlTemplate: { type: string }
+      headers: { type: object, additionalProperties: { type: string } }
+      retryInstance: { type: string }
+      circuitBreakerInstance: { type: string }
+      allowEmpty: { type: boolean, default: false }
+</code></pre>
+<p><strong>connections.yaml</strong></p>
+<pre><code class="language-yaml">- connectionRef: kafka.orders
+  connectorId: kafka.source
+  config:
+    type: kafka
+    bootstrapServers: broker1:9092,broker2:9092
+    topic: orders
+    groupId: orders-stream
+
+- connectionRef: http.orders
+  connectorId: http.sink
+  config:
+    type: http
+    urlTemplate: https://api.example.com/orders
+    headers:
+      Authorization: Bearer TOKEN
+    retryInstance: retry-a
+    circuitBreakerInstance: cb-a
+</code></pre>
+<p><strong>manifest (JSON)</strong></p>
+<pre><code class="language-json">{
+  &quot;schemaVersion&quot;: &quot;1.0.0&quot;,
+  &quot;id&quot;: &quot;orders-streaming&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;displayName&quot;: &quot;Orders Stream&quot;,
+  &quot;operations&quot;: { &quot;orders-stream&quot;: &quot;orders-stream&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;orders-stream&quot;: {
+      &quot;operationId&quot;: &quot;orders-stream&quot;,
+      &quot;kind&quot;: &quot;trigger&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;streaming&quot;,
+        &quot;stream&quot;: &quot;orders&quot;,
+        &quot;source&quot;: { &quot;type&quot;: &quot;kafka&quot;, &quot;connectionRef&quot;: &quot;kafka.orders&quot; },
+        &quot;process&quot;: { &quot;type&quot;: &quot;pipeline&quot;, &quot;pipeline&quot;: &quot;transform-orders&quot;, &quot;version&quot;: &quot;1.0.0&quot; },
+        &quot;sink&quot;: { &quot;type&quot;: &quot;http&quot;, &quot;connectionRef&quot;: &quot;http.orders&quot;, &quot;allowEmpty&quot;: false }
+      }
+    }
+  }
+}
+</code></pre>
+<p>Notes:
+- <code>pipeline</code>/<code>pipelineCall</code> sinks forward their output into <code>next</code> sinks; <code>next</code>
+  accepts a single sink or a list for fan-out.
+- Top-level <code>process</code> is a single object; supported types: <code>pipeline</code> / <code>pipelineCall</code>.
+- <code>fanout</code> lives on the sink block (or via <code>next</code> list on a pipeline sink) and
+  delivers synchronously/serially today.</p>
+<hr />
+<h2 id="define-connectors-programmatically-no-manifest-files">Define connectors programmatically (no manifest files)</h2>
+<p>Build the manifest objects in code and register them with the <code>ConnectorRegistry</code>
+so they show up in discovery endpoints and run through the same dispatcher as
+file-based manifests.</p>
+<pre><code class="language-java">ConnectorOperationDefinition echoOp =
+        ConnectorOperationDefinition.builder(&quot;echo&quot;, ConnectorOperationDefinition.Kind.ACTION)
+                .execution(HttpExecution.builder()
+                        .method(&quot;POST&quot;)
+                        .urlTemplate(&quot;https://api.example.com/echo&quot;)
+                        .build())
+                .inputSchema(Map.of(&quot;type&quot;, &quot;object&quot;))
+                .outputSchema(Map.of(&quot;type&quot;, &quot;object&quot;))
+                .build();
+
+ConnectorManifest manifest = ConnectorManifest.builder(&quot;demo.echo&quot;, &quot;1.0.0&quot;, &quot;Demo Echo&quot;)
+        .operations(Map.of(&quot;echo&quot;, &quot;echo&quot;))
+        .operationDefs(Map.of(&quot;echo&quot;, echoOp))
+        .build();
+
+ConnectorRegistry.getInstance().registerManifest(manifest);
+</code></pre>
+<p>For streaming triggers, build a <code>ReactiveStreamExecution</code> with <code>source</code>/<code>sink</code>
+maps (including a single <code>process</code> object and sink <code>next</code>/<code>fanout</code> if needed)
+and attach it to the operation definition. Registering the manifest makes it
+discoverable and executable without shipping JSON/YAML files.</p>
+<p><strong>connections (file → registry)</strong>
+- You can register connection instances (like ADF “linked services”) from a YAML/JSON file at startup and they’ll be available via <code>connectionRef</code>:</p>
+<pre><code class="language-yaml">- connectionRef: demo.http
+  connectorId: demo.http      # ties to the connector template
+  scope: { tenantId: acme, pipelineId: orders }
+  config:
+    type: http
+    urlTemplate: https://api.example.com/ship
+    headers:
+      Authorization: ${SECRET_TOKEN}
+    timeoutMs: 8000
+- connectionRef: orders-db
+  connectorId: sql.connector
+  scope: { tenantId: acme, pipelineId: orders }
+  config:
+    type: sql
+    jdbcUrl: jdbc:postgresql://db:5432/orders
+    username: orders
+    password: ${DB_PASSWORD}
+</code></pre>
+<ul>
+<li>A bootstrapper loads these and registers them into the connector registry per scope so <code>$enrich</code>/<code>$httpCall</code>/pipeline sinks can resolve <code>connectionRef</code>.</li>
+<li>Runtime loader: point <code>fluxion.connect.templates-path</code> / <code>fluxion.connect.connections-path</code> system properties at your YAML/JSON files and initialize via <code>ConnectorRegistryInitializer.loadFromSystemProperties()</code>. The HTTP and Kafka sinks and enrichment operators then resolve <code>connectionRef</code> from the in-memory registry.</li>
+<li>HTTP and Kafka sinks also accept <code>retryInstance</code> / <code>circuitBreakerInstance</code> (Resilience4j names) when using <code>connectionRef</code> or inline config; populate the Resilience4j registries and the sink will wrap calls accordingly.</li>
+</ul>
+<p><strong>connections (programmatic registration)</strong>
+- Build connections at runtime and register them directly with the in-memory registry; useful for SDK-only flows or when pulling config from a service:</p>
+<pre><code class="language-java">InMemoryConnectorRegistry registry = new InMemoryConnectorRegistry();
+registry.registerConnection(
+        ConnectionScope.defaultScope(),
+        &quot;orders-api&quot;,
+        Map.of(
+            &quot;type&quot;, &quot;http&quot;,
+            &quot;endpoint&quot;, &quot;https://api.example.com/orders&quot;,
+            &quot;headers&quot;, Map.of(&quot;Authorization&quot;, &quot;Bearer TOKEN&quot;),
+            &quot;retryInstance&quot;, &quot;http-retry&quot;
+        )
+);
+HttpSinkProvider.RegistryHolder.registry = registry; // make sinks/operators see it
+</code></pre>
+<ul>
+<li>You can also register templates in code if you need to hydrate multiple <code>connectionRef</code>s from the same base template.</li>
+</ul>
+<p><strong>timer (trigger)</strong></p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;tick&quot;: &quot;tick&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;tick&quot;: {
+      &quot;operationId&quot;: &quot;tick&quot;,
+      &quot;kind&quot;: &quot;trigger&quot;,
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;timer&quot;,
+        &quot;cron&quot;: &quot;PT1M&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<p>For custom providers/runtimes and per-type recipes, see:
+- <a href="../build-custom-connector-http/">Build custom connector: HTTP</a>
+- <a href="../build-custom-connector-javabean/">Build custom connector: JavaBean</a>
+- <a href="../build-custom-connector-pipeline-call/">Build custom connector: Pipeline call</a>
+- <a href="../build-custom-connector-webhook/">Build custom connector: Webhook</a>
+- <a href="../build-custom-connector-polling/">Build custom connector: Polling</a>
+- <a href="../build-custom-connector-streaming/">Build custom connector: Streaming</a>
+- <a href="../build-custom-connector-timer/">Build custom connector: Timer</a></p>
+<pre><code class="language-java">@Configuration
+public class HeartbeatTimerConfig {
+
+    @Bean
+    CommandLineRunner startTimer(PipelineExecutor pipelineExecutor) {
+        return args -&gt; {
+            List&lt;Stage&gt; stages = DocumentParser.getStagesFromJsonArray(
+                Files.readString(Path.of(&quot;pipelines/heartbeat.json&quot;))
+            );
+
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            Runnable runPipeline = () -&gt; {
+                List&lt;Document&gt; input = DocumentParser.getDocumentsFromJsonArray(&quot;[{}]&quot;); // pipeline adds fields
+                pipelineExecutor.run(input, stages, Map.of(&quot;tenantId&quot;, &quot;acme&quot;)); // globals hold tenant
+            };
+
+            scheduler.scheduleAtFixedRate(runPipeline, 0, 5, TimeUnit.MINUTES);
+        };
+    }
+}
+</code></pre>
+<p>Swap out the scheduler for your trigger runtime so that the timer manifest drives scheduling automatically and the emitted document (<code>firedAt</code>, <code>message</code>) becomes the first input into your pipeline.</p>
+<h2 id="pipeline-invoker-resilience-starter-defaults">Pipeline invoker + resilience (starter defaults)</h2>
+<ul>
+<li>The Spring Boot starter ships a default <code>PipelineCallInvoker</code> that POSTs to <code>/api/pipelines/{name}/{version}:run</code> on the pipeline-service.</li>
+<li>Configure target URL + timeout and bind retry/circuit-breaker via Resilience4j registries:</li>
+</ul>
+<pre><code class="language-yaml">fluxion:
+  connect:
+    pipeline:
+      base-url: http://fluxion-pipeline-service:8085
+      timeout-ms: 10000
+      headers:
+        Authorization: &quot;Bearer &lt;token&gt;&quot;    # optional default headers (e.g., auth)
+      retry-instance: pipeline-service     # optional override for retry instance name
+      circuit-breaker-instance: pipeline-service
+resilience4j:
+  retry:
+    instances:
+      pipeline-service:
+        max-attempts: 3
+        wait-duration: 500ms
+  circuitbreaker:
+    instances:
+      pipeline-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+</code></pre>
+<ul>
+<li>This invoker is used for <code>execution.type=pipelineCall</code>, pipeline sinks (with <code>next</code>), and top-level streaming <code>process</code> (single object). Inputs are sent as <code>document</code>; outputs flow to the sink chain or back to the caller. Default headers are applied to the POST.</li>
+<li>Connections loaded via the registry loader become available to any connector/operator that uses <code>connectionRef</code> (e.g., <code>$httpCall</code>, <code>$enrich</code>, streaming sources/sinks).</li>
+</ul>
+<hr />
+<h2 id="manifest-shape-jsonyaml">Manifest shape (JSON/YAML)</h2>
+<pre><code class="language-json">{
+  &quot;schemaVersion&quot;: &quot;1.0.0&quot;,
+  &quot;id&quot;: &quot;slack.webapi&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;displayName&quot;: &quot;Slack Web API&quot;,
+  &quot;category&quot;: &quot;messaging&quot;,
+  &quot;auth&quot;: {
+    &quot;type&quot;: &quot;bearerToken&quot;,
+    &quot;configSchema&quot;: { &quot;type&quot;: &quot;object&quot; }
+  },
+  &quot;configSchema&quot;: { &quot;type&quot;: &quot;object&quot; },
+  &quot;operations&quot;: {
+    &quot;postMessage&quot;: { &quot;$ref&quot;: &quot;#/operationDefs/postMessage&quot; }
+  },
+  &quot;operationDefs&quot;: {
+    &quot;postMessage&quot;: {
+      &quot;operationId&quot;: &quot;postMessage&quot;,
+      &quot;kind&quot;: &quot;action&quot;,
+      &quot;inputSchema&quot;: { &quot;type&quot;: &quot;object&quot; },
+      &quot;outputSchema&quot;: { &quot;type&quot;: &quot;object&quot; },
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;http&quot;,
+        &quot;method&quot;: &quot;POST&quot;,
+        &quot;urlTemplate&quot;: &quot;{{config.baseUrl}}/chat.postMessage&quot;,
+        &quot;authStyle&quot;: &quot;bearerTokenFromConfig.botTokenRef&quot;,
+        &quot;timeoutMs&quot;: 10000
+      }
+    }
+  }
+}
+</code></pre>
+<p>Fields:</p>
+<ul>
+<li><code>id</code>, <code>version</code>, <code>displayName</code>, <code>category</code></li>
+<li><code>auth</code>: <code>type</code>, optional <code>configSchema</code></li>
+<li><code>configSchema</code>: connector-level JSON Schema</li>
+<li><code>operations</code>: map of operation name → ref into <code>operationDefs</code></li>
+<li><code>operationDefs[*]</code>: <code>operationId</code>, <code>kind</code> (<code>action</code> or <code>trigger</code>), <code>inputSchema</code>,
+  <code>outputSchema</code>, <code>execution</code> (must include <code>execution.type</code>)</li>
+</ul>
+<hr />
+<h2 id="how-connectors-are-resolved-at-runtime">How connectors are resolved at runtime</h2>
+<ul>
+<li><strong>Manifest drives dispatch</strong>: <code>connectionRef</code> + <code>connectorId</code> + <code>operationId</code> select the connector and operation. Enrichment operators (<code>$httpCall</code>, <code>$sqlQuery</code>, <code>$enrich</code>) pass these into the Connector Dispatcher; streaming connectors use <code>SourceConnectorProvider</code> / <code>SinkConnectorProvider</code>.</li>
+<li><strong>Scopes</strong>: the connector registry is scoped by tenant/pipeline. Set the scope (<code>tenant::pipeline</code>) before registering connectors to avoid cross-tenant leakage.</li>
+<li><strong>ServiceLoader</strong>: source/sink providers are discovered via <code>META-INF/services/ai.fluxion.core.engine.connectors.SourceConnectorProvider</code> (or sink). JavaBean executions are resolved from your DI container by <code>beanName</code>.</li>
+<li><strong>Auth/config</strong>: <code>ConnectorContext</code> supplies tenant/pipeline IDs, config, secret resolution, logger, metrics, and tracing; never cache per-tenant secrets statically.</li>
+</ul>
+<hr />
+<h3 id="dispatcher-vs-providers">Dispatcher vs. providers</h3>
+<ul>
+<li>Built-in in the dispatcher: <code>webhook</code>, <code>polling</code>, <code>timer</code>, <code>javaBean</code>, <code>pipelineCall</code>, <code>http</code>. With a manifest that declares these types, the dispatcher spins up the webhook server, polling interval, timer ticks, or invokes the registered bean/pipeline/HTTP call. No provider SPI is needed—just register your action/trigger handlers (for javaBean/polling) and optional pipeline invoker/HTTP headers, etc.</li>
+<li>Invocation paths: use <code>ManifestConnectorDispatcher</code> directly, or invoke actions from pipelines via <code>$enrich</code> (or the specialized operators like <code>$httpCall</code>/<code>$sqlQuery</code> where available).</li>
+<li>Provider SPI required: <code>streaming</code> sources/sinks. You must have <code>SourceConnectorProvider</code> / <code>SinkConnectorProvider</code> implementations for the <code>source.type</code> / <code>sink.type</code> (Kafka/custom) discovered via ServiceLoader.</li>
+<li>Manifest loading: ServiceLoader only discovers providers. Manifests must be loaded separately—either via the Spring Boot starter classpath scan (e.g., <code>classpath*:manifests/*.json</code>) or manually with <code>ConnectorManifestLoader.load(...)</code> before using the dispatcher/<code>$enrich</code>.</li>
+</ul>
+<p>For per-type recipes and custom connector creation, see the “Build Custom Connector”
+pages in the sidebar (HTTP, JavaBean, pipeline call, webhook, polling, streaming,
+timer).</p>
+<h2 id="execution-type-examples-at-a-glance">Execution-type examples at a glance</h2>
+<p>Use these patterns per <code>execution.type</code> when authoring manifests.</p>
+<h3 id="http-action">http (action)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;http&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;urlTemplate&quot;: &quot;https://api.example.com/echo&quot;,
+    &quot;headers&quot;: { &quot;X-Tenant&quot;: &quot;{{context.tenantId}}&quot; },
+    &quot;timeoutMs&quot;: 5000
+  }
+}
+</code></pre>
+<p><strong>Per-operation schemas (input/output)</strong>
+- Define payload shapes per operation via <code>operationDefs[*].inputSchema</code> / <code>outputSchema</code> (separate from connector config in templates.yaml).
+- Example (Slack <code>postMessage</code>):</p>
+<pre><code class="language-json">{
+  &quot;operations&quot;: { &quot;postMessage&quot;: &quot;postMessage&quot; },
+  &quot;operationDefs&quot;: {
+    &quot;postMessage&quot;: {
+      &quot;operationId&quot;: &quot;postMessage&quot;,
+      &quot;kind&quot;: &quot;action&quot;,
+      &quot;inputSchema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [&quot;channel&quot;, &quot;text&quot;],
+        &quot;properties&quot;: {
+          &quot;channel&quot;: { &quot;type&quot;: &quot;string&quot; },
+          &quot;text&quot;: { &quot;type&quot;: &quot;string&quot; },
+          &quot;thread_ts&quot;: { &quot;type&quot;: &quot;string&quot; },
+          &quot;attachments&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;object&quot; } }
+        }
+      },
+      &quot;outputSchema&quot;: { &quot;type&quot;: &quot;object&quot; },
+      &quot;execution&quot;: {
+        &quot;type&quot;: &quot;http&quot;,
+        &quot;method&quot;: &quot;POST&quot;,
+        &quot;urlTemplate&quot;: &quot;{{config.baseUrl}}/chat.postMessage&quot;,
+        &quot;headers&quot;: { &quot;Authorization&quot;: &quot;Bearer {{config.tokenRef}}&quot; }
+      }
+    }
+  }
+}
+</code></pre>
+<p>Each operation can have its own schema; reuse the connector template/config for shared settings like base URL, auth, and timeouts.</p>
+<h3 id="javabean-action">javaBean (action)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;javaBean&quot;,
+    &quot;beanName&quot;: &quot;helloConnector&quot;   // Spring/Micronaut bean implementing ConnectorActionHandler
+  }
+}
+</code></pre>
+<h3 id="pipelinecall-action">pipelineCall (action)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;pipelineCall&quot;,
+    &quot;targetPipeline&quot;: &quot;downstream.orders&quot;,
+    &quot;version&quot;: &quot;1.0.0&quot;
+  }
+}
+</code></pre>
+<h3 id="webhook-trigger">webhook (trigger)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;webhook&quot;,
+    &quot;path&quot;: &quot;/webhook&quot;,
+    &quot;method&quot;: &quot;POST&quot;
+  }
+}
+</code></pre>
+<h3 id="polling-trigger">polling (trigger)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;polling&quot;,
+    &quot;intervalMillis&quot;: 30000,
+    &quot;beanName&quot;: &quot;pollerHandler&quot;   // implements ConnectorTriggerHandler
+  }
+}
+</code></pre>
+<h3 id="streaming-trigger">streaming (trigger)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;streaming&quot;,
+    &quot;stream&quot;: &quot;orders&quot;,
+    &quot;source&quot;: { &quot;type&quot;: &quot;kafka&quot;, &quot;connectionRef&quot;: &quot;kafka-orders&quot; },
+    &quot;sink&quot;: { &quot;type&quot;: &quot;http&quot;, &quot;connectionRef&quot;: &quot;http-sink&quot; }
+  }
+}
+</code></pre>
+<h3 id="timer-trigger">timer (trigger)</h3>
+<pre><code class="language-json">{
+  &quot;execution&quot;: {
+    &quot;type&quot;: &quot;timer&quot;,
+    &quot;cron&quot;: &quot;PT5M&quot;
+  }
+}
+</code></pre>
+<hr />
+<h2 id="java-connector-sdk">Java Connector SDK</h2>
+<p>Use these interfaces when custom logic is needed (typically for <code>javaBean</code>, <code>polling</code>,
+<code>streaming</code> implementations):</p>
+<ul>
+<li><code>ConnectorActionHandler&lt;I, O&gt;</code> — one-shot actions (send email/HTTP/db write).</li>
+<li><code>ConnectorTriggerHandler&lt;I, O&gt;</code> — triggers/streams; returns <code>Flux&lt;O&gt;</code>.</li>
+<li><code>ConnectorContext</code> — tenant/pipeline metadata, config, secret resolver, logger,
+  metrics, tracing; multi-tenant safe.</li>
+<li><code>AbstractActionHandler&lt;I, O&gt;</code> — convenience wrapper to record latency and log failures.</li>
+</ul>
+<p>Example action handler:</p>
+<pre><code class="language-java">@Component(&quot;smtpEmailConnector&quot;)
+public class SmtpEmailConnector extends AbstractActionHandler&lt;SendEmailInput, SendEmailOutput&gt; {
+    private final JavaMailSender mailSender;
+    public SmtpEmailConnector(JavaMailSender mailSender) { this.mailSender = mailSender; }
+
+    @Override
+    protected SendEmailOutput doExecute(ConnectorContext ctx, SendEmailInput input) throws Exception {
+        SmtpConfig cfg = ctx.getConnectorConfig(SmtpConfig.class);
+        ctx.getLogger().info(&quot;Sending email for tenant {} to {}&quot;, ctx.getTenantId(), input.to);
+        // ... send ...
+        return new SendEmailOutput(&quot;sent&quot;);
+    }
+}
+</code></pre>
+<hr />
+<h2 id="secrets-and-multi-tenancy">Secrets and multi-tenancy</h2>
+<ul>
+<li>Store only secret references (e.g., <code>secret://vault/t-123/slack/botToken</code>) in config.</li>
+<li>Mark secret fields in schemas with <code>"x-secret": true</code>.</li>
+<li>Resolve secrets only via <code>ConnectorContext.resolveSecret(secretRef)</code>.</li>
+<li>Never log or emit secret values.</li>
+</ul>
+<hr />
+<h2 id="orchestration-boundary">Orchestration boundary</h2>
+<ul>
+<li>Pipeline orchestration lives in the engine (<code>ConnectorEngine</code>, <code>PipelineEngine</code>).</li>
+<li>Handlers should perform external I/O only; do not embed orchestration logic.</li>
+<li>Triggers/streams are started by the trigger runtime; actions are invoked by pipeline
+  connector nodes.</li>
+</ul>
+<hr />
+<h2 id="catalogs-streamssinks">Catalogs (streams/sinks)</h2>
+<ul>
+<li><code>ConnectorStreamDescriptor</code> exposes stream metadata (name, namespace, schema,
+  sync modes, cursor/PK hints) for <code>streaming</code>/<code>polling</code> connectors and sinks.</li>
+<li>Use discovery endpoints (<code>/api/connectors/discovery/sources|sinks</code> in pipeline-service)
+  to fetch catalogs; pipeline specs remain connector-agnostic.</li>
+</ul>
+<hr />
+<h2 id="checklist-for-new-connectors">Checklist for new connectors</h2>
+<ul>
+<li>Pick an <code>execution.type</code> from the fixed list.</li>
+<li>Provide a manifest with <code>id/version/displayName/category</code>, <code>auth</code>, <code>configSchema</code>,
+  <code>operations</code> + <code>operationDefs</code> (with <code>execution.type</code>).</li>
+<li>For custom logic, implement <code>ConnectorActionHandler</code>/<code>ConnectorTriggerHandler</code> or extend
+  <code>AbstractActionHandler</code>.</li>
+<li>Respect multi-tenancy and secret handling via <code>ConnectorContext</code>.</li>
+<li>(Streaming) Expose <code>ConnectorStreamDescriptor</code> if applicable for catalogs.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
